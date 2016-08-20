@@ -1,0 +1,10 @@
+[package]
+name = "erased-serde"
+version = "0.1.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+
+[dependencies]
+serde = "0.8"
+
+[dev-dependencies]
+serde_json = "0.8"
