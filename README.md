@@ -8,6 +8,9 @@ This crate provides type-erased versions of Serde's `Serialize` and `Serializer`
 traits that can be used as [trait
 objects](https://doc.rust-lang.org/book/trait-objects.html).
 
+- [`erased_serde::Serialize`](https://docs.serde.rs/erased_serde/trait.Serialize.html)
+- [`erased_serde::Serializer`](https://docs.serde.rs/erased_serde/trait.Serializer.html)
+
 ```rust
 extern crate erased_serde;
 extern crate serde_json;
