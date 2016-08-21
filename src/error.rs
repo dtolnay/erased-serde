@@ -37,3 +37,17 @@ impl serde::ser::Error for Error {
         }
     }
 }
+
+impl serde::de::Error for Error {
+    fn custom<T: Into<String>>(msg: T) -> Self {
+        Error {
+            msg: msg.into(),
+        }
+    }
+
+    fn end_of_stream() -> Self {
+        Error {
+            msg: "end of stream".to_string(),
+        }
+    }
+}
