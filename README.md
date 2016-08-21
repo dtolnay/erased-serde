@@ -8,6 +8,32 @@ This crate provides type-erased versions of Serde's `Serialize` and `Serializer`
 traits that can be used as [trait
 objects](https://doc.rust-lang.org/book/trait-objects.html).
 
+```rust
+extern crate erased_serde;
+extern crate serde_json;
+
+use erased_serde::{Serialize, Serializer};
+
+fn main() {
+    // This is a type-erased trait object.
+    let obj: &Serialize = &vec!["a", "b"];
+
+    let mut buf = Vec::new();
+
+    {
+        let mut ser = serde_json::Serializer::new(&mut buf);
+
+        // This is a type-erased trait object.
+        let ser: &mut Serializer = &mut ser;
+
+        // Both `obj` and `ser` are trait objects.
+        obj.erased_serialize(ser).unwrap();
+    }
+
+    assert_eq!(&buf, br#"["a","b"]"#);
+}
+```
+
 ## License
 
 Licensed under either of
