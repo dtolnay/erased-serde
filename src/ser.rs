@@ -410,7 +410,7 @@ fn unerase<E>(e: Error) -> E
 }
 
 #[test]
-fn json() {
+fn trait_object() {
     extern crate serde_json;
 
     let obj: &Serialize = &vec!["a", "b"];
@@ -422,6 +422,24 @@ fn json() {
         let ser: &mut Serializer = &mut ser;
 
         obj.erased_serialize(ser).unwrap();
+    }
+
+    assert_eq!(&buf, br#"["a","b"]"#);
+}
+
+#[test]
+fn box_trait() {
+    extern crate serde_json;
+
+    let obj: Box<Serialize> = Box::new(vec!["a", "b"]);
+
+    let mut buf = Vec::new();
+
+    {
+        let ser = serde_json::Serializer::new(&mut buf);
+        let mut ser: Box<Serializer> = Box::new(ser);
+
+        obj.erased_serialize(&mut *ser).unwrap();
     }
 
     assert_eq!(&buf, br#"["a","b"]"#);
