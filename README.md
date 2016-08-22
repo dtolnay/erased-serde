@@ -11,29 +11,47 @@ objects](https://doc.rust-lang.org/book/trait-objects.html).
 - [`erased_serde::Serialize`](https://docs.serde.rs/erased_serde/trait.Serialize.html)
 - [`erased_serde::Serializer`](https://docs.serde.rs/erased_serde/trait.Serializer.html)
 
+The usual Serde `Serialize` and `Serializer` traits cannot be used as trait
+objects like `&Serialize` or boxed trait objects like `Box<Serialize>` because
+of Rust's ["object safety"
+rules](http://huonw.github.io/blog/2015/01/object-safety/). In particular, both
+traits contain generic methods which cannot be made into a trait object.
+
+The traits in this crate work seamlessly with any existing Serde `Serialize` or
+`Serializer` type.
+
 ```rust
 extern crate erased_serde;
 extern crate serde_json;
+extern crate serde_cbor;
+
+use std::collections::BTreeMap as Map;
+use std::io::stdout;
 
 use erased_serde::{Serialize, Serializer};
 
 fn main() {
-    // This is a type-erased trait object.
-    let obj: &Serialize = &vec!["a", "b"];
+    // The values in this map are boxed trait objects. Ordinarily this would not
+    // be possible with serde::Serializer because of object safety, but type
+    // erasure makes it possible with erased_serde::Serializer.
+    let mut formats: Map<&str, Box<Serializer>> = Map::new();
+    formats.insert("json", Box::new(serde_json::ser::Serializer::new(stdout())));
+    formats.insert("cbor", Box::new(serde_cbor::ser::Serializer::new(stdout())));
 
-    let mut buf = Vec::new();
+    // These are boxed trait objects as well. Same thing here - type erasure
+    // makes this possible.
+    let mut values: Map<&str, Box<Serialize>> = Map::new();
+    values.insert("vec", Box::new(vec!["a", "b"]));
+    values.insert("int", Box::new(65536));
 
-    {
-        let mut ser = serde_json::Serializer::new(&mut buf);
+    // Pick a Serializer out of the formats map, making sure it is mutable.
+    let format = &mut **formats.get_mut("json").unwrap();
 
-        // This is a type-erased trait object.
-        let ser: &mut Serializer = &mut ser;
+    // Pick a Serialize out of the values map.
+    let value = values.get("vec").unwrap();
 
-        // Both `obj` and `ser` are trait objects.
-        obj.erased_serialize(ser).unwrap();
-    }
-
-    assert_eq!(&buf, br#"["a","b"]"#);
+    // This line prints `["a","b"]` to stdout.
+    value.erased_serialize(format).unwrap();
 }
 ```
 
