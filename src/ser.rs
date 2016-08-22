@@ -77,7 +77,7 @@ impl<'a> serde::Serialize for &'a Serialize {
     }
 }
 
-impl<'a, T: ?Sized> Serializer for T
+impl<T: ?Sized> Serializer for T
     where T: serde::Serializer
 {
     fn erased_serialize_bool(&mut self, v: bool) -> Result<(), Error> {
