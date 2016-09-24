@@ -13,4 +13,9 @@ include = ["Cargo.toml", "src/**/*.rs"]
 serde = "0.8"
 
 [dev-dependencies]
+serde_cbor = "0.4"
 serde_json = "0.8"
+
+[[test]]
+name = "test"
+path = "tests/readme.rs"
