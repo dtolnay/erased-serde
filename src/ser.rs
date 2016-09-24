@@ -256,154 +256,167 @@ state_any!(MapState);
 state_any!(StructState);
 state_any!(StructVariantState);
 
-impl<'a> serde::Serializer for &'a mut Serializer {
-    type Error = Error;
-    type SeqState = SeqState;
-    type TupleState = TupleState;
-    type TupleStructState = TupleStructState;
-    type TupleVariantState = TupleVariantState;
-    type MapState = MapState;
-    type StructState = StructState;
-    type StructVariantState = StructVariantState;
-    fn serialize_bool(&mut self, v: bool) -> Result<(), Error> {
-        (**self).erased_serialize_bool(v).map_err(erase)
-    }
-    fn serialize_isize(&mut self, v: isize) -> Result<(), Error> {
-        (**self).erased_serialize_isize(v).map_err(erase)
-    }
-    fn serialize_i8(&mut self, v: i8) -> Result<(), Error> {
-        (**self).erased_serialize_i8(v).map_err(erase)
-    }
-    fn serialize_i16(&mut self, v: i16) -> Result<(), Error> {
-        (**self).erased_serialize_i16(v).map_err(erase)
-    }
-    fn serialize_i32(&mut self, v: i32) -> Result<(), Error> {
-        (**self).erased_serialize_i32(v).map_err(erase)
-    }
-    fn serialize_i64(&mut self, v: i64) -> Result<(), Error> {
-        (**self).erased_serialize_i64(v).map_err(erase)
-    }
-    fn serialize_usize(&mut self, v: usize) -> Result<(), Error> {
-        (**self).erased_serialize_usize(v).map_err(erase)
-    }
-    fn serialize_u8(&mut self, v: u8) -> Result<(), Error> {
-        (**self).erased_serialize_u8(v).map_err(erase)
-    }
-    fn serialize_u16(&mut self, v: u16) -> Result<(), Error> {
-        (**self).erased_serialize_u16(v).map_err(erase)
-    }
-    fn serialize_u32(&mut self, v: u32) -> Result<(), Error> {
-        (**self).erased_serialize_u32(v).map_err(erase)
-    }
-    fn serialize_u64(&mut self, v: u64) -> Result<(), Error> {
-        (**self).erased_serialize_u64(v).map_err(erase)
-    }
-    fn serialize_f32(&mut self, v: f32) -> Result<(), Error> {
-        (**self).erased_serialize_f32(v).map_err(erase)
-    }
-    fn serialize_f64(&mut self, v: f64) -> Result<(), Error> {
-        (**self).erased_serialize_f64(v).map_err(erase)
-    }
-    fn serialize_char(&mut self, v: char) -> Result<(), Error> {
-        (**self).erased_serialize_char(v).map_err(erase)
-    }
-    fn serialize_str(&mut self, v: &str) -> Result<(), Error> {
-        (**self).erased_serialize_str(v).map_err(erase)
-    }
-    fn serialize_bytes(&mut self, v: &[u8]) -> Result<(), Error> {
-        (**self).erased_serialize_bytes(v).map_err(erase)
-    }
-    fn serialize_unit(&mut self) -> Result<(), Error> {
-        (**self).erased_serialize_unit().map_err(erase)
-    }
-    fn serialize_unit_struct(&mut self, name: &'static str) -> Result<(), Error> {
-        (**self).erased_serialize_unit_struct(name).map_err(erase)
-    }
-    fn serialize_unit_variant(&mut self, name: &'static str, variant_index: usize, variant: &'static str) -> Result<(), Error> {
-        (**self).erased_serialize_unit_variant(name, variant_index, variant).map_err(erase)
-    }
-    fn serialize_newtype_struct<T: serde::Serialize>(&mut self, name: &'static str, v: T) -> Result<(), Error> {
-        (**self).erased_serialize_newtype_struct(name, &v).map_err(erase)
-    }
-    fn serialize_newtype_variant<T: serde::Serialize>(&mut self, name: &'static str, variant_index: usize, variant: &'static str, v: T) -> Result<(), Error> {
-        (**self).erased_serialize_newtype_variant(name, variant_index, variant, &v).map_err(erase)
-    }
-    fn serialize_none(&mut self) -> Result<(), Error> {
-        (**self).erased_serialize_none().map_err(erase)
-    }
-    fn serialize_some<T: serde::Serialize>(&mut self, v: T) -> Result<(), Error> {
-        (**self).erased_serialize_some(&v).map_err(erase)
-    }
-    fn serialize_seq(&mut self, len: Option<usize>) -> Result<Self::SeqState, Error> {
-        (**self).erased_serialize_seq(len).map_err(erase)
-    }
-    fn serialize_seq_elt<T: serde::Serialize>(&mut self, state: &mut Self::SeqState, v: T) -> Result<(), Error> {
-        (**self).erased_serialize_seq_elt(state, &v).map_err(erase)
-    }
-    fn serialize_seq_end(&mut self, state: Self::SeqState) -> Result<(), Error> {
-        (**self).erased_serialize_seq_end(state).map_err(erase)
-    }
-    fn serialize_seq_fixed_size(&mut self, size: usize) -> Result<Self::SeqState, Error> {
-        (**self).erased_serialize_seq_fixed_size(size).map_err(erase)
-    }
-    fn serialize_tuple(&mut self, len: usize) -> Result<Self::TupleState, Error> {
-        (**self).erased_serialize_tuple(len).map_err(erase)
-    }
-    fn serialize_tuple_elt<T: serde::Serialize>(&mut self, state: &mut Self::TupleState, v: T) -> Result<(), Error> {
-        (**self).erased_serialize_tuple_elt(state, &v).map_err(erase)
-    }
-    fn serialize_tuple_end(&mut self, state: Self::TupleState) -> Result<(), Error> {
-        (**self).erased_serialize_tuple_end(state).map_err(erase)
-    }
-    fn serialize_tuple_struct(&mut self, name: &'static str, len: usize) -> Result<Self::TupleStructState, Error> {
-        (**self).erased_serialize_tuple_struct(name, len).map_err(erase)
-    }
-    fn serialize_tuple_struct_elt<T: serde::Serialize>(&mut self, state: &mut Self::TupleStructState, v: T) -> Result<(), Error> {
-        (**self).erased_serialize_tuple_struct_elt(state, &v).map_err(erase)
-    }
-    fn serialize_tuple_struct_end(&mut self, state: Self::TupleStructState) -> Result<(), Error> {
-        (**self).erased_serialize_tuple_struct_end(state).map_err(erase)
-    }
-    fn serialize_tuple_variant(&mut self, name: &'static str, variant_index: usize, variant: &'static str, len: usize) -> Result<Self::TupleVariantState, Error> {
-        (**self).erased_serialize_tuple_variant(name, variant_index, variant, len).map_err(erase)
-    }
-    fn serialize_tuple_variant_elt<T: serde::Serialize>(&mut self, state: &mut Self::TupleVariantState, v: T) -> Result<(), Error> {
-        (**self).erased_serialize_tuple_variant_elt(state, &v).map_err(erase)
-    }
-    fn serialize_tuple_variant_end(&mut self, state: Self::TupleVariantState) -> Result<(), Error> {
-        (**self).erased_serialize_tuple_variant_end(state).map_err(erase)
-    }
-    fn serialize_map(&mut self, len: Option<usize>) -> Result<Self::MapState, Error> {
-        (**self).erased_serialize_map(len).map_err(erase)
-    }
-    fn serialize_map_key<T: serde::Serialize>(&mut self, state: &mut Self::MapState, k: T) -> Result<(), Error> {
-        (**self).erased_serialize_map_key(state, &k).map_err(erase)
-    }
-    fn serialize_map_value<T: serde::Serialize>(&mut self, state: &mut Self::MapState, v: T) -> Result<(), Error> {
-        (**self).erased_serialize_map_value(state, &v).map_err(erase)
-    }
-    fn serialize_map_end(&mut self, state: Self::MapState) -> Result<(), Error> {
-        (**self).erased_serialize_map_end(state).map_err(erase)
-    }
-    fn serialize_struct(&mut self, name: &'static str, len: usize) -> Result<Self::StructState, Error> {
-        (**self).erased_serialize_struct(name, len).map_err(erase)
-    }
-    fn serialize_struct_elt<V: serde::Serialize>(&mut self, state: &mut Self::StructState, k: &'static str, v: V) -> Result<(), Error> {
-        (**self).erased_serialize_struct_elt(state, k, &v).map_err(erase)
-    }
-    fn serialize_struct_end(&mut self, state: Self::StructState) -> Result<(), Error> {
-        (**self).erased_serialize_struct_end(state).map_err(erase)
-    }
-    fn serialize_struct_variant(&mut self, name: &'static str, variant_index: usize, variant: &'static str, len: usize) -> Result<Self::StructVariantState, Error> {
-        (**self).erased_serialize_struct_variant(name, variant_index, variant, len).map_err(erase)
-    }
-    fn serialize_struct_variant_elt<V: serde::Serialize>(&mut self, state: &mut Self::StructVariantState, k: &'static str, v: V) -> Result<(), Error> {
-        (**self).erased_serialize_struct_variant_elt(state, k, &v).map_err(erase)
-    }
-    fn serialize_struct_variant_end(&mut self, state: Self::StructVariantState) -> Result<(), Error> {
-        (**self).erased_serialize_struct_variant_end(state).map_err(erase)
-    }
+macro_rules! impl_serializer_for_trait_object {
+    ({$($generics:tt)*} $ty:ty) => {
+        impl <$($generics)*> serde::Serializer for $ty {
+            type Error = Error;
+            type SeqState = SeqState;
+            type TupleState = TupleState;
+            type TupleStructState = TupleStructState;
+            type TupleVariantState = TupleVariantState;
+            type MapState = MapState;
+            type StructState = StructState;
+            type StructVariantState = StructVariantState;
+            fn serialize_bool(&mut self, v: bool) -> Result<(), Error> {
+                (**self).erased_serialize_bool(v).map_err(erase)
+            }
+            fn serialize_isize(&mut self, v: isize) -> Result<(), Error> {
+                (**self).erased_serialize_isize(v).map_err(erase)
+            }
+            fn serialize_i8(&mut self, v: i8) -> Result<(), Error> {
+                (**self).erased_serialize_i8(v).map_err(erase)
+            }
+            fn serialize_i16(&mut self, v: i16) -> Result<(), Error> {
+                (**self).erased_serialize_i16(v).map_err(erase)
+            }
+            fn serialize_i32(&mut self, v: i32) -> Result<(), Error> {
+                (**self).erased_serialize_i32(v).map_err(erase)
+            }
+            fn serialize_i64(&mut self, v: i64) -> Result<(), Error> {
+                (**self).erased_serialize_i64(v).map_err(erase)
+            }
+            fn serialize_usize(&mut self, v: usize) -> Result<(), Error> {
+                (**self).erased_serialize_usize(v).map_err(erase)
+            }
+            fn serialize_u8(&mut self, v: u8) -> Result<(), Error> {
+                (**self).erased_serialize_u8(v).map_err(erase)
+            }
+            fn serialize_u16(&mut self, v: u16) -> Result<(), Error> {
+                (**self).erased_serialize_u16(v).map_err(erase)
+            }
+            fn serialize_u32(&mut self, v: u32) -> Result<(), Error> {
+                (**self).erased_serialize_u32(v).map_err(erase)
+            }
+            fn serialize_u64(&mut self, v: u64) -> Result<(), Error> {
+                (**self).erased_serialize_u64(v).map_err(erase)
+            }
+            fn serialize_f32(&mut self, v: f32) -> Result<(), Error> {
+                (**self).erased_serialize_f32(v).map_err(erase)
+            }
+            fn serialize_f64(&mut self, v: f64) -> Result<(), Error> {
+                (**self).erased_serialize_f64(v).map_err(erase)
+            }
+            fn serialize_char(&mut self, v: char) -> Result<(), Error> {
+                (**self).erased_serialize_char(v).map_err(erase)
+            }
+            fn serialize_str(&mut self, v: &str) -> Result<(), Error> {
+                (**self).erased_serialize_str(v).map_err(erase)
+            }
+            fn serialize_bytes(&mut self, v: &[u8]) -> Result<(), Error> {
+                (**self).erased_serialize_bytes(v).map_err(erase)
+            }
+            fn serialize_unit(&mut self) -> Result<(), Error> {
+                (**self).erased_serialize_unit().map_err(erase)
+            }
+            fn serialize_unit_struct(&mut self, name: &'static str) -> Result<(), Error> {
+                (**self).erased_serialize_unit_struct(name).map_err(erase)
+            }
+            fn serialize_unit_variant(&mut self, name: &'static str, variant_index: usize, variant: &'static str) -> Result<(), Error> {
+                (**self).erased_serialize_unit_variant(name, variant_index, variant).map_err(erase)
+            }
+            fn serialize_newtype_struct<T: serde::Serialize>(&mut self, name: &'static str, v: T) -> Result<(), Error> {
+                (**self).erased_serialize_newtype_struct(name, &v).map_err(erase)
+            }
+            fn serialize_newtype_variant<T: serde::Serialize>(&mut self, name: &'static str, variant_index: usize, variant: &'static str, v: T) -> Result<(), Error> {
+                (**self).erased_serialize_newtype_variant(name, variant_index, variant, &v).map_err(erase)
+            }
+            fn serialize_none(&mut self) -> Result<(), Error> {
+                (**self).erased_serialize_none().map_err(erase)
+            }
+            fn serialize_some<T: serde::Serialize>(&mut self, v: T) -> Result<(), Error> {
+                (**self).erased_serialize_some(&v).map_err(erase)
+            }
+            fn serialize_seq(&mut self, len: Option<usize>) -> Result<Self::SeqState, Error> {
+                (**self).erased_serialize_seq(len).map_err(erase)
+            }
+            fn serialize_seq_elt<T: serde::Serialize>(&mut self, state: &mut Self::SeqState, v: T) -> Result<(), Error> {
+                (**self).erased_serialize_seq_elt(state, &v).map_err(erase)
+            }
+            fn serialize_seq_end(&mut self, state: Self::SeqState) -> Result<(), Error> {
+                (**self).erased_serialize_seq_end(state).map_err(erase)
+            }
+            fn serialize_seq_fixed_size(&mut self, size: usize) -> Result<Self::SeqState, Error> {
+                (**self).erased_serialize_seq_fixed_size(size).map_err(erase)
+            }
+            fn serialize_tuple(&mut self, len: usize) -> Result<Self::TupleState, Error> {
+                (**self).erased_serialize_tuple(len).map_err(erase)
+            }
+            fn serialize_tuple_elt<T: serde::Serialize>(&mut self, state: &mut Self::TupleState, v: T) -> Result<(), Error> {
+                (**self).erased_serialize_tuple_elt(state, &v).map_err(erase)
+            }
+            fn serialize_tuple_end(&mut self, state: Self::TupleState) -> Result<(), Error> {
+                (**self).erased_serialize_tuple_end(state).map_err(erase)
+            }
+            fn serialize_tuple_struct(&mut self, name: &'static str, len: usize) -> Result<Self::TupleStructState, Error> {
+                (**self).erased_serialize_tuple_struct(name, len).map_err(erase)
+            }
+            fn serialize_tuple_struct_elt<T: serde::Serialize>(&mut self, state: &mut Self::TupleStructState, v: T) -> Result<(), Error> {
+                (**self).erased_serialize_tuple_struct_elt(state, &v).map_err(erase)
+            }
+            fn serialize_tuple_struct_end(&mut self, state: Self::TupleStructState) -> Result<(), Error> {
+                (**self).erased_serialize_tuple_struct_end(state).map_err(erase)
+            }
+            fn serialize_tuple_variant(&mut self, name: &'static str, variant_index: usize, variant: &'static str, len: usize) -> Result<Self::TupleVariantState, Error> {
+                (**self).erased_serialize_tuple_variant(name, variant_index, variant, len).map_err(erase)
+            }
+            fn serialize_tuple_variant_elt<T: serde::Serialize>(&mut self, state: &mut Self::TupleVariantState, v: T) -> Result<(), Error> {
+                (**self).erased_serialize_tuple_variant_elt(state, &v).map_err(erase)
+            }
+            fn serialize_tuple_variant_end(&mut self, state: Self::TupleVariantState) -> Result<(), Error> {
+                (**self).erased_serialize_tuple_variant_end(state).map_err(erase)
+            }
+            fn serialize_map(&mut self, len: Option<usize>) -> Result<Self::MapState, Error> {
+                (**self).erased_serialize_map(len).map_err(erase)
+            }
+            fn serialize_map_key<T: serde::Serialize>(&mut self, state: &mut Self::MapState, k: T) -> Result<(), Error> {
+                (**self).erased_serialize_map_key(state, &k).map_err(erase)
+            }
+            fn serialize_map_value<T: serde::Serialize>(&mut self, state: &mut Self::MapState, v: T) -> Result<(), Error> {
+                (**self).erased_serialize_map_value(state, &v).map_err(erase)
+            }
+            fn serialize_map_end(&mut self, state: Self::MapState) -> Result<(), Error> {
+                (**self).erased_serialize_map_end(state).map_err(erase)
+            }
+            fn serialize_struct(&mut self, name: &'static str, len: usize) -> Result<Self::StructState, Error> {
+                (**self).erased_serialize_struct(name, len).map_err(erase)
+            }
+            fn serialize_struct_elt<V: serde::Serialize>(&mut self, state: &mut Self::StructState, k: &'static str, v: V) -> Result<(), Error> {
+                (**self).erased_serialize_struct_elt(state, k, &v).map_err(erase)
+            }
+            fn serialize_struct_end(&mut self, state: Self::StructState) -> Result<(), Error> {
+                (**self).erased_serialize_struct_end(state).map_err(erase)
+            }
+            fn serialize_struct_variant(&mut self, name: &'static str, variant_index: usize, variant: &'static str, len: usize) -> Result<Self::StructVariantState, Error> {
+                (**self).erased_serialize_struct_variant(name, variant_index, variant, len).map_err(erase)
+            }
+            fn serialize_struct_variant_elt<V: serde::Serialize>(&mut self, state: &mut Self::StructVariantState, k: &'static str, v: V) -> Result<(), Error> {
+                (**self).erased_serialize_struct_variant_elt(state, k, &v).map_err(erase)
+            }
+            fn serialize_struct_variant_end(&mut self, state: Self::StructVariantState) -> Result<(), Error> {
+                (**self).erased_serialize_struct_variant_end(state).map_err(erase)
+            }
+        }
+    };
 }
+
+impl_serializer_for_trait_object!({'a} &'a mut Serializer);
+impl_serializer_for_trait_object!({'a} &'a mut (Serializer + Send));
+impl_serializer_for_trait_object!({'a} &'a mut (Serializer + Sync));
+impl_serializer_for_trait_object!({'a} &'a mut (Serializer + Send + Sync));
+impl_serializer_for_trait_object!({} Box<Serializer>);
+impl_serializer_for_trait_object!({} Box<Serializer + Send>);
+impl_serializer_for_trait_object!({} Box<Serializer + Sync>);
+impl_serializer_for_trait_object!({} Box<Serializer + Send + Sync>);
 
 fn erase<E>(e: E) -> Error
     where E: Display
@@ -473,4 +486,21 @@ fn assert_serialize() {
     assert::<Box<Serialize + Sync + Send>>();
     assert::<Vec<Box<Serialize>>>();
     assert::<Vec<Box<Serialize + Send>>>();
+}
+
+#[test]
+fn assert_serializer() {
+    fn assert<T: serde::Serializer>() {}
+
+    assert::<&mut Serializer>();
+    assert::<&mut (Serializer + Send)>();
+    assert::<&mut (Serializer + Sync)>();
+    assert::<&mut (Serializer + Send + Sync)>();
+    assert::<&mut (Serializer + Sync + Send)>();
+
+    assert::<Box<Serializer>>();
+    assert::<Box<Serializer + Send>>();
+    assert::<Box<Serializer + Sync>>();
+    assert::<Box<Serializer + Send + Sync>>();
+    assert::<Box<Serializer + Sync + Send>>();
 }
