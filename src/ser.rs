@@ -69,13 +69,22 @@ impl<T: ?Sized> Serialize for T
     }
 }
 
-impl<'a> serde::Serialize for &'a Serialize {
-    fn serialize<S>(&self, mut serializer: &mut S) -> Result<(), S::Error>
-        where S: serde::Serializer
-    {
-        (**self).erased_serialize(serializer).map_err(unerase)
-    }
+macro_rules! impl_serialize_for_trait_object {
+    (Serialize $(+ $traits:ident)*) => {
+        impl<'a> serde::Serialize for Serialize + 'a $(+ $traits)* {
+            fn serialize<S>(&self, mut serializer: &mut S) -> Result<(), S::Error>
+                where S: serde::Serializer
+            {
+                (*self).erased_serialize(serializer).map_err(unerase)
+            }
+        }
+    };
 }
+
+impl_serialize_for_trait_object!(Serialize);
+impl_serialize_for_trait_object!(Serialize + Send);
+impl_serialize_for_trait_object!(Serialize + Sync);
+impl_serialize_for_trait_object!(Serialize + Send + Sync);
 
 impl<T: ?Sized> Serializer for T
     where T: serde::Serializer
@@ -443,4 +452,25 @@ fn box_trait() {
     }
 
     assert_eq!(&buf, br#"["a","b"]"#);
+}
+
+#[test]
+fn assert_serialize() {
+    fn assert<T: serde::Serialize>() {}
+
+    assert::<&Serialize>();
+    assert::<&(Serialize + Send)>();
+    assert::<&(Serialize + Sync)>();
+    assert::<&(Serialize + Send + Sync)>();
+    assert::<&(Serialize + Sync + Send)>();
+    assert::<Vec<&Serialize>>();
+    assert::<Vec<&(Serialize + Send)>>();
+
+    assert::<Box<Serialize>>();
+    assert::<Box<Serialize + Send>>();
+    assert::<Box<Serialize + Sync>>();
+    assert::<Box<Serialize + Send + Sync>>();
+    assert::<Box<Serialize + Sync + Send>>();
+    assert::<Vec<Box<Serialize>>>();
+    assert::<Vec<Box<Serialize + Send>>>();
 }
