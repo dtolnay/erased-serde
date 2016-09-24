@@ -75,7 +75,7 @@ macro_rules! impl_serialize_for_trait_object {
             fn serialize<S>(&self, mut serializer: &mut S) -> Result<(), S::Error>
                 where S: serde::Serializer
             {
-                (*self).erased_serialize(serializer).map_err(unerase)
+                self.erased_serialize(serializer).map_err(unerase)
             }
         }
     };
