@@ -11,7 +11,7 @@ impl Any {
     pub fn new<T>(t: T) -> Self {
         let ptr: *mut T = Box::into_raw(Box::new(t));
         Any {
-            ptr: unsafe { mem::transmute(ptr) },
+            ptr: ptr as *mut (),
             fingerprint: Fingerprint::of::<T>(),
         }
     }
@@ -20,14 +20,15 @@ impl Any {
         if self.fingerprint != Fingerprint::of::<T>() {
             panic!("invalid cast");
         }
-        unsafe { mem::transmute(&mut *self.ptr) }
+        let ptr = self.ptr as *mut T;
+        unsafe { &mut *ptr }
     }
 
     pub fn take<T>(self) -> T {
         if self.fingerprint != Fingerprint::of::<T>() {
             panic!("invalid cast");
         }
-        let ptr: *mut T = unsafe { mem::transmute(self.ptr) };
+        let ptr = self.ptr as *mut T;
         let box_t = unsafe { Box::from_raw(ptr) };
         *box_t
     }
