@@ -1,4 +1,3 @@
-use std::str;
 use std::fmt::Display;
 
 use serde;
