@@ -2,7 +2,7 @@ use std::mem;
 
 pub struct Any {
     ptr: *mut (),
-    // Can't get a real TypeId because we don't have Reflect bounds on the
+    // Can't get a real TypeId because we don't have 'static bounds on the
     // Serializer associates types, so settle for checking size_of and align_of.
     fingerprint: Fingerprint,
 }
