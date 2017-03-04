@@ -8,9 +8,9 @@ This crate provides type-erased versions of Serde's `Serialize`, `Serializer`
 and `Deserializer` traits that can be used as [trait
 objects](https://doc.rust-lang.org/book/trait-objects.html).
 
-- [`erased_serde::Serialize`](https://docs.serde.rs/erased_serde/trait.Serialize.html)
-- [`erased_serde::Serializer`](https://docs.serde.rs/erased_serde/trait.Serializer.html)
-- [`erased_serde::Deserializer`](https://docs.serde.rs/erased_serde/trait.Deserializer.html)
+- [`erased_serde::Serialize`](https://docs.rs/erased-serde/0.1.3/erased_serde/trait.Serialize.html)
+- [`erased_serde::Serializer`](https://docs.rs/erased-serde/0.1.3/erased_serde/trait.Serializer.html)
+- [`erased_serde::Deserializer`](https://docs.rs/erased-serde/0.1.3/erased_serde/trait.Deserializer.html)
 
 The usual Serde `Serialize`, `Serializer` and `Deserializer` traits cannot be
 used as trait objects like `&Serialize` or boxed trait objects like
