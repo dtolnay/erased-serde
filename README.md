@@ -22,6 +22,12 @@ three traits contain generic methods which cannot be made into a trait object.
 and `Deserialize` type and any existing Serde `Serializer` and `Deserializer`
 format.**
 
+```toml
+[dependencies]
+serde = "0.8"
+erased-serde = "0.1"
+```
+
 ## Serialization
 
 ```rust
