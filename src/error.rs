@@ -31,23 +31,17 @@ impl error::Error for Error {
 }
 
 impl serde::ser::Error for Error {
-    fn custom<T: Into<String>>(msg: T) -> Self {
+    fn custom<T: Display>(msg: T) -> Self {
         Error {
-            msg: msg.into(),
+            msg: msg.to_string(),
         }
     }
 }
 
 impl serde::de::Error for Error {
-    fn custom<T: Into<String>>(msg: T) -> Self {
+    fn custom<T: Display>(msg: T) -> Self {
         Error {
-            msg: msg.into(),
-        }
-    }
-
-    fn end_of_stream() -> Self {
-        Error {
-            msg: "end of stream".to_string(),
+            msg: msg.to_string(),
         }
     }
 }

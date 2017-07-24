@@ -2,16 +2,16 @@ use std::mem;
 
 pub struct Any {
     ptr: *mut (),
-    // Can't get a real TypeId because we don't have 'static bounds on the
-    // Serializer associates types, so settle for checking size_of and align_of.
+    drop: fn(*mut ()),
     fingerprint: Fingerprint,
 }
 
 impl Any {
     pub fn new<T>(t: T) -> Self {
-        let ptr: *mut T = Box::into_raw(Box::new(t));
+        let ptr = Box::into_raw(Box::new(t));
         Any {
             ptr: ptr as *mut (),
+            drop: |ptr| drop(unsafe { Box::from_raw(ptr as *mut T) }),
             fingerprint: Fingerprint::of::<T>(),
         }
     }
@@ -30,7 +30,14 @@ impl Any {
         }
         let ptr = self.ptr as *mut T;
         let box_t = unsafe { Box::from_raw(ptr) };
+        mem::forget(self);
         *box_t
+    }
+}
+
+impl Drop for Any {
+    fn drop(&mut self) {
+        (self.drop)(self.ptr);
     }
 }
 
@@ -38,6 +45,7 @@ impl Any {
 struct Fingerprint {
     size: usize,
     align: usize,
+    id: usize,
 }
 
 impl Fingerprint {
@@ -45,6 +53,7 @@ impl Fingerprint {
         Fingerprint {
             size: mem::size_of::<T>(),
             align: mem::align_of::<T>(),
+            id: Fingerprint::of::<T> as usize,
         }
     }
 }
