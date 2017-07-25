@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use std::marker::PhantomData;
 
 use serde;
 use serde::ser::{SerializeSeq, SerializeTuple, SerializeTupleStruct,
@@ -212,17 +213,17 @@ impl_serialize_for_trait_object!(Serialize + Sync);
 impl_serialize_for_trait_object!(Serialize + Send + Sync);
 
 macro_rules! impl_serializer_for_trait_object {
-    ({$($generics:tt)*} $ty:ty) => {
-        impl <$($generics)*> serde::Serializer for $ty {
+    ($ty:ty) => {
+        impl<'a> serde::Serializer for $ty {
             type Ok = Ok;
             type Error = Error;
-            type SerializeSeq = Seq;
-            type SerializeTuple = Tuple;
-            type SerializeTupleStruct = TupleStruct;
-            type SerializeTupleVariant = TupleVariant;
-            type SerializeMap = Map;
-            type SerializeStruct = Struct;
-            type SerializeStructVariant = StructVariant;
+            type SerializeSeq = Seq<'a>;
+            type SerializeTuple = Tuple<'a>;
+            type SerializeTupleStruct = TupleStruct<'a>;
+            type SerializeTupleVariant = TupleVariant<'a>;
+            type SerializeMap = Map<'a>;
+            type SerializeStruct = Struct<'a>;
+            type SerializeStructVariant = StructVariant<'a>;
             fn serialize_bool(mut self, v: bool) -> Result<Ok, Error> {
                 self.erased_serialize_bool(v)
             }
@@ -286,50 +287,47 @@ macro_rules! impl_serializer_for_trait_object {
             fn serialize_newtype_variant<T: ?Sized + serde::Serialize>(mut self, name: &'static str, variant_index: usize, variant: &'static str, v: &T) -> Result<Ok, Error> {
                 self.erased_serialize_newtype_variant(name, variant_index, variant, &v)
             }
-            fn serialize_seq(mut self, len: Option<usize>) -> Result<Seq, Error> {
+            fn serialize_seq(mut self, len: Option<usize>) -> Result<Seq<'a>, Error> {
                 self.erased_serialize_seq(len)
             }
-            fn serialize_seq_fixed_size(mut self, size: usize) -> Result<Seq, Error> {
+            fn serialize_seq_fixed_size(mut self, size: usize) -> Result<Seq<'a>, Error> {
                 self.erased_serialize_seq_fixed_size(size)
             }
-            fn serialize_tuple(mut self, len: usize) -> Result<Tuple, Error> {
+            fn serialize_tuple(mut self, len: usize) -> Result<Tuple<'a>, Error> {
                 self.erased_serialize_tuple(len)
             }
-            fn serialize_tuple_struct(mut self, name: &'static str, len: usize) -> Result<TupleStruct, Error> {
+            fn serialize_tuple_struct(mut self, name: &'static str, len: usize) -> Result<TupleStruct<'a>, Error> {
                 self.erased_serialize_tuple_struct(name, len)
             }
-            fn serialize_tuple_variant(mut self, name: &'static str, variant_index: usize, variant: &'static str, len: usize) -> Result<TupleVariant, Error> {
+            fn serialize_tuple_variant(mut self, name: &'static str, variant_index: usize, variant: &'static str, len: usize) -> Result<TupleVariant<'a>, Error> {
                 self.erased_serialize_tuple_variant(name, variant_index, variant, len)
             }
-            fn serialize_map(mut self, len: Option<usize>) -> Result<Map, Error> {
+            fn serialize_map(mut self, len: Option<usize>) -> Result<Map<'a>, Error> {
                 self.erased_serialize_map(len)
             }
-            fn serialize_struct(mut self, name: &'static str, len: usize) -> Result<Struct, Error> {
+            fn serialize_struct(mut self, name: &'static str, len: usize) -> Result<Struct<'a>, Error> {
                 self.erased_serialize_struct(name, len)
             }
-            fn serialize_struct_variant(mut self, name: &'static str, variant_index: usize, variant: &'static str, len: usize) -> Result<StructVariant, Error> {
+            fn serialize_struct_variant(mut self, name: &'static str, variant_index: usize, variant: &'static str, len: usize) -> Result<StructVariant<'a>, Error> {
                 self.erased_serialize_struct_variant(name, variant_index, variant, len)
             }
         }
     };
 }
 
-impl_serializer_for_trait_object!({'a} &'a mut Serializer);
-impl_serializer_for_trait_object!({'a} &'a mut (Serializer + Send));
-impl_serializer_for_trait_object!({'a} &'a mut (Serializer + Sync));
-impl_serializer_for_trait_object!({'a} &'a mut (Serializer + Send + Sync));
-impl_serializer_for_trait_object!({} Box<Serializer>);
-impl_serializer_for_trait_object!({} Box<Serializer + Send>);
-impl_serializer_for_trait_object!({} Box<Serializer + Sync>);
-impl_serializer_for_trait_object!({} Box<Serializer + Send + Sync>);
+impl_serializer_for_trait_object!(&'a mut Serializer);
+impl_serializer_for_trait_object!(&'a mut (Serializer + Send));
+impl_serializer_for_trait_object!(&'a mut (Serializer + Sync));
+impl_serializer_for_trait_object!(&'a mut (Serializer + Send + Sync));
 
-pub struct Seq {
+pub struct Seq<'a> {
     data: Any,
     serialize_element: fn(&mut Any, &Serialize) -> Result<(), Error>,
     end: fn(Any) -> Result<Ok, Error>,
+    lifetime: PhantomData<&'a Serializer>,
 }
 
-impl Seq {
+impl<'a> Seq<'a> {
     fn new<T: serde::ser::SerializeSeq>(data: T) -> Self {
         Seq {
             data: Any::new(data),
@@ -339,11 +337,12 @@ impl Seq {
             end: |data| {
                 data.take::<T>().end().map(Ok::new).map_err(erase)
             },
+            lifetime: PhantomData,
         }
     }
 }
 
-impl SerializeSeq for Seq {
+impl<'a> SerializeSeq for Seq<'a> {
     type Ok = Ok;
     type Error = Error;
     fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<(), Error> where T: serde::Serialize {
@@ -354,13 +353,14 @@ impl SerializeSeq for Seq {
     }
 }
 
-pub struct Tuple {
+pub struct Tuple<'a> {
     data: Any,
     serialize_element: fn(&mut Any, &Serialize) -> Result<(), Error>,
     end: fn(Any) -> Result<Ok, Error>,
+    lifetime: PhantomData<&'a Serializer>,
 }
 
-impl Tuple {
+impl<'a> Tuple<'a> {
     fn new<T: serde::ser::SerializeTuple>(data: T) -> Self {
         Tuple {
             data: Any::new(data),
@@ -370,11 +370,12 @@ impl Tuple {
             end: |data| {
                 data.take::<T>().end().map(Ok::new).map_err(erase)
             },
+            lifetime: PhantomData,
         }
     }
 }
 
-impl SerializeTuple for Tuple {
+impl<'a> SerializeTuple for Tuple<'a> {
     type Ok = Ok;
     type Error = Error;
     fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<(), Error> where T: serde::Serialize {
@@ -385,13 +386,14 @@ impl SerializeTuple for Tuple {
     }
 }
 
-pub struct TupleStruct {
+pub struct TupleStruct<'a> {
     data: Any,
     serialize_field: fn(&mut Any, &Serialize) -> Result<(), Error>,
     end: fn(Any) -> Result<Ok, Error>,
+    lifetime: PhantomData<&'a Serializer>,
 }
 
-impl TupleStruct {
+impl<'a> TupleStruct<'a> {
     fn new<T: serde::ser::SerializeTupleStruct>(data: T) -> Self {
         TupleStruct {
             data: Any::new(data),
@@ -401,11 +403,12 @@ impl TupleStruct {
             end: |data| {
                 data.take::<T>().end().map(Ok::new).map_err(erase)
             },
+            lifetime: PhantomData,
         }
     }
 }
 
-impl SerializeTupleStruct for TupleStruct {
+impl<'a> SerializeTupleStruct for TupleStruct<'a> {
     type Ok = Ok;
     type Error = Error;
     fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), Error> where T: serde::Serialize {
@@ -416,13 +419,14 @@ impl SerializeTupleStruct for TupleStruct {
     }
 }
 
-pub struct TupleVariant {
+pub struct TupleVariant<'a> {
     data: Any,
     serialize_field: fn(&mut Any, &Serialize) -> Result<(), Error>,
     end: fn(Any) -> Result<Ok, Error>,
+    lifetime: PhantomData<&'a Serializer>,
 }
 
-impl TupleVariant {
+impl<'a> TupleVariant<'a> {
     fn new<T: serde::ser::SerializeTupleVariant>(data: T) -> Self {
         TupleVariant {
             data: Any::new(data),
@@ -432,11 +436,12 @@ impl TupleVariant {
             end: |data| {
                 data.take::<T>().end().map(Ok::new).map_err(erase)
             },
+            lifetime: PhantomData,
         }
     }
 }
 
-impl SerializeTupleVariant for TupleVariant {
+impl<'a> SerializeTupleVariant for TupleVariant<'a> {
     type Ok = Ok;
     type Error = Error;
     fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), Error> where T: serde::Serialize {
@@ -447,15 +452,16 @@ impl SerializeTupleVariant for TupleVariant {
     }
 }
 
-pub struct Map {
+pub struct Map<'a> {
     data: Any,
     serialize_key: fn(&mut Any, &Serialize) -> Result<(), Error>,
     serialize_value: fn(&mut Any, &Serialize) -> Result<(), Error>,
     serialize_entry: fn(&mut Any, &Serialize, &Serialize) -> Result<(), Error>,
     end: fn(Any) -> Result<Ok, Error>,
+    lifetime: PhantomData<&'a Serializer>,
 }
 
-impl Map {
+impl<'a> Map<'a> {
     fn new<T: serde::ser::SerializeMap>(data: T) -> Self {
         Map {
             data: Any::new(data),
@@ -471,11 +477,12 @@ impl Map {
             end: |data| {
                 data.take::<T>().end().map(Ok::new).map_err(erase)
             },
+            lifetime: PhantomData,
         }
     }
 }
 
-impl SerializeMap for Map {
+impl<'a> SerializeMap for Map<'a> {
     type Ok = Ok;
     type Error = Error;
     fn serialize_key<T: ?Sized>(&mut self, key: &T) -> Result<(), Error> where T: serde::Serialize {
@@ -492,13 +499,14 @@ impl SerializeMap for Map {
     }
 }
 
-pub struct Struct {
+pub struct Struct<'a> {
     data: Any,
     serialize_field: fn(&mut Any, &'static str, &Serialize) -> Result<(), Error>,
     end: fn(Any) -> Result<Ok, Error>,
+    lifetime: PhantomData<&'a Serializer>,
 }
 
-impl Struct {
+impl<'a> Struct<'a> {
     fn new<T: serde::ser::SerializeStruct>(data: T) -> Self {
         Struct {
             data: Any::new(data),
@@ -508,11 +516,12 @@ impl Struct {
             end: |data| {
                 data.take::<T>().end().map(Ok::new).map_err(erase)
             },
+            lifetime: PhantomData,
         }
     }
 }
 
-impl SerializeStruct for Struct {
+impl<'a> SerializeStruct for Struct<'a> {
     type Ok = Ok;
     type Error = Error;
     fn serialize_field<T: ?Sized>(&mut self, name: &'static str, field: &T) -> Result<(), Error> where T: serde::Serialize {
@@ -523,13 +532,14 @@ impl SerializeStruct for Struct {
     }
 }
 
-pub struct StructVariant {
+pub struct StructVariant<'a> {
     data: Any,
     serialize_field: fn(&mut Any, &'static str, &Serialize) -> Result<(), Error>,
     end: fn(Any) -> Result<Ok, Error>,
+    lifetime: PhantomData<&'a Serializer>,
 }
 
-impl StructVariant {
+impl<'a> StructVariant<'a> {
     fn new<T: serde::ser::SerializeStructVariant>(data: T) -> Self {
         StructVariant {
             data: Any::new(data),
@@ -539,11 +549,12 @@ impl StructVariant {
             end: |data| {
                 data.take::<T>().end().map(Ok::new).map_err(erase)
             },
+            lifetime: PhantomData,
         }
     }
 }
 
-impl SerializeStructVariant for StructVariant {
+impl<'a> SerializeStructVariant for StructVariant<'a> {
     type Ok = Ok;
     type Error = Error;
     fn serialize_field<T: ?Sized>(&mut self, name: &'static str, field: &T) -> Result<(), Error> where T: serde::Serialize {
@@ -637,10 +648,4 @@ fn assert_serializer() {
     assert::<&mut (Serializer + Sync)>();
     assert::<&mut (Serializer + Send + Sync)>();
     assert::<&mut (Serializer + Sync + Send)>();
-
-    assert::<Box<Serializer>>();
-    assert::<Box<Serializer + Send>>();
-    assert::<Box<Serializer + Sync>>();
-    assert::<Box<Serializer + Send + Sync>>();
-    assert::<Box<Serializer + Sync + Send>>();
 }
