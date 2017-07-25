@@ -78,7 +78,7 @@ macro_rules! impl_serialize_for_trait_object {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
                 where S: serde::Serializer
             {
-                let mut erased = Erase {
+                let mut erased = erase::Serializer {
                     state: Some(serializer),
                 };
                 self.erased_serialize(&mut erased).map(Ok::take).map_err(unerase)
@@ -92,28 +92,30 @@ impl_serialize_for_trait_object!(Serialize + Send);
 impl_serialize_for_trait_object!(Serialize + Sync);
 impl_serialize_for_trait_object!(Serialize + Send + Sync);
 
-pub struct Erase<S> {
-    state: Option<S>,
-}
-
-impl<S> Erase<S> {
-    fn take(&mut self) -> S {
-        self.state.take().unwrap()
-    }
-}
-
 impl Serializer {
-    pub fn erase<S>(serializer: S) -> Erase<S>
+    pub fn erase<S>(serializer: S) -> erase::Serializer<S>
         where S: serde::Serializer,
               S::Ok: 'static,
     {
-        Erase {
+        erase::Serializer {
             state: Some(serializer),
         }
     }
 }
 
-impl<T: ?Sized> Serializer for Erase<T>
+mod erase {
+    pub struct Serializer<S> {
+        pub(super) state: Option<S>,
+    }
+
+    impl<S> Serializer<S> {
+        pub(super) fn take(&mut self) -> S {
+            self.state.take().unwrap()
+        }
+    }
+}
+
+impl<T: ?Sized> Serializer for erase::Serializer<T>
     where T: serde::Serializer
 {
     fn erased_serialize_bool(&mut self, v: bool) -> Result<Ok, Error> {
