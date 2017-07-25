@@ -573,6 +573,108 @@ impl<'a> SerializeStructVariant for StructVariant<'a> {
     }
 }
 
+// IMPL ERASED SERDE FOR ERASED SERDE //////////////////////////////////////////
+
+macro_rules! deref_erased_serializer {
+    ($($imp:tt)+) => {
+        impl $($imp)+ {
+            fn erased_serialize_bool(&mut self, v: bool) -> Result<Ok, Error> {
+                (**self).erased_serialize_bool(v)
+            }
+            fn erased_serialize_i8(&mut self, v: i8) -> Result<Ok, Error> {
+                (**self).erased_serialize_i8(v)
+            }
+            fn erased_serialize_i16(&mut self, v: i16) -> Result<Ok, Error> {
+                (**self).erased_serialize_i16(v)
+            }
+            fn erased_serialize_i32(&mut self, v: i32) -> Result<Ok, Error> {
+                (**self).erased_serialize_i32(v)
+            }
+            fn erased_serialize_i64(&mut self, v: i64) -> Result<Ok, Error> {
+                (**self).erased_serialize_i64(v)
+            }
+            fn erased_serialize_u8(&mut self, v: u8) -> Result<Ok, Error> {
+                (**self).erased_serialize_u8(v)
+            }
+            fn erased_serialize_u16(&mut self, v: u16) -> Result<Ok, Error> {
+                (**self).erased_serialize_u16(v)
+            }
+            fn erased_serialize_u32(&mut self, v: u32) -> Result<Ok, Error> {
+                (**self).erased_serialize_u32(v)
+            }
+            fn erased_serialize_u64(&mut self, v: u64) -> Result<Ok, Error> {
+                (**self).erased_serialize_u64(v)
+            }
+            fn erased_serialize_f32(&mut self, v: f32) -> Result<Ok, Error> {
+                (**self).erased_serialize_f32(v)
+            }
+            fn erased_serialize_f64(&mut self, v: f64) -> Result<Ok, Error> {
+                (**self).erased_serialize_f64(v)
+            }
+            fn erased_serialize_char(&mut self, v: char) -> Result<Ok, Error> {
+                (**self).erased_serialize_char(v)
+            }
+            fn erased_serialize_str(&mut self, v: &str) -> Result<Ok, Error> {
+                (**self).erased_serialize_str(v)
+            }
+            fn erased_serialize_bytes(&mut self, v: &[u8]) -> Result<Ok, Error> {
+                (**self).erased_serialize_bytes(v)
+            }
+            fn erased_serialize_none(&mut self) -> Result<Ok, Error> {
+                (**self).erased_serialize_none()
+            }
+            fn erased_serialize_some(&mut self, v: &Serialize) -> Result<Ok, Error> {
+                (**self).erased_serialize_some(v)
+            }
+            fn erased_serialize_unit(&mut self) -> Result<Ok, Error> {
+                (**self).erased_serialize_unit()
+            }
+            fn erased_serialize_unit_struct(&mut self, name: &'static str) -> Result<Ok, Error> {
+                (**self).erased_serialize_unit_struct(name)
+            }
+            fn erased_serialize_unit_variant(&mut self, name: &'static str, variant_index: usize, variant: &'static str) -> Result<Ok, Error> {
+                (**self).erased_serialize_unit_variant(name, variant_index, variant)
+            }
+            fn erased_serialize_newtype_struct(&mut self, name: &'static str, v: &Serialize) -> Result<Ok, Error> {
+                (**self).erased_serialize_newtype_struct(name, v)
+            }
+            fn erased_serialize_newtype_variant(&mut self, name: &'static str, variant_index: usize, variant: &'static str, v: &Serialize) -> Result<Ok, Error> {
+                (**self).erased_serialize_newtype_variant(name, variant_index, variant, v)
+            }
+            fn erased_serialize_seq(&mut self, len: Option<usize>) -> Result<Seq, Error> {
+                (**self).erased_serialize_seq(len)
+            }
+            fn erased_serialize_seq_fixed_size(&mut self, size: usize) -> Result<Seq, Error> {
+                (**self).erased_serialize_seq_fixed_size(size)
+            }
+            fn erased_serialize_tuple(&mut self, len: usize) -> Result<Tuple, Error> {
+                (**self).erased_serialize_tuple(len)
+            }
+            fn erased_serialize_tuple_struct(&mut self, name: &'static str, len: usize) -> Result<TupleStruct, Error> {
+                (**self).erased_serialize_tuple_struct(name, len)
+            }
+            fn erased_serialize_tuple_variant(&mut self, name: &'static str, variant_index: usize, variant: &'static str, len: usize) -> Result<TupleVariant, Error> {
+                (**self).erased_serialize_tuple_variant(name, variant_index, variant, len)
+            }
+            fn erased_serialize_map(&mut self, len: Option<usize>) -> Result<Map, Error> {
+                (**self).erased_serialize_map(len)
+            }
+            fn erased_serialize_struct(&mut self, name: &'static str, len: usize) -> Result<Struct, Error> {
+                (**self).erased_serialize_struct(name, len)
+            }
+            fn erased_serialize_struct_variant(&mut self, name: &'static str, variant_index: usize, variant: &'static str, len: usize) -> Result<StructVariant, Error> {
+                (**self).erased_serialize_struct_variant(name, variant_index, variant, len)
+            }
+        }
+    };
+}
+
+deref_erased_serializer!(<'a> Serializer for Box<Serializer + 'a>);
+deref_erased_serializer!(<'a> Serializer for Box<Serializer + Send + 'a>);
+deref_erased_serializer!(<'a> Serializer for Box<Serializer + Sync + 'a>);
+deref_erased_serializer!(<'a> Serializer for Box<Serializer + Send + Sync + 'a>);
+deref_erased_serializer!(<'a, T: ?Sized + Serializer> Serializer for &'a mut T);
+
 // ERROR ///////////////////////////////////////////////////////////////////////
 
 fn erase<E>(e: E) -> Error
@@ -620,7 +722,7 @@ fn box_trait() {
         let mut ser = serde_json::Serializer::new(&mut buf);
         let mut ser: Box<Serializer> = Box::new(Serializer::erase(&mut ser));
 
-        obj.erased_serialize(&mut *ser).unwrap();
+        obj.erased_serialize(&mut ser).unwrap();
     }
 
     assert_eq!(&buf, br#"["a","b"]"#);

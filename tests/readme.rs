@@ -27,7 +27,7 @@ fn serialization() {
     values.insert("int", Box::new(65536));
 
     // Pick a Serializer out of the formats map.
-    let format = formats.get_mut("json").unwrap().as_mut();
+    let format = formats.get_mut("json").unwrap();
 
     // Pick a Serialize out of the values map.
     let value = values.get("vec").unwrap();
