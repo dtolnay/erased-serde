@@ -158,30 +158,30 @@ mod erase {
     }
 
     pub struct SeqAccess<D> {
-        pub(crate) state: Option<D>,
+        pub(crate) state: D,
     }
 
     impl<D> SeqAccess<D> {
         pub(crate) fn as_ref(&self) -> &D {
-            self.state.as_ref().unwrap()
+            &self.state
         }
 
         pub(crate) fn as_mut(&mut self) -> &mut D {
-            self.state.as_mut().unwrap()
+            &mut self.state
         }
     }
 
     pub struct MapAccess<D> {
-        pub(crate) state: Option<D>,
+        pub(crate) state: D,
     }
 
     impl<D> MapAccess<D> {
         pub(crate) fn as_ref(&self) -> &D {
-            self.state.as_ref().unwrap()
+            &self.state
         }
 
         pub(crate) fn as_mut(&mut self) -> &mut D {
-            self.state.as_mut().unwrap()
+            &mut self.state
         }
     }
 
@@ -627,13 +627,13 @@ impl<'de, 'a> serde::de::Visitor<'de> for &'a mut Visitor<'de> {
     }
     fn visit_seq<V>(self, visitor: V) -> Result<Out, V::Error> where V: serde::de::SeqAccess<'de> {
         let mut erased = erase::SeqAccess {
-            state: Some(visitor),
+            state: visitor,
         };
         self.erased_visit_seq(&mut erased).map_err(unerase)
     }
     fn visit_map<V>(self, visitor: V) -> Result<Out, V::Error> where V: serde::de::MapAccess<'de> {
         let mut erased = erase::MapAccess {
-            state: Some(visitor),
+            state: visitor,
         };
         self.erased_visit_map(&mut erased).map_err(unerase)
     }
