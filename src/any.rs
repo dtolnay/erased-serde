@@ -53,6 +53,10 @@ impl Fingerprint {
         Fingerprint {
             size: mem::size_of::<T>(),
             align: mem::align_of::<T>(),
+            // This is not foolproof -- theoretically Rust or LLVM could
+            // deduplicate some or all of these methods. But in practice it's
+            // great and I am comfortable relying on this in debug mode to catch
+            // bugs early.
             id: Fingerprint::of::<T> as usize,
         }
     }
