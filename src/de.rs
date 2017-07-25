@@ -814,6 +814,18 @@ fn trait_object() {
 }
 
 #[test]
+fn box_trait() {
+    extern crate serde_json;
+
+    let json = br#"["a", 1, [true], {"a": 1}]"#;
+    let expected: serde_json::Value = serde_json::from_slice(json).unwrap();
+
+    let mut de = serde_json::Deserializer::from_slice(json);
+    let mut de: Box<Deserializer> = Box::new(Deserializer::erase(&mut de));
+    assert_eq!(expected, deserialize::<serde_json::Value>(&mut de).unwrap());
+}
+
+#[test]
 fn assert_deserializer() {
     fn assert<T: serde::Deserializer>() {}
 
