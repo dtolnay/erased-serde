@@ -96,11 +96,11 @@ impl<T: ?Sized> Serialize for T
 
 mod erase {
     pub struct Serializer<S> {
-        pub(super) state: Option<S>,
+        pub(crate) state: Option<S>,
     }
 
     impl<S> Serializer<S> {
-        pub(super) fn take(&mut self) -> S {
+        pub(crate) fn take(&mut self) -> S {
             self.state.take().unwrap()
         }
     }

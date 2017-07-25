@@ -423,45 +423,45 @@ impl<'a> serde::de::EnumVisitor for &'a mut EnumVisitor {
 
 mod erase {
     pub struct Deserializer<D> {
-        pub(super) state: Option<D>,
+        pub(crate) state: Option<D>,
     }
 
     impl<D> Deserializer<D> {
-        pub(super) fn take(&mut self) -> D {
+        pub(crate) fn take(&mut self) -> D {
             self.state.take().unwrap()
         }
     }
 
     pub struct DeserializeSeed<D> {
-        pub(super) state: Option<D>,
+        pub(crate) state: Option<D>,
     }
 
     impl<D> DeserializeSeed<D> {
-        pub(super) fn take(&mut self) -> D {
+        pub(crate) fn take(&mut self) -> D {
             self.state.take().unwrap()
         }
     }
 
     pub struct Visitor<D> {
-        pub(super) state: Option<D>,
+        pub(crate) state: Option<D>,
     }
 
     impl<D> Visitor<D> {
-        pub(super) fn take(&mut self) -> D {
+        pub(crate) fn take(&mut self) -> D {
             self.state.take().unwrap()
         }
 
-        pub(super) fn as_ref(&self) -> &D {
+        pub(crate) fn as_ref(&self) -> &D {
             self.state.as_ref().unwrap()
         }
     }
 
     pub struct EnumVisitor<D> {
-        pub(super) state: Option<D>,
+        pub(crate) state: Option<D>,
     }
 
     impl<D> EnumVisitor<D> {
-        pub(super) fn take(&mut self) -> D {
+        pub(crate) fn take(&mut self) -> D {
             self.state.take().unwrap()
         }
     }
