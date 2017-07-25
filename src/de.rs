@@ -121,7 +121,6 @@ mod erase {
     pub struct DeserializeSeed<D> {
         pub(crate) state: Option<D>,
     }
-
     impl<D> DeserializeSeed<D> {
         pub(crate) fn take(&mut self) -> D {
             self.state.take().unwrap()
@@ -131,7 +130,6 @@ mod erase {
     pub struct Deserializer<D> {
         pub(crate) state: Option<D>,
     }
-
     impl<D> Deserializer<D> {
         pub(crate) fn take(&mut self) -> D {
             self.state.take().unwrap()
@@ -141,12 +139,10 @@ mod erase {
     pub struct Visitor<D> {
         pub(crate) state: Option<D>,
     }
-
     impl<D> Visitor<D> {
         pub(crate) fn take(&mut self) -> D {
             self.state.take().unwrap()
         }
-
         pub(crate) fn as_ref(&self) -> &D {
             self.state.as_ref().unwrap()
         }
@@ -155,12 +151,10 @@ mod erase {
     pub struct SeqAccess<D> {
         pub(crate) state: D,
     }
-
     impl<D> SeqAccess<D> {
         pub(crate) fn as_ref(&self) -> &D {
             &self.state
         }
-
         pub(crate) fn as_mut(&mut self) -> &mut D {
             &mut self.state
         }
@@ -169,12 +163,10 @@ mod erase {
     pub struct MapAccess<D> {
         pub(crate) state: D,
     }
-
     impl<D> MapAccess<D> {
         pub(crate) fn as_ref(&self) -> &D {
             &self.state
         }
-
         pub(crate) fn as_mut(&mut self) -> &mut D {
             &mut self.state
         }
@@ -183,7 +175,6 @@ mod erase {
     pub struct EnumAccess<D> {
         pub(crate) state: Option<D>,
     }
-
     impl<D> EnumAccess<D> {
         pub(crate) fn take(&mut self) -> D {
             self.state.take().unwrap()
@@ -412,9 +403,7 @@ impl<'de, T> EnumAccess<'de> for erase::EnumAccess<T> where T: serde::de::EnumAc
 impl<'de, 'a> serde::de::DeserializeSeed<'de> for &'a mut DeserializeSeed<'de> {
     type Value = Out;
     fn deserialize<D>(self, deserializer: D) -> Result<Out, D::Error> where D: serde::Deserializer<'de> {
-        let mut erased = erase::Deserializer {
-            state: Some(deserializer),
-        };
+        let mut erased = erase::Deserializer { state: Some(deserializer) };
         self.erased_deserialize_seed(&mut erased).map_err(unerase)
     }
 }
@@ -606,15 +595,11 @@ impl<'de, 'a> serde::de::Visitor<'de> for &'a mut Visitor<'de> {
         self.erased_visit_none().map_err(unerase)
     }
     fn visit_some<D>(self, deserializer: D) -> Result<Out, D::Error> where D: serde::Deserializer<'de> {
-        let mut erased = erase::Deserializer {
-            state: Some(deserializer),
-        };
+        let mut erased = erase::Deserializer { state: Some(deserializer) };
         self.erased_visit_some(&mut erased).map_err(unerase)
     }
     fn visit_newtype_struct<D>(self, deserializer: D) -> Result<Out, D::Error> where D: serde::Deserializer<'de> {
-        let mut erased = erase::Deserializer {
-            state: Some(deserializer),
-        };
+        let mut erased = erase::Deserializer { state: Some(deserializer) };
         self.erased_visit_newtype_struct(&mut erased).map_err(unerase)
     }
     fn visit_seq<V>(self, seq: V) -> Result<Out, V::Error> where V: serde::de::SeqAccess<'de> {
