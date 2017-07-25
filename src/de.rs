@@ -202,7 +202,7 @@ impl<'de, T> DeserializeSeed<'de> for erase::DeserializeSeed<T> where T: serde::
     }
 }
 
-impl<'de, T: ?Sized> Deserializer<'de> for erase::Deserializer<'de, T> where T: serde::Deserializer<'de> {
+impl<'de, T> Deserializer<'de> for erase::Deserializer<'de, T> where T: serde::Deserializer<'de> {
     fn erased_deserialize_any(&mut self, visitor: &mut Visitor<'de>) -> Result<Out, Error> {
         self.take().deserialize_any(visitor).map_err(erase)
     }
@@ -292,7 +292,7 @@ impl<'de, T: ?Sized> Deserializer<'de> for erase::Deserializer<'de, T> where T: 
     }
 }
 
-impl<'de, T: ?Sized> Visitor<'de> for erase::Visitor<T> where T: serde::de::Visitor<'de> {
+impl<'de, T> Visitor<'de> for erase::Visitor<T> where T: serde::de::Visitor<'de> {
     fn erased_expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         self.as_ref().expecting(formatter)
     }
@@ -364,7 +364,7 @@ impl<'de, T: ?Sized> Visitor<'de> for erase::Visitor<T> where T: serde::de::Visi
     }
 }
 
-impl<'de, T: ?Sized> SeqAccess<'de> for erase::SeqAccess<T> where T: serde::de::SeqAccess<'de> {
+impl<'de, T> SeqAccess<'de> for erase::SeqAccess<T> where T: serde::de::SeqAccess<'de> {
     fn erased_next_element(&mut self, seed: &mut DeserializeSeed<'de>) -> Result<Option<Out>, Error> {
         self.as_mut().next_element_seed(seed).map_err(erase)
     }
@@ -373,7 +373,7 @@ impl<'de, T: ?Sized> SeqAccess<'de> for erase::SeqAccess<T> where T: serde::de::
     }
 }
 
-impl<'de, T: ?Sized> MapAccess<'de> for erase::MapAccess<T> where T: serde::de::MapAccess<'de> {
+impl<'de, T> MapAccess<'de> for erase::MapAccess<T> where T: serde::de::MapAccess<'de> {
     fn erased_next_key(&mut self, seed: &mut DeserializeSeed<'de>) -> Result<Option<Out>, Error> {
         self.as_mut().next_key_seed(seed).map_err(erase)
     }
@@ -388,7 +388,7 @@ impl<'de, T: ?Sized> MapAccess<'de> for erase::MapAccess<T> where T: serde::de::
     }
 }
 
-impl<'de, T: ?Sized> EnumAccess<'de> for erase::EnumAccess<T> where T: serde::de::EnumAccess<'de> {
+impl<'de, T> EnumAccess<'de> for erase::EnumAccess<T> where T: serde::de::EnumAccess<'de> {
     fn erased_variant_seed(&mut self, seed: &mut DeserializeSeed<'de>) -> Result<(Out, Variant<'de>), Error> {
         self.take().variant_seed(seed).map(|(out, variant)| {
             use serde::de::VariantAccess;
