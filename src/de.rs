@@ -387,9 +387,7 @@ impl<T: ?Sized> EnumVisitor for erase::EnumVisitor<T> where T: serde::de::EnumVi
 
 impl<'a> serde::de::DeserializeSeed for &'a mut DeserializeSeed {
     type Value = Out;
-    fn deserialize<D>(self, deserializer: D) -> Result<Out, D::Error>
-        where D: serde::Deserializer
-    {
+    fn deserialize<D>(self, deserializer: D) -> Result<Out, D::Error> where D: serde::Deserializer {
         let mut erased = erase::Deserializer { state: Some(deserializer) };
         self.erased_deserialize_seed(&mut erased).map_err(unerase)
     }
@@ -659,21 +657,15 @@ impl serde::de::VariantVisitor for Variant {
     fn visit_unit(self) -> Result<(), Error> {
         (self.visit_unit)(self.data)
     }
-    fn visit_newtype_seed<T>(self, seed: T) -> Result<T::Value, Error>
-        where T: serde::de::DeserializeSeed
-    {
+    fn visit_newtype_seed<T>(self, seed: T) -> Result<T::Value, Error> where T: serde::de::DeserializeSeed {
         let mut erased = erase::DeserializeSeed { state: Some(seed) };
         (self.visit_newtype)(self.data, &mut erased).map(Out::take)
     }
-    fn visit_tuple<V>(self, len: usize, visitor: V) -> Result<V::Value, Error>
-        where V: serde::de::Visitor
-    {
+    fn visit_tuple<V>(self, len: usize, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor {
         let mut erased = erase::Visitor { state: Some(visitor) };
         (self.visit_tuple)(self.data, len, &mut erased).map(Out::take)
     }
-    fn visit_struct<V>(self, fields: &'static [&'static str], visitor: V) -> Result<V::Value, Error>
-        where V: serde::de::Visitor
-    {
+    fn visit_struct<V>(self, fields: &'static [&'static str], visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor {
         let mut erased = erase::Visitor { state: Some(visitor) };
         (self.visit_struct)(self.data, fields, &mut erased).map(Out::take)
     }
