@@ -5,7 +5,7 @@ extern crate serde_cbor;
 use std::collections::BTreeMap as Map;
 use std::io;
 
-use erased_serde::{Serialize, Serializer};
+use erased_serde::{Serialize, Serializer, Deserializer};
 
 #[test]
 fn serialization() {
@@ -36,23 +36,25 @@ fn serialization() {
     value.erased_serialize(&mut **format).unwrap();
 }
 
-/*
 #[test]
 fn deserialization() {
     static JSON: &'static [u8] = br#"{"A": 65, "B": 66}"#;
     static CBOR: &'static [u8] = &[162, 97, 65, 24, 65, 97, 66, 24, 66];
 
+    // Construct some deserializers.
+    let json = &mut serde_json::de::Deserializer::from_slice(JSON);
+    let cbor = &mut serde_cbor::de::Deserializer::new(CBOR);
+
     // The values in this map are boxed trait objects, which is not possible
     // with the normal serde::Deserializer because of object safety.
     let mut formats: Map<&str, Box<Deserializer>> = Map::new();
-    formats.insert("json", Box::new(serde_json::de::Deserializer::new(JSON.bytes())));
-    formats.insert("cbor", Box::new(serde_cbor::de::Deserializer::new(CBOR)));
+    formats.insert("json", Box::new(Deserializer::erase(json)));
+    formats.insert("cbor", Box::new(Deserializer::erase(cbor)));
 
     // Pick a Deserializer out of the formats map.
     let format = formats.get_mut("json").unwrap();
 
-    let data: Map<String, usize> = erased_serde::deserialize(format).unwrap();
+    let data: Map<String, usize> = erased_serde::deserialize(&mut **format).unwrap();
 
     println!("{}", data["A"] + data["B"]);
 }
-*/
