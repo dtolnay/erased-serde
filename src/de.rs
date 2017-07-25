@@ -155,17 +155,6 @@ impl Out {
     }
 }
 
-// Required because Out is used as the Value type of the Visitor.
-impl serde::Deserialize for Out {
-    fn deserialize<D>(_deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
-    {
-        // I don't think this is called...?
-        // Please file a ticket if it gets called.
-        unimplemented!()
-    }
-}
-
 // IMPL SERDE FOR ERASED SERDE /////////////////////////////////////////////////
 
 macro_rules! impl_deserializer_for_trait_object {
