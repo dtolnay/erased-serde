@@ -346,13 +346,9 @@ impl Seq {
 impl SerializeSeq for Seq {
     type Ok = Ok;
     type Error = Error;
-
-    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<(), Error>
-        where T: serde::Serialize
-    {
+    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<(), Error> where T: serde::Serialize {
         (self.serialize_element)(&mut self.data, &value)
     }
-
     fn end(self) -> Result<Ok, Error> {
         (self.end)(self.data)
     }
@@ -381,13 +377,9 @@ impl Tuple {
 impl SerializeTuple for Tuple {
     type Ok = Ok;
     type Error = Error;
-
-    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<(), Error>
-        where T: serde::Serialize
-    {
+    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<(), Error> where T: serde::Serialize {
         (self.serialize_element)(&mut self.data, &value)
     }
-
     fn end(self) -> Result<Ok, Error> {
         (self.end)(self.data)
     }
@@ -416,13 +408,9 @@ impl TupleStruct {
 impl SerializeTupleStruct for TupleStruct {
     type Ok = Ok;
     type Error = Error;
-
-    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), Error>
-        where T: serde::Serialize
-    {
+    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), Error> where T: serde::Serialize {
         (self.serialize_field)(&mut self.data, &value)
     }
-
     fn end(self) -> Result<Ok, Error> {
         (self.end)(self.data)
     }
@@ -451,13 +439,9 @@ impl TupleVariant {
 impl SerializeTupleVariant for TupleVariant {
     type Ok = Ok;
     type Error = Error;
-
-    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), Error>
-        where T: serde::Serialize
-    {
+    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), Error> where T: serde::Serialize {
         (self.serialize_field)(&mut self.data, &value)
     }
-
     fn end(self) -> Result<Ok, Error> {
         (self.end)(self.data)
     }
@@ -494,26 +478,15 @@ impl Map {
 impl SerializeMap for Map {
     type Ok = Ok;
     type Error = Error;
-
-    fn serialize_key<T: ?Sized>(&mut self, key: &T) -> Result<(), Error>
-        where T: serde::Serialize
-    {
+    fn serialize_key<T: ?Sized>(&mut self, key: &T) -> Result<(), Error> where T: serde::Serialize {
         (self.serialize_key)(&mut self.data, &key)
     }
-
-    fn serialize_value<T: ?Sized>(&mut self, value: &T) -> Result<(), Error>
-        where T: serde::Serialize
-    {
+    fn serialize_value<T: ?Sized>(&mut self, value: &T) -> Result<(), Error> where T: serde::Serialize {
         (self.serialize_value)(&mut self.data, &value)
     }
-
-    fn serialize_entry<K: ?Sized, V: ?Sized>(&mut self, key: &K, value: &V) -> Result<(), Error>
-        where K: serde::Serialize,
-              V: serde::Serialize
-    {
+    fn serialize_entry<K: ?Sized, V: ?Sized>(&mut self, key: &K, value: &V) -> Result<(), Error> where K: serde::Serialize, V: serde::Serialize {
         (self.serialize_entry)(&mut self.data, &key, &value)
     }
-
     fn end(self) -> Result<Ok, Error> {
         (self.end)(self.data)
     }
@@ -542,13 +515,9 @@ impl Struct {
 impl SerializeStruct for Struct {
     type Ok = Ok;
     type Error = Error;
-
-    fn serialize_field<T: ?Sized>(&mut self, name: &'static str, field: &T) -> Result<(), Error>
-        where T: serde::Serialize
-    {
+    fn serialize_field<T: ?Sized>(&mut self, name: &'static str, field: &T) -> Result<(), Error> where T: serde::Serialize {
         (self.serialize_field)(&mut self.data, name, &field)
     }
-
     fn end(self) -> Result<Ok, Error> {
         (self.end)(self.data)
     }
@@ -577,13 +546,9 @@ impl StructVariant {
 impl SerializeStructVariant for StructVariant {
     type Ok = Ok;
     type Error = Error;
-
-    fn serialize_field<T: ?Sized>(&mut self, name: &'static str, field: &T) -> Result<(), Error>
-        where T: serde::Serialize
-    {
+    fn serialize_field<T: ?Sized>(&mut self, name: &'static str, field: &T) -> Result<(), Error> where T: serde::Serialize {
         (self.serialize_field)(&mut self.data, name, &field)
     }
-
     fn end(self) -> Result<Ok, Error> {
         (self.end)(self.data)
     }
