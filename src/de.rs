@@ -436,7 +436,7 @@ impl<D> Erase<D> {
 }
 
 impl Deserializer {
-    pub fn new<D>(deserializer: D) -> Erase<D>
+    pub fn erase<D>(deserializer: D) -> Erase<D>
         where D: serde::Deserializer
     {
         Erase {
@@ -683,7 +683,7 @@ fn trait_object() {
     let expected: serde_json::Value = serde_json::from_slice(json).unwrap();
 
     let mut de = serde_json::Deserializer::from_slice(json);
-    let de: &mut Deserializer = &mut Deserializer::new(&mut de);
+    let de: &mut Deserializer = &mut Deserializer::erase(&mut de);
     assert_eq!(expected, deserialize::<serde_json::Value>(de).unwrap());
 }
 

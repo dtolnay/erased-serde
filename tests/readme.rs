@@ -17,8 +17,8 @@ fn serialization() {
     // be possible with serde::Serializer because of object safety, but type
     // erasure makes it possible with erased_serde::Serializer.
     let mut formats: Map<&str, Box<Serializer>> = Map::new();
-    formats.insert("json", Box::new(Serializer::new(json)));
-    formats.insert("cbor", Box::new(Serializer::new(cbor)));
+    formats.insert("json", Box::new(Serializer::erase(json)));
+    formats.insert("cbor", Box::new(Serializer::erase(cbor)));
 
     // These are boxed trait objects as well. Same thing here - type erasure
     // makes this possible.

@@ -103,7 +103,7 @@ impl<S> Erase<S> {
 }
 
 impl Serializer {
-    pub fn new<S>(serializer: S) -> Erase<S>
+    pub fn erase<S>(serializer: S) -> Erase<S>
         where S: serde::Serializer,
               S::Ok: 'static,
     {
@@ -606,7 +606,7 @@ fn trait_object() {
 
     {
         let mut ser = serde_json::Serializer::new(&mut buf);
-        let ser: &mut Serializer = &mut Serializer::new(&mut ser);
+        let ser: &mut Serializer = &mut Serializer::erase(&mut ser);
 
         obj.erased_serialize(ser).unwrap();
     }
@@ -624,7 +624,7 @@ fn box_trait() {
 
     {
         let mut ser = serde_json::Serializer::new(&mut buf);
-        let mut ser: Box<Serializer> = Box::new(Serializer::new(&mut ser));
+        let mut ser: Box<Serializer> = Box::new(Serializer::erase(&mut ser));
 
         obj.erased_serialize(&mut *ser).unwrap();
     }
