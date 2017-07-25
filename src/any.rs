@@ -6,8 +6,21 @@ pub struct Any {
     fingerprint: Fingerprint,
 }
 
+// These functions are all unsafe. They are not exposed to the user. Declaring
+// them as `unsafe fn` would not make the rest of erased-serde any safer or more
+// readable.
 impl Any {
-    pub fn new<T>(t: T) -> Self {
+    // This is unsafe -- caller must not hold on to the Any beyond the lifetime
+    // of T.
+    //
+    // Example of bad code:
+    //
+    //    let s = "bad".to_owned();
+    //    let a = Any::new(&s);
+    //    drop(s);
+    //
+    // Now `a.view()` and `a.take()` return references to a dead String.
+    pub(crate) fn new<T>(t: T) -> Self {
         let ptr = Box::into_raw(Box::new(t));
         Any {
             ptr: ptr as *mut (),
@@ -16,7 +29,8 @@ impl Any {
         }
     }
 
-    pub fn view<T>(&mut self) -> &mut T {
+    // This is unsafe -- caller is responsible that T is the correct type.
+    pub(crate) fn view<T>(&mut self) -> &mut T {
         if self.fingerprint != Fingerprint::of::<T>() {
             panic!("invalid cast");
         }
@@ -24,7 +38,8 @@ impl Any {
         unsafe { &mut *ptr }
     }
 
-    pub fn take<T>(self) -> T {
+    // This is unsafe -- caller is responsible that T is the correct type.
+    pub(crate) fn take<T>(self) -> T {
         if self.fingerprint != Fingerprint::of::<T>() {
             panic!("invalid cast");
         }
