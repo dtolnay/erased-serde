@@ -56,7 +56,7 @@ impl Drop for Any {
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 struct Fingerprint {
     size: usize,
     align: usize,
@@ -75,4 +75,19 @@ impl Fingerprint {
             id: Fingerprint::of::<T> as usize,
         }
     }
+}
+
+#[test]
+fn test_fingerprint() {
+    assert_eq!(Fingerprint::of::<usize>(), Fingerprint::of::<usize>());
+    assert_eq!(Fingerprint::of::<&str>(), Fingerprint::of::<&'static str>());
+
+    assert_ne!(Fingerprint::of::<usize>(), Fingerprint::of::<isize>());
+    assert_ne!(Fingerprint::of::<usize>(), Fingerprint::of::<&usize>());
+    assert_ne!(Fingerprint::of::<&usize>(), Fingerprint::of::<&&usize>());
+    assert_ne!(Fingerprint::of::<&usize>(), Fingerprint::of::<&mut usize>());
+
+    struct A;
+    struct B;
+    assert_ne!(Fingerprint::of::<A>(), Fingerprint::of::<B>());
 }
