@@ -3,6 +3,7 @@ use std::fmt::{self, Display};
 
 use serde;
 
+/// Error when a `Serializer` or `Deserializer` trait object fails.
 #[derive(Debug)]
 pub struct Error {
     msg: String,

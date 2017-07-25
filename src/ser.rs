@@ -11,10 +11,97 @@ use error::Error;
 
 // TRAITS //////////////////////////////////////////////////////////////////////
 
+/// An object-safe equivalent of Serde's `Serialize` trait.
+///
+/// Any implementation of Serde's `Serialize` converts seamlessly to an
+/// `&erased_serde::Serialize` or `Box<erased_serde::Serialize>` trait object.
+///
+/// ```rust
+/// extern crate erased_serde;
+/// extern crate serde_json;
+/// extern crate serde_cbor;
+///
+/// use std::collections::BTreeMap as Map;
+/// use std::io;
+///
+/// use erased_serde::{Serialize, Serializer};
+///
+/// fn main() {
+///     // Construct some serializers.
+///     let json = &mut serde_json::ser::Serializer::new(io::stdout());
+///     let cbor = &mut serde_cbor::ser::Serializer::new(io::stdout());
+///
+///     // The values in this map are boxed trait objects. Ordinarily this would not
+///     // be possible with serde::Serializer because of object safety, but type
+///     // erasure makes it possible with erased_serde::Serializer.
+///     let mut formats: Map<&str, Box<Serializer>> = Map::new();
+///     formats.insert("json", Box::new(Serializer::erase(json)));
+///     formats.insert("cbor", Box::new(Serializer::erase(cbor)));
+///
+///     // These are boxed trait objects as well. Same thing here - type erasure
+///     // makes this possible.
+///     let mut values: Map<&str, Box<Serialize>> = Map::new();
+///     values.insert("vec", Box::new(vec!["a", "b"]));
+///     values.insert("int", Box::new(65536));
+///
+///     // Pick a Serializer out of the formats map.
+///     let format = formats.get_mut("json").unwrap();
+///
+///     // Pick a Serialize out of the values map.
+///     let value = values.get("vec").unwrap();
+///
+///     // This line prints `["a","b"]` to stdout.
+///     value.erased_serialize(format).unwrap();
+/// }
+/// ```
 pub trait Serialize {
     fn erased_serialize(&self, &mut Serializer) -> Result<Ok, Error>;
 }
 
+/// An object-safe equivalent of Serde's `Serializer` trait.
+///
+/// Any implementation of Serde's `Serializer` can be converted to an
+/// `&erased_serde::Serializer` or `Box<erased_serde::Serializer>` trait object
+/// using `erased_serde::Serializer::erase`.
+///
+/// ```rust
+/// extern crate erased_serde;
+/// extern crate serde_json;
+/// extern crate serde_cbor;
+///
+/// use std::collections::BTreeMap as Map;
+/// use std::io;
+///
+/// use erased_serde::{Serialize, Serializer};
+///
+/// fn main() {
+///     // Construct some serializers.
+///     let json = &mut serde_json::ser::Serializer::new(io::stdout());
+///     let cbor = &mut serde_cbor::ser::Serializer::new(io::stdout());
+///
+///     // The values in this map are boxed trait objects. Ordinarily this would not
+///     // be possible with serde::Serializer because of object safety, but type
+///     // erasure makes it possible with erased_serde::Serializer.
+///     let mut formats: Map<&str, Box<Serializer>> = Map::new();
+///     formats.insert("json", Box::new(Serializer::erase(json)));
+///     formats.insert("cbor", Box::new(Serializer::erase(cbor)));
+///
+///     // These are boxed trait objects as well. Same thing here - type erasure
+///     // makes this possible.
+///     let mut values: Map<&str, Box<Serialize>> = Map::new();
+///     values.insert("vec", Box::new(vec!["a", "b"]));
+///     values.insert("int", Box::new(65536));
+///
+///     // Pick a Serializer out of the formats map.
+///     let format = formats.get_mut("json").unwrap();
+///
+///     // Pick a Serialize out of the values map.
+///     let value = values.get("vec").unwrap();
+///
+///     // This line prints `["a","b"]` to stdout.
+///     value.erased_serialize(format).unwrap();
+/// }
+/// ```
 pub trait Serializer {
     fn erased_serialize_bool(&mut self, bool) -> Result<Ok, Error>;
     fn erased_serialize_i8(&mut self, i8) -> Result<Ok, Error>;
@@ -47,6 +134,46 @@ pub trait Serializer {
 }
 
 impl Serializer {
+    /// Convert any Serde `Serializer` to a trait object.
+    ///
+    /// ```rust
+    /// extern crate erased_serde;
+    /// extern crate serde_json;
+    /// extern crate serde_cbor;
+    ///
+    /// use std::collections::BTreeMap as Map;
+    /// use std::io;
+    ///
+    /// use erased_serde::{Serialize, Serializer};
+    ///
+    /// fn main() {
+    ///     // Construct some serializers.
+    ///     let json = &mut serde_json::ser::Serializer::new(io::stdout());
+    ///     let cbor = &mut serde_cbor::ser::Serializer::new(io::stdout());
+    ///
+    ///     // The values in this map are boxed trait objects. Ordinarily this would not
+    ///     // be possible with serde::Serializer because of object safety, but type
+    ///     // erasure makes it possible with erased_serde::Serializer.
+    ///     let mut formats: Map<&str, Box<Serializer>> = Map::new();
+    ///     formats.insert("json", Box::new(Serializer::erase(json)));
+    ///     formats.insert("cbor", Box::new(Serializer::erase(cbor)));
+    ///
+    ///     // These are boxed trait objects as well. Same thing here - type erasure
+    ///     // makes this possible.
+    ///     let mut values: Map<&str, Box<Serialize>> = Map::new();
+    ///     values.insert("vec", Box::new(vec!["a", "b"]));
+    ///     values.insert("int", Box::new(65536));
+    ///
+    ///     // Pick a Serializer out of the formats map.
+    ///     let format = formats.get_mut("json").unwrap();
+    ///
+    ///     // Pick a Serialize out of the values map.
+    ///     let value = values.get("vec").unwrap();
+    ///
+    ///     // This line prints `["a","b"]` to stdout.
+    ///     value.erased_serialize(format).unwrap();
+    /// }
+    /// ```
     pub fn erase<S>(serializer: S) -> erase::Serializer<S>
         where S: serde::Serializer,
               S::Ok: 'static,
