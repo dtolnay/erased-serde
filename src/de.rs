@@ -350,11 +350,11 @@ impl<'de, T> Visitor<'de> for erase::Visitor<T> where T: serde::de::Visitor<'de>
     fn erased_visit_newtype_struct(&mut self, deserializer: &mut Deserializer<'de>) -> Result<Out, Error> {
         self.take().visit_newtype_struct(deserializer).map(Out::new)
     }
-    fn erased_visit_seq(&mut self, visitor: &mut SeqAccess<'de>) -> Result<Out, Error> {
-        self.take().visit_seq(visitor).map(Out::new)
+    fn erased_visit_seq(&mut self, seq: &mut SeqAccess<'de>) -> Result<Out, Error> {
+        self.take().visit_seq(seq).map(Out::new)
     }
-    fn erased_visit_map(&mut self, visitor: &mut MapAccess<'de>) -> Result<Out, Error> {
-        self.take().visit_map(visitor).map(Out::new)
+    fn erased_visit_map(&mut self, map: &mut MapAccess<'de>) -> Result<Out, Error> {
+        self.take().visit_map(map).map(Out::new)
     }
     fn erased_visit_bytes(&mut self, v: &[u8]) -> Result<Out, Error> {
         self.take().visit_bytes(v).map(Out::new)
@@ -625,15 +625,15 @@ impl<'de, 'a> serde::de::Visitor<'de> for &'a mut Visitor<'de> {
         };
         self.erased_visit_newtype_struct(&mut erased).map_err(unerase)
     }
-    fn visit_seq<V>(self, visitor: V) -> Result<Out, V::Error> where V: serde::de::SeqAccess<'de> {
+    fn visit_seq<V>(self, seq: V) -> Result<Out, V::Error> where V: serde::de::SeqAccess<'de> {
         let mut erased = erase::SeqAccess {
-            state: visitor,
+            state: seq,
         };
         self.erased_visit_seq(&mut erased).map_err(unerase)
     }
-    fn visit_map<V>(self, visitor: V) -> Result<Out, V::Error> where V: serde::de::MapAccess<'de> {
+    fn visit_map<V>(self, map: V) -> Result<Out, V::Error> where V: serde::de::MapAccess<'de> {
         let mut erased = erase::MapAccess {
-            state: visitor,
+            state: map,
         };
         self.erased_visit_map(&mut erased).map_err(unerase)
     }
