@@ -60,6 +60,14 @@ impl Serializer {
 
 // OK //////////////////////////////////////////////////////////////////////////
 
+// Corresponds to the Serializer::Ok associated type.
+//
+// This struct is exposed to users by invoking methods on the Serialize or
+// Serializer trait objects, so we need to make sure they do not hold on to the
+// Ok beyond the lifetime of the data in the Any.
+//
+// We do this by enforcing S::Ok is 'static for every Serializer trait object
+// created by the user.
 pub struct Ok {
     data: Any,
 }
