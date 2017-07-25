@@ -679,6 +679,111 @@ impl serde::de::VariantVisitor for Variant {
     }
 }
 
+// IMPL ERASED SERDE FOR ERASED SERDE //////////////////////////////////////////
+
+macro_rules! deref_erased_deserializer {
+    ($($imp:tt)+) => {
+        impl $($imp)+ {
+            fn erased_deserialize(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize(visitor)
+            }
+            fn erased_deserialize_bool(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_bool(visitor)
+            }
+            fn erased_deserialize_u8(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_u8(visitor)
+            }
+            fn erased_deserialize_u16(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_u16(visitor)
+            }
+            fn erased_deserialize_u32(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_u32(visitor)
+            }
+            fn erased_deserialize_u64(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_u64(visitor)
+            }
+            fn erased_deserialize_i8(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_i8(visitor)
+            }
+            fn erased_deserialize_i16(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_i16(visitor)
+            }
+            fn erased_deserialize_i32(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_i32(visitor)
+            }
+            fn erased_deserialize_i64(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_i64(visitor)
+            }
+            fn erased_deserialize_f32(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_f32(visitor)
+            }
+            fn erased_deserialize_f64(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_f64(visitor)
+            }
+            fn erased_deserialize_char(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_char(visitor)
+            }
+            fn erased_deserialize_str(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_str(visitor)
+            }
+            fn erased_deserialize_string(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_string(visitor)
+            }
+            fn erased_deserialize_bytes(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_bytes(visitor)
+            }
+            fn erased_deserialize_byte_buf(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_byte_buf(visitor)
+            }
+            fn erased_deserialize_option(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_option(visitor)
+            }
+            fn erased_deserialize_unit(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_unit(visitor)
+            }
+            fn erased_deserialize_unit_struct(&mut self, name: &'static str, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_unit_struct(name, visitor)
+            }
+            fn erased_deserialize_newtype_struct(&mut self, name: &'static str, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_newtype_struct(name, visitor)
+            }
+            fn erased_deserialize_seq(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_seq(visitor)
+            }
+            fn erased_deserialize_seq_fixed_size(&mut self, len: usize, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_seq_fixed_size(len, visitor)
+            }
+            fn erased_deserialize_tuple(&mut self, len: usize, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_tuple(len, visitor)
+            }
+            fn erased_deserialize_tuple_struct(&mut self, name: &'static str, len: usize, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_tuple_struct(name, len, visitor)
+            }
+            fn erased_deserialize_map(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_map(visitor)
+            }
+            fn erased_deserialize_struct(&mut self, name: &'static str, fields: &'static [&'static str], visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_struct(name, fields, visitor)
+            }
+            fn erased_deserialize_struct_field(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_struct_field(visitor)
+            }
+            fn erased_deserialize_enum(&mut self, name: &'static str, variants: &'static [&'static str], visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_enum(name, variants, visitor)
+            }
+            fn erased_deserialize_ignored_any(&mut self, visitor: &mut Visitor) -> Result<Out, Error> {
+                (**self).erased_deserialize_ignored_any(visitor)
+            }
+        }
+    };
+}
+
+deref_erased_deserializer!(<'a> Deserializer for Box<Deserializer + 'a>);
+deref_erased_deserializer!(<'a> Deserializer for Box<Deserializer + Send + 'a>);
+deref_erased_deserializer!(<'a> Deserializer for Box<Deserializer + Sync + 'a>);
+deref_erased_deserializer!(<'a> Deserializer for Box<Deserializer + Send + Sync + 'a>);
+deref_erased_deserializer!(<'a, T: ?Sized + Deserializer> Deserializer for &'a mut T);
+
 // ERROR ///////////////////////////////////////////////////////////////////////
 
 fn erase<E>(e: E) -> Error

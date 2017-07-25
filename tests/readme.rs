@@ -52,7 +52,7 @@ fn deserialization() {
     formats.insert("cbor", Box::new(Deserializer::erase(cbor)));
 
     // Pick a Deserializer out of the formats map.
-    let format = formats.get_mut("json").unwrap().as_mut();
+    let format = formats.get_mut("json").unwrap();
 
     let data: Map<String, usize> = erased_serde::deserialize(format).unwrap();
 
