@@ -10,11 +10,11 @@ keywords = ["serde", "erasure"]
 include = ["Cargo.toml", "src/**/*.rs"]
 
 [dependencies]
-serde = "0.9"
+serde = "1.0"
 
 [dev-dependencies]
-serde_cbor = "0.5"
-serde_json = "0.9"
+serde_cbor = "0.6"
+serde_json = "1.0"
 
 [[test]]
 name = "test"
