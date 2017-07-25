@@ -5,7 +5,7 @@ extern crate serde_cbor;
 use std::collections::BTreeMap as Map;
 use std::io;
 
-use erased_serde::{Serialize, Serializer};
+use erased_serde::{Serialize, Serializer, Deserializer};
 
 #[test]
 fn serialization() {
@@ -36,7 +36,6 @@ fn serialization() {
     value.erased_serialize(format).unwrap();
 }
 
-/*
 #[test]
 fn deserialization() {
     static JSON: &'static [u8] = br#"{"A": 65, "B": 66}"#;
@@ -59,4 +58,3 @@ fn deserialization() {
 
     println!("{}", data["A"] + data["B"]);
 }
-*/
