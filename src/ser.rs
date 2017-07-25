@@ -31,12 +31,12 @@ pub trait Serializer {
     fn erased_serialize_str(&mut self, &str) -> Result<Ok, Error>;
     fn erased_serialize_bytes(&mut self, &[u8]) -> Result<Ok, Error>;
     fn erased_serialize_none(&mut self) -> Result<Ok, Error>;
-    fn erased_serialize_some(&mut self, v: &Serialize) -> Result<Ok, Error>;
+    fn erased_serialize_some(&mut self, &Serialize) -> Result<Ok, Error>;
     fn erased_serialize_unit(&mut self) -> Result<Ok, Error>;
     fn erased_serialize_unit_struct(&mut self, name: &'static str) -> Result<Ok, Error>;
     fn erased_serialize_unit_variant(&mut self, name: &'static str, variant_index: usize, variant: &'static str) -> Result<Ok, Error>;
-    fn erased_serialize_newtype_struct(&mut self, name: &'static str, v: &Serialize) -> Result<Ok, Error>;
-    fn erased_serialize_newtype_variant(&mut self, name: &'static str, variant_index: usize, variant: &'static str, v: &Serialize) -> Result<Ok, Error>;
+    fn erased_serialize_newtype_struct(&mut self, name: &'static str, &Serialize) -> Result<Ok, Error>;
+    fn erased_serialize_newtype_variant(&mut self, name: &'static str, variant_index: usize, variant: &'static str, &Serialize) -> Result<Ok, Error>;
     fn erased_serialize_seq(&mut self, len: Option<usize>) -> Result<Seq, Error>;
     fn erased_serialize_seq_fixed_size(&mut self, size: usize) -> Result<Seq, Error>;
     fn erased_serialize_tuple(&mut self, len: usize) -> Result<Tuple, Error>;

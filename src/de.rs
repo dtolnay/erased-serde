@@ -14,7 +14,7 @@ pub fn deserialize<T>(deserializer: &mut Deserializer) -> Result<T, Error>
 // TRAITS //////////////////////////////////////////////////////////////////////
 
 pub trait DeserializeSeed {
-    fn erased_deserialize_seed(&mut self, deserializer: &mut Deserializer) -> Result<Out, Error>;
+    fn erased_deserialize_seed(&mut self, &mut Deserializer) -> Result<Out, Error>;
 }
 
 pub trait Deserializer {
@@ -51,45 +51,45 @@ pub trait Deserializer {
 }
 
 pub trait Visitor {
-    fn erased_expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result;
-    fn erased_visit_bool(&mut self, v: bool) -> Result<Out, Error>;
-    fn erased_visit_i8(&mut self, v: i8) -> Result<Out, Error>;
-    fn erased_visit_i16(&mut self, v: i16) -> Result<Out, Error>;
-    fn erased_visit_i32(&mut self, v: i32) -> Result<Out, Error>;
-    fn erased_visit_i64(&mut self, v: i64) -> Result<Out, Error>;
-    fn erased_visit_u8(&mut self, v: u8) -> Result<Out, Error>;
-    fn erased_visit_u16(&mut self, v: u16) -> Result<Out, Error>;
-    fn erased_visit_u32(&mut self, v: u32) -> Result<Out, Error>;
-    fn erased_visit_u64(&mut self, v: u64) -> Result<Out, Error>;
-    fn erased_visit_f32(&mut self, v: f32) -> Result<Out, Error>;
-    fn erased_visit_f64(&mut self, v: f64) -> Result<Out, Error>;
-    fn erased_visit_char(&mut self, v: char) -> Result<Out, Error>;
-    fn erased_visit_str(&mut self, v: &str) -> Result<Out, Error>;
-    fn erased_visit_string(&mut self, v: String) -> Result<Out, Error>;
+    fn erased_expecting(&self, &mut fmt::Formatter) -> fmt::Result;
+    fn erased_visit_bool(&mut self, bool) -> Result<Out, Error>;
+    fn erased_visit_i8(&mut self, i8) -> Result<Out, Error>;
+    fn erased_visit_i16(&mut self, i16) -> Result<Out, Error>;
+    fn erased_visit_i32(&mut self, i32) -> Result<Out, Error>;
+    fn erased_visit_i64(&mut self, i64) -> Result<Out, Error>;
+    fn erased_visit_u8(&mut self, u8) -> Result<Out, Error>;
+    fn erased_visit_u16(&mut self, u16) -> Result<Out, Error>;
+    fn erased_visit_u32(&mut self, u32) -> Result<Out, Error>;
+    fn erased_visit_u64(&mut self, u64) -> Result<Out, Error>;
+    fn erased_visit_f32(&mut self, f32) -> Result<Out, Error>;
+    fn erased_visit_f64(&mut self, f64) -> Result<Out, Error>;
+    fn erased_visit_char(&mut self, char) -> Result<Out, Error>;
+    fn erased_visit_str(&mut self, &str) -> Result<Out, Error>;
+    fn erased_visit_string(&mut self, String) -> Result<Out, Error>;
     fn erased_visit_unit(&mut self) -> Result<Out, Error>;
     fn erased_visit_none(&mut self) -> Result<Out, Error>;
-    fn erased_visit_some(&mut self, deserializer: &mut Deserializer) -> Result<Out, Error>;
-    fn erased_visit_newtype_struct(&mut self, deserializer: &mut Deserializer) -> Result<Out, Error>;
-    fn erased_visit_seq(&mut self, visitor: &mut SeqVisitor) -> Result<Out, Error>;
-    fn erased_visit_map(&mut self, visitor: &mut MapVisitor) -> Result<Out, Error>;
-    fn erased_visit_bytes(&mut self, v: &[u8]) -> Result<Out, Error>;
-    fn erased_visit_byte_buf(&mut self, v: Vec<u8>) -> Result<Out, Error>;
+    fn erased_visit_some(&mut self, &mut Deserializer) -> Result<Out, Error>;
+    fn erased_visit_newtype_struct(&mut self, &mut Deserializer) -> Result<Out, Error>;
+    fn erased_visit_seq(&mut self, &mut SeqVisitor) -> Result<Out, Error>;
+    fn erased_visit_map(&mut self, &mut MapVisitor) -> Result<Out, Error>;
+    fn erased_visit_bytes(&mut self, &[u8]) -> Result<Out, Error>;
+    fn erased_visit_byte_buf(&mut self, Vec<u8>) -> Result<Out, Error>;
 }
 
 pub trait SeqVisitor {
-    fn erased_visit(&mut self, seed: &mut DeserializeSeed) -> Result<Option<Out>, Error>;
+    fn erased_visit(&mut self, &mut DeserializeSeed) -> Result<Option<Out>, Error>;
     fn erased_size_hint(&self) -> (usize, Option<usize>);
 }
 
 pub trait MapVisitor {
-    fn erased_visit_key(&mut self, seed: &mut DeserializeSeed) -> Result<Option<Out>, Error>;
-    fn erased_visit_value(&mut self, seed: &mut DeserializeSeed) -> Result<Out, Error>;
-    fn erased_visit(&mut self, k: &mut DeserializeSeed, v: &mut DeserializeSeed) -> Result<Option<(Out, Out)>, Error>;
+    fn erased_visit_key(&mut self, &mut DeserializeSeed) -> Result<Option<Out>, Error>;
+    fn erased_visit_value(&mut self, &mut DeserializeSeed) -> Result<Out, Error>;
+    fn erased_visit(&mut self, key: &mut DeserializeSeed, value: &mut DeserializeSeed) -> Result<Option<(Out, Out)>, Error>;
     fn erased_size_hint(&self) -> (usize, Option<usize>);
 }
 
 pub trait EnumVisitor {
-    fn erased_visit_variant(&mut self, seed: &mut DeserializeSeed) -> Result<(Out, Variant), Error>;
+    fn erased_visit_variant(&mut self, &mut DeserializeSeed) -> Result<(Out, Variant), Error>;
 }
 
 impl Deserializer {
