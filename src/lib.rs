@@ -88,6 +88,8 @@
 //! }
 //! ```
 
+#![doc(html_root_url = "https://docs.rs/erased-serde/0.2.0")]
+
 extern crate serde;
 
 mod any;
