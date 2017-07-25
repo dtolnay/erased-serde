@@ -24,8 +24,8 @@ format.**
 
 ```toml
 [dependencies]
-serde = "0.8"
-erased-serde = "0.1"
+serde = "1.0"
+erased-serde = "0.3"
 ```
 
 ## Serialization
@@ -36,17 +36,21 @@ extern crate serde_json;
 extern crate serde_cbor;
 
 use std::collections::BTreeMap as Map;
-use std::io::stdout;
+use std::io;
 
 use erased_serde::{Serialize, Serializer};
 
 fn main() {
+    // Construct some serializers.
+    let json = &mut serde_json::ser::Serializer::new(io::stdout());
+    let cbor = &mut serde_cbor::ser::Serializer::new(io::stdout());
+
     // The values in this map are boxed trait objects. Ordinarily this would not
     // be possible with serde::Serializer because of object safety, but type
     // erasure makes it possible with erased_serde::Serializer.
     let mut formats: Map<&str, Box<Serializer>> = Map::new();
-    formats.insert("json", Box::new(serde_json::ser::Serializer::new(stdout())));
-    formats.insert("cbor", Box::new(serde_cbor::ser::Serializer::new(stdout())));
+    formats.insert("json", Box::new(Serializer::erase(json)));
+    formats.insert("cbor", Box::new(Serializer::erase(cbor)));
 
     // These are boxed trait objects as well. Same thing here - type erasure
     // makes this possible.
@@ -73,7 +77,6 @@ extern crate serde_json;
 extern crate serde_cbor;
 
 use std::collections::BTreeMap as Map;
-use std::io::Read;
 
 use erased_serde::Deserializer;
 
@@ -81,11 +84,15 @@ fn main() {
     static JSON: &'static [u8] = br#"{"A": 65, "B": 66}"#;
     static CBOR: &'static [u8] = &[162, 97, 65, 24, 65, 97, 66, 24, 66];
 
+    // Construct some deserializers.
+    let json = &mut serde_json::de::Deserializer::from_slice(JSON);
+    let cbor = &mut serde_cbor::de::Deserializer::new(CBOR);
+
     // The values in this map are boxed trait objects, which is not possible
     // with the normal serde::Deserializer because of object safety.
     let mut formats: Map<&str, Box<Deserializer>> = Map::new();
-    formats.insert("json", Box::new(serde_json::de::Deserializer::new(JSON.bytes())));
-    formats.insert("cbor", Box::new(serde_cbor::de::Deserializer::new(CBOR)));
+    formats.insert("json", Box::new(Deserializer::erase(json)));
+    formats.insert("cbor", Box::new(Deserializer::erase(cbor)));
 
     // Pick a Deserializer out of the formats map.
     let format = formats.get_mut("json").unwrap();
