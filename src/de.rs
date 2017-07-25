@@ -157,6 +157,34 @@ mod erase {
         }
     }
 
+    pub struct SeqAccess<D> {
+        pub(crate) state: Option<D>,
+    }
+
+    impl<D> SeqAccess<D> {
+        pub(crate) fn as_ref(&self) -> &D {
+            self.state.as_ref().unwrap()
+        }
+
+        pub(crate) fn as_mut(&mut self) -> &mut D {
+            self.state.as_mut().unwrap()
+        }
+    }
+
+    pub struct MapAccess<D> {
+        pub(crate) state: Option<D>,
+    }
+
+    impl<D> MapAccess<D> {
+        pub(crate) fn as_ref(&self) -> &D {
+            self.state.as_ref().unwrap()
+        }
+
+        pub(crate) fn as_mut(&mut self) -> &mut D {
+            self.state.as_mut().unwrap()
+        }
+    }
+
     pub struct EnumAccess<D> {
         pub(crate) state: Option<D>,
     }
@@ -336,27 +364,27 @@ impl<'de, T: ?Sized> Visitor<'de> for erase::Visitor<T> where T: serde::de::Visi
     }
 }
 
-impl<'de, T: ?Sized> SeqAccess<'de> for T where T: serde::de::SeqAccess<'de> {
+impl<'de, T: ?Sized> SeqAccess<'de> for erase::SeqAccess<T> where T: serde::de::SeqAccess<'de> {
     fn erased_next_element(&mut self, seed: &mut DeserializeSeed<'de>) -> Result<Option<Out>, Error> {
-        self.next_element_seed(seed).map_err(erase)
+        self.as_mut().next_element_seed(seed).map_err(erase)
     }
     fn erased_size_hint(&self) -> Option<usize> {
-        self.size_hint()
+        self.as_ref().size_hint()
     }
 }
 
-impl<'de, T: ?Sized> MapAccess<'de> for T where T: serde::de::MapAccess<'de> {
+impl<'de, T: ?Sized> MapAccess<'de> for erase::MapAccess<T> where T: serde::de::MapAccess<'de> {
     fn erased_next_key(&mut self, seed: &mut DeserializeSeed<'de>) -> Result<Option<Out>, Error> {
-        self.next_key_seed(seed).map_err(erase)
+        self.as_mut().next_key_seed(seed).map_err(erase)
     }
     fn erased_next_value(&mut self, seed: &mut DeserializeSeed<'de>) -> Result<Out, Error> {
-        self.next_value_seed(seed).map_err(erase)
+        self.as_mut().next_value_seed(seed).map_err(erase)
     }
     fn erased_next_entry(&mut self, k: &mut DeserializeSeed<'de>, v: &mut DeserializeSeed<'de>) -> Result<Option<(Out, Out)>, Error> {
-        self.next_entry_seed(k, v).map_err(erase)
+        self.as_mut().next_entry_seed(k, v).map_err(erase)
     }
     fn erased_size_hint(&self) -> Option<usize> {
-        self.size_hint()
+        self.as_ref().size_hint()
     }
 }
 
@@ -597,11 +625,17 @@ impl<'de, 'a> serde::de::Visitor<'de> for &'a mut Visitor<'de> {
         };
         self.erased_visit_newtype_struct(&mut erased).map_err(unerase)
     }
-    fn visit_seq<V>(self, mut visitor: V) -> Result<Out, V::Error> where V: serde::de::SeqAccess<'de> {
-        self.erased_visit_seq(&mut visitor).map_err(unerase)
+    fn visit_seq<V>(self, visitor: V) -> Result<Out, V::Error> where V: serde::de::SeqAccess<'de> {
+        let mut erased = erase::SeqAccess {
+            state: Some(visitor),
+        };
+        self.erased_visit_seq(&mut erased).map_err(unerase)
     }
-    fn visit_map<V>(self, mut visitor: V) -> Result<Out, V::Error> where V: serde::de::MapAccess<'de> {
-        self.erased_visit_map(&mut visitor).map_err(unerase)
+    fn visit_map<V>(self, visitor: V) -> Result<Out, V::Error> where V: serde::de::MapAccess<'de> {
+        let mut erased = erase::MapAccess {
+            state: Some(visitor),
+        };
+        self.erased_visit_map(&mut erased).map_err(unerase)
     }
     fn visit_bytes<E>(self, v: &[u8]) -> Result<Out, E> where E: serde::de::Error {
         self.erased_visit_bytes(v).map_err(unerase)
