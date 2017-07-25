@@ -1,5 +1,4 @@
 use std::fmt::{self, Display};
-use std::marker::PhantomData;
 
 use serde;
 
@@ -93,12 +92,11 @@ pub trait EnumAccess<'de> {
 }
 
 impl<'de> Deserializer<'de> {
-    pub fn erase<D>(deserializer: D) -> erase::Deserializer<'de, D>
+    pub fn erase<D>(deserializer: D) -> erase::Deserializer<D>
         where D: serde::Deserializer<'de>
     {
         erase::Deserializer {
             state: Some(deserializer),
-            lifetime: PhantomData,
         }
     }
 }
@@ -120,8 +118,6 @@ impl Out {
 // IMPL ERASED SERDE FOR SERDE /////////////////////////////////////////////////
 
 mod erase {
-    use std::marker::PhantomData;
-
     pub struct DeserializeSeed<D> {
         pub(crate) state: Option<D>,
     }
@@ -132,12 +128,11 @@ mod erase {
         }
     }
 
-    pub struct Deserializer<'de, D> {
+    pub struct Deserializer<D> {
         pub(crate) state: Option<D>,
-        pub(crate) lifetime: PhantomData<&'de ()>,
     }
 
-    impl<'de, D> Deserializer<'de, D> {
+    impl<D> Deserializer<D> {
         pub(crate) fn take(&mut self) -> D {
             self.state.take().unwrap()
         }
@@ -202,7 +197,7 @@ impl<'de, T> DeserializeSeed<'de> for erase::DeserializeSeed<T> where T: serde::
     }
 }
 
-impl<'de, T> Deserializer<'de> for erase::Deserializer<'de, T> where T: serde::Deserializer<'de> {
+impl<'de, T> Deserializer<'de> for erase::Deserializer<T> where T: serde::Deserializer<'de> {
     fn erased_deserialize_any(&mut self, visitor: &mut Visitor<'de>) -> Result<Out, Error> {
         self.take().deserialize_any(visitor).map_err(erase)
     }
@@ -419,7 +414,6 @@ impl<'de, 'a> serde::de::DeserializeSeed<'de> for &'a mut DeserializeSeed<'de> {
     fn deserialize<D>(self, deserializer: D) -> Result<Out, D::Error> where D: serde::Deserializer<'de> {
         let mut erased = erase::Deserializer {
             state: Some(deserializer),
-            lifetime: PhantomData,
         };
         self.erased_deserialize_seed(&mut erased).map_err(unerase)
     }
@@ -614,14 +608,12 @@ impl<'de, 'a> serde::de::Visitor<'de> for &'a mut Visitor<'de> {
     fn visit_some<D>(self, deserializer: D) -> Result<Out, D::Error> where D: serde::Deserializer<'de> {
         let mut erased = erase::Deserializer {
             state: Some(deserializer),
-            lifetime: PhantomData,
         };
         self.erased_visit_some(&mut erased).map_err(unerase)
     }
     fn visit_newtype_struct<D>(self, deserializer: D) -> Result<Out, D::Error> where D: serde::Deserializer<'de> {
         let mut erased = erase::Deserializer {
             state: Some(deserializer),
-            lifetime: PhantomData,
         };
         self.erased_visit_newtype_struct(&mut erased).map_err(unerase)
     }
