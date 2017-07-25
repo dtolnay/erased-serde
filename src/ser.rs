@@ -586,7 +586,7 @@ impl_serializer_for_trait_object!({} Box<Serializer + Send + Sync>);
 fn erase<E>(e: E) -> Error
     where E: Display
 {
-    Error::new(e.to_string())
+    serde::ser::Error::custom(e)
 }
 
 fn unerase<E>(e: Error) -> E

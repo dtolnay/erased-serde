@@ -663,7 +663,7 @@ impl<T: ?Sized> EnumVisitor for Erase<T> where T: serde::de::EnumVisitor {
 fn erase<E>(e: E) -> Error
     where E: Display
 {
-    Error::new(e.to_string())
+    serde::de::Error::custom(e)
 }
 
 fn unerase<E>(e: Error) -> E
