@@ -27,13 +27,13 @@ fn serialization() {
     values.insert("int", Box::new(65536));
 
     // Pick a Serializer out of the formats map.
-    let format = formats.get_mut("json").unwrap();
+    let format = formats.get_mut("json").unwrap().as_mut();
 
     // Pick a Serialize out of the values map.
     let value = values.get("vec").unwrap();
 
     // This line prints `["a","b"]` to stdout.
-    value.erased_serialize(&mut **format).unwrap();
+    value.erased_serialize(format).unwrap();
 }
 
 #[test]
@@ -52,9 +52,9 @@ fn deserialization() {
     formats.insert("cbor", Box::new(Deserializer::erase(cbor)));
 
     // Pick a Deserializer out of the formats map.
-    let format = formats.get_mut("json").unwrap();
+    let format = formats.get_mut("json").unwrap().as_mut();
 
-    let data: Map<String, usize> = erased_serde::deserialize(&mut **format).unwrap();
+    let data: Map<String, usize> = erased_serde::deserialize(format).unwrap();
 
     println!("{}", data["A"] + data["B"]);
 }
