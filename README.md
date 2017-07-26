@@ -15,9 +15,10 @@ and `Deserializer` traits that can be used as [trait objects].
 
 The usual Serde `Serialize`, `Serializer` and `Deserializer` traits cannot be
 used as trait objects like `&Serialize` or boxed trait objects like
-`Box<Serialize>` because of Rust's ["object safety"
-rules](http://huonw.github.io/blog/2015/01/object-safety/). In particular, all
+`Box<Serialize>` because of Rust's ["object safety" rules]. In particular, all
 three traits contain generic methods which cannot be made into a trait object.
+
+["object safety" rules]: http://huonw.github.io/blog/2015/01/object-safety/
 
 **The traits in this crate work seamlessly with any existing Serde `Serialize`
 and `Deserialize` type and any existing Serde `Serializer` and `Deserializer`
