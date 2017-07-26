@@ -5,8 +5,9 @@ Erased Serde
 [![Latest Version](https://img.shields.io/crates/v/erased-serde.svg)](https://crates.io/crates/erased-serde)
 
 This crate provides type-erased versions of Serde's `Serialize`, `Serializer`
-and `Deserializer` traits that can be used as [trait
-objects](https://doc.rust-lang.org/book/trait-objects.html).
+and `Deserializer` traits that can be used as [trait objects].
+
+[trait objects]: https://doc.rust-lang.org/book/first-edition/trait-objects.html
 
 - [`erased_serde::Serialize`](https://docs.rs/erased-serde/0.3.0/erased_serde/trait.Serialize.html)
 - [`erased_serde::Serializer`](https://docs.rs/erased-serde/0.3.0/erased_serde/trait.Serializer.html)
