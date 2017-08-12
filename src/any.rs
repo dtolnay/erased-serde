@@ -28,13 +28,21 @@ impl Any {
     //
     // Now `a.view()` and `a.take()` return references to a dead String.
     pub(crate) fn new<T>(t: T) -> Self {
-        let ptr = Box::into_raw(Box::new(t));
-        Any {
-            ptr: ptr as *mut (),
-            drop: |ptr| drop(unsafe { Box::from_raw(ptr as *mut T) }),
-            fingerprint: Fingerprint::of::<T>(),
-            #[cfg(feature = "unstable-debug")]
-            type_name: unsafe { intrinsics::type_name::<T>() },
+        let ptr = Box::into_raw(Box::new(t)) as *mut ();
+        let drop = |ptr| drop(unsafe { Box::from_raw(ptr as *mut T) });
+        let fingerprint = Fingerprint::of::<T>();
+
+        // Once attributes on struct literal fields are stable, do that instead.
+        // https://github.com/rust-lang/rust/issues/41681
+        #[cfg(not(feature = "unstable-debug"))]
+        {
+            Any { ptr, drop, fingerprint }
+        }
+
+        #[cfg(feature = "unstable-debug")]
+        {
+            let type_name = unsafe { intrinsics::type_name::<T>() };
+            Any { ptr, drop, fingerprint, type_name }
         }
     }
 
