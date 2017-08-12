@@ -1,9 +1,16 @@
 use std::mem;
 
+#[cfg(feature = "unstable-debug")]
+use std::intrinsics;
+
 pub struct Any {
     ptr: *mut (),
     drop: fn(*mut ()),
     fingerprint: Fingerprint,
+
+    /// For panic messages only. Not used for comparison.
+    #[cfg(feature = "unstable-debug")]
+    type_name: &'static str,
 }
 
 // These functions are all unsafe. They are not exposed to the user. Declaring
@@ -26,13 +33,15 @@ impl Any {
             ptr: ptr as *mut (),
             drop: |ptr| drop(unsafe { Box::from_raw(ptr as *mut T) }),
             fingerprint: Fingerprint::of::<T>(),
+            #[cfg(feature = "unstable-debug")]
+            type_name: unsafe { intrinsics::type_name::<T>() },
         }
     }
 
     // This is unsafe -- caller is responsible that T is the correct type.
     pub(crate) fn view<T>(&mut self) -> &mut T {
         if self.fingerprint != Fingerprint::of::<T>() {
-            panic!("invalid cast");
+            self.invalid_cast_to::<T>();
         }
         let ptr = self.ptr as *mut T;
         unsafe { &mut *ptr }
@@ -41,12 +50,24 @@ impl Any {
     // This is unsafe -- caller is responsible that T is the correct type.
     pub(crate) fn take<T>(self) -> T {
         if self.fingerprint != Fingerprint::of::<T>() {
-            panic!("invalid cast");
+            self.invalid_cast_to::<T>();
         }
         let ptr = self.ptr as *mut T;
         let box_t = unsafe { Box::from_raw(ptr) };
         mem::forget(self);
         *box_t
+    }
+
+    #[cfg(not(feature = "unstable-debug"))]
+    fn invalid_cast_to<T>(&self) -> ! {
+        panic!("invalid cast; enable `unstable-debug` feature to debug");
+    }
+
+    #[cfg(feature = "unstable-debug")]
+    fn invalid_cast_to<T>(&self) -> ! {
+        let from = self.type_name;
+        let to = unsafe { intrinsics::type_name::<T>() };
+        panic!("invalid cast: {} to {}", from, to);
     }
 }
 

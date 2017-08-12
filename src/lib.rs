@@ -90,6 +90,8 @@
 
 #![doc(html_root_url = "https://docs.rs/erased-serde/0.3.0")]
 
+#![cfg_attr(feature = "unstable-debug", feature(core_intrinsics))]
+
 extern crate serde;
 
 #[cfg(test)]
