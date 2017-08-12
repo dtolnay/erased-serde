@@ -201,9 +201,7 @@ impl<'de> Deserializer<'de> {
     pub fn erase<D>(deserializer: D) -> erase::Deserializer<D>
         where D: serde::Deserializer<'de>
     {
-        erase::Deserializer {
-            state: Some(deserializer),
-        }
+        erase::Deserializer { state: Some(deserializer) }
     }
 }
 
@@ -730,21 +728,15 @@ impl<'de, 'a> serde::de::Visitor<'de> for &'a mut Visitor<'de> {
         self.erased_visit_newtype_struct(&mut erased).map_err(unerase)
     }
     fn visit_seq<V>(self, seq: V) -> Result<Out, V::Error> where V: serde::de::SeqAccess<'de> {
-        let mut erased = erase::SeqAccess {
-            state: seq,
-        };
+        let mut erased = erase::SeqAccess { state: seq };
         self.erased_visit_seq(&mut erased).map_err(unerase)
     }
     fn visit_map<V>(self, map: V) -> Result<Out, V::Error> where V: serde::de::MapAccess<'de> {
-        let mut erased = erase::MapAccess {
-            state: map,
-        };
+        let mut erased = erase::MapAccess { state: map };
         self.erased_visit_map(&mut erased).map_err(unerase)
     }
     fn visit_enum<V>(self, data: V) -> Result<Out, V::Error> where V: serde::de::EnumAccess<'de> {
-        let mut erased = erase::EnumAccess {
-            state: Some(data),
-        };
+        let mut erased = erase::EnumAccess { state: Some(data) };
         self.erased_visit_enum(&mut erased).map_err(unerase)
     }
 }
