@@ -800,70 +800,109 @@ fn unerase<E>(e: Error) -> E
 
 // TEST ////////////////////////////////////////////////////////////////////////
 
-#[test]
-fn trait_object() {
-    extern crate serde_json;
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json;
 
-    let obj: &Serialize = &vec!["a", "b"];
-
-    let mut buf = Vec::new();
-
+    fn test_json<T>(t: T)
+        where T: serde::Serialize
     {
-        let mut ser = serde_json::Serializer::new(&mut buf);
-        let ser: &mut Serializer = &mut Serializer::erase(&mut ser);
+        let expected = serde_json::to_vec(&t).unwrap();
 
-        obj.erased_serialize(ser).unwrap();
+        // test borrowed trait object
+        {
+            let obj: &Serialize = &t;
+
+            let mut buf = Vec::new();
+
+            {
+                let mut ser = serde_json::Serializer::new(&mut buf);
+                let ser: &mut Serializer = &mut Serializer::erase(&mut ser);
+
+                obj.erased_serialize(ser).unwrap();
+            }
+
+            assert_eq!(buf, expected);
+        }
+
+        // test boxed trait object
+        {
+            let obj: Box<Serialize> = Box::new(t);
+
+            let mut buf = Vec::new();
+
+            {
+                let mut ser = serde_json::Serializer::new(&mut buf);
+                let mut ser: Box<Serializer> = Box::new(Serializer::erase(&mut ser));
+
+                obj.erased_serialize(&mut ser).unwrap();
+            }
+
+            assert_eq!(buf, expected);
+        }
     }
 
-    assert_eq!(&buf, br#"["a","b"]"#);
-}
-
-#[test]
-fn box_trait() {
-    extern crate serde_json;
-
-    let obj: Box<Serialize> = Box::new(vec!["a", "b"]);
-
-    let mut buf = Vec::new();
-
-    {
-        let mut ser = serde_json::Serializer::new(&mut buf);
-        let mut ser: Box<Serializer> = Box::new(Serializer::erase(&mut ser));
-
-        obj.erased_serialize(&mut ser).unwrap();
+    #[test]
+    fn test_vec() {
+        test_json(vec!["a", "b"]);
     }
 
-    assert_eq!(&buf, br#"["a","b"]"#);
-}
+    #[test]
+    fn test_struct() {
+        #[derive(Serialize)]
+        struct S {
+            f: usize,
+        }
 
-#[test]
-fn assert_serialize() {
-    fn assert<T: serde::Serialize>() {}
+        test_json(S { f: 256 });
+    }
 
-    assert::<&Serialize>();
-    assert::<&(Serialize + Send)>();
-    assert::<&(Serialize + Sync)>();
-    assert::<&(Serialize + Send + Sync)>();
-    assert::<&(Serialize + Sync + Send)>();
-    assert::<Vec<&Serialize>>();
-    assert::<Vec<&(Serialize + Send)>>();
+    #[test]
+    fn test_enum() {
+        #[derive(Serialize)]
+        enum E {
+            Unit,
+            Newtype(bool),
+            Tuple(bool, bool),
+            Struct { t: bool, f: bool },
+        }
 
-    assert::<Box<Serialize>>();
-    assert::<Box<Serialize + Send>>();
-    assert::<Box<Serialize + Sync>>();
-    assert::<Box<Serialize + Send + Sync>>();
-    assert::<Box<Serialize + Sync + Send>>();
-    assert::<Vec<Box<Serialize>>>();
-    assert::<Vec<Box<Serialize + Send>>>();
-}
+        test_json(E::Unit);
+        test_json(E::Newtype(true));
+        test_json(E::Tuple(true, false));
+        test_json(E::Struct { t: true, f: false });
+    }
 
-#[test]
-fn assert_serializer() {
-    fn assert<T: serde::Serializer>() {}
+    #[test]
+    fn assert_serialize() {
+        fn assert<T: serde::Serialize>() {}
 
-    assert::<&mut Serializer>();
-    assert::<&mut (Serializer + Send)>();
-    assert::<&mut (Serializer + Sync)>();
-    assert::<&mut (Serializer + Send + Sync)>();
-    assert::<&mut (Serializer + Sync + Send)>();
+        assert::<&Serialize>();
+        assert::<&(Serialize + Send)>();
+        assert::<&(Serialize + Sync)>();
+        assert::<&(Serialize + Send + Sync)>();
+        assert::<&(Serialize + Sync + Send)>();
+        assert::<Vec<&Serialize>>();
+        assert::<Vec<&(Serialize + Send)>>();
+
+        assert::<Box<Serialize>>();
+        assert::<Box<Serialize + Send>>();
+        assert::<Box<Serialize + Sync>>();
+        assert::<Box<Serialize + Send + Sync>>();
+        assert::<Box<Serialize + Sync + Send>>();
+        assert::<Vec<Box<Serialize>>>();
+        assert::<Vec<Box<Serialize + Send>>>();
+    }
+
+    #[test]
+    fn assert_serializer() {
+        fn assert<T: serde::Serializer>() {}
+
+        assert::<&mut Serializer>();
+        assert::<&mut (Serializer + Send)>();
+        assert::<&mut (Serializer + Sync)>();
+        assert::<&mut (Serializer + Send + Sync)>();
+        assert::<&mut (Serializer + Sync + Send)>();
+    }
 }

@@ -92,6 +92,12 @@
 
 extern crate serde;
 
+#[cfg(test)]
+#[macro_use]
+extern crate serde_derive;
+#[cfg(test)]
+extern crate serde_json;
+
 mod any;
 mod de;
 mod error;
