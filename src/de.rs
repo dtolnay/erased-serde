@@ -522,122 +522,122 @@ impl<'de, 'a> serde::de::DeserializeSeed<'de> for &'a mut DeserializeSeed<'de> {
 }
 
 macro_rules! impl_deserializer_for_trait_object {
-    ({$($generics:tt)*} $ty:ty) => {
+    ({$($generics:tt)*} {$($mut:tt)*} $ty:ty) => {
         impl <$($generics)*> serde::Deserializer<'de> for $ty {
             type Error = Error;
-            fn deserialize_any<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_any<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_any(&mut erased).map(Out::take)
             }
-            fn deserialize_bool<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_bool<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_bool(&mut erased).map(Out::take)
             }
-            fn deserialize_u8<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_u8<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_u8(&mut erased).map(Out::take)
             }
-            fn deserialize_u16<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_u16<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_u16(&mut erased).map(Out::take)
             }
-            fn deserialize_u32<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_u32<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_u32(&mut erased).map(Out::take)
             }
-            fn deserialize_u64<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_u64<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_u64(&mut erased).map(Out::take)
             }
-            fn deserialize_i8<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_i8<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_i8(&mut erased).map(Out::take)
             }
-            fn deserialize_i16<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_i16<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_i16(&mut erased).map(Out::take)
             }
-            fn deserialize_i32<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_i32<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_i32(&mut erased).map(Out::take)
             }
-            fn deserialize_i64<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_i64<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_i64(&mut erased).map(Out::take)
             }
-            fn deserialize_f32<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_f32<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_f32(&mut erased).map(Out::take)
             }
-            fn deserialize_f64<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_f64<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_f64(&mut erased).map(Out::take)
             }
-            fn deserialize_char<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_char<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_char(&mut erased).map(Out::take)
             }
-            fn deserialize_str<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_str<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_str(&mut erased).map(Out::take)
             }
-            fn deserialize_string<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_string<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_string(&mut erased).map(Out::take)
             }
-            fn deserialize_bytes<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_bytes<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_bytes(&mut erased).map(Out::take)
             }
-            fn deserialize_byte_buf<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_byte_buf<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_byte_buf(&mut erased).map(Out::take)
             }
-            fn deserialize_option<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_option<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_option(&mut erased).map(Out::take)
             }
-            fn deserialize_unit<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_unit<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_unit(&mut erased).map(Out::take)
             }
-            fn deserialize_unit_struct<V>(mut self, name: &'static str, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_unit_struct<V>($($mut)* self, name: &'static str, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_unit_struct(name, &mut erased).map(Out::take)
             }
-            fn deserialize_newtype_struct<V>(mut self, name: &'static str, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_newtype_struct<V>($($mut)* self, name: &'static str, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_newtype_struct(name, &mut erased).map(Out::take)
             }
-            fn deserialize_seq<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_seq<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_seq(&mut erased).map(Out::take)
             }
-            fn deserialize_tuple<V>(mut self, len: usize, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_tuple<V>($($mut)* self, len: usize, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_tuple(len, &mut erased).map(Out::take)
             }
-            fn deserialize_tuple_struct<V>(mut self, name: &'static str, len: usize, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_tuple_struct<V>($($mut)* self, name: &'static str, len: usize, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_tuple_struct(name, len, &mut erased).map(Out::take)
             }
-            fn deserialize_map<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_map<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_map(&mut erased).map(Out::take)
             }
-            fn deserialize_struct<V>(mut self, name: &'static str, fields: &'static [&'static str], visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_struct<V>($($mut)* self, name: &'static str, fields: &'static [&'static str], visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_struct(name, fields, &mut erased).map(Out::take)
             }
-            fn deserialize_identifier<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_identifier<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_identifier(&mut erased).map(Out::take)
             }
-            fn deserialize_enum<V>(mut self, name: &'static str, variants: &'static [&'static str], visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_enum<V>($($mut)* self, name: &'static str, variants: &'static [&'static str], visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_enum(name, variants, &mut erased).map(Out::take)
             }
-            fn deserialize_ignored_any<V>(mut self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
+            fn deserialize_ignored_any<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_ignored_any(&mut erased).map(Out::take)
             }
@@ -645,14 +645,14 @@ macro_rules! impl_deserializer_for_trait_object {
     };
 }
 
-impl_deserializer_for_trait_object!({'de, 'a} &'a mut Deserializer<'de>);
-impl_deserializer_for_trait_object!({'de, 'a} &'a mut (Deserializer<'de> + Send));
-impl_deserializer_for_trait_object!({'de, 'a} &'a mut (Deserializer<'de> + Sync));
-impl_deserializer_for_trait_object!({'de, 'a} &'a mut (Deserializer<'de> + Send + Sync));
-impl_deserializer_for_trait_object!({'de} Box<Deserializer<'de>>);
-impl_deserializer_for_trait_object!({'de} Box<Deserializer<'de> + Send>);
-impl_deserializer_for_trait_object!({'de} Box<Deserializer<'de> + Sync>);
-impl_deserializer_for_trait_object!({'de} Box<Deserializer<'de> + Send + Sync>);
+impl_deserializer_for_trait_object!({'de, 'a} {} &'a mut Deserializer<'de>);
+impl_deserializer_for_trait_object!({'de, 'a} {} &'a mut (Deserializer<'de> + Send));
+impl_deserializer_for_trait_object!({'de, 'a} {} &'a mut (Deserializer<'de> + Sync));
+impl_deserializer_for_trait_object!({'de, 'a} {} &'a mut (Deserializer<'de> + Send + Sync));
+impl_deserializer_for_trait_object!({'de} {mut} Box<Deserializer<'de>>);
+impl_deserializer_for_trait_object!({'de} {mut} Box<Deserializer<'de> + Send>);
+impl_deserializer_for_trait_object!({'de} {mut} Box<Deserializer<'de> + Sync>);
+impl_deserializer_for_trait_object!({'de} {mut} Box<Deserializer<'de> + Send + Sync>);
 
 impl<'de, 'a> serde::de::Visitor<'de> for &'a mut Visitor<'de> {
     type Value = Out;
