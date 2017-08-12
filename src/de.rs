@@ -506,7 +506,7 @@ impl<'de, T> EnumAccess<'de> for erase::EnumAccess<T> where T: serde::de::EnumAc
                     a.take::<T::Variant>().struct_variant(fields, visitor).map_err(erase)
                 },
             };
-            (Out::new(out), erased)
+            (out, erased)
         }).map_err(erase)
     }
 }
