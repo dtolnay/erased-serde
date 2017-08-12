@@ -134,15 +134,18 @@ pub trait Visitor<'de> {
     fn erased_visit_f64(&mut self, f64) -> Result<Out, Error>;
     fn erased_visit_char(&mut self, char) -> Result<Out, Error>;
     fn erased_visit_str(&mut self, &str) -> Result<Out, Error>;
+    fn erased_visit_borrowed_str(&mut self, &'de str) -> Result<Out, Error>;
     fn erased_visit_string(&mut self, String) -> Result<Out, Error>;
-    fn erased_visit_unit(&mut self) -> Result<Out, Error>;
+    fn erased_visit_bytes(&mut self, &[u8]) -> Result<Out, Error>;
+    fn erased_visit_borrowed_bytes(&mut self, &'de [u8]) -> Result<Out, Error>;
+    fn erased_visit_byte_buf(&mut self, Vec<u8>) -> Result<Out, Error>;
     fn erased_visit_none(&mut self) -> Result<Out, Error>;
     fn erased_visit_some(&mut self, &mut Deserializer<'de>) -> Result<Out, Error>;
+    fn erased_visit_unit(&mut self) -> Result<Out, Error>;
     fn erased_visit_newtype_struct(&mut self, &mut Deserializer<'de>) -> Result<Out, Error>;
     fn erased_visit_seq(&mut self, &mut SeqAccess<'de>) -> Result<Out, Error>;
     fn erased_visit_map(&mut self, &mut MapAccess<'de>) -> Result<Out, Error>;
-    fn erased_visit_bytes(&mut self, &[u8]) -> Result<Out, Error>;
-    fn erased_visit_byte_buf(&mut self, Vec<u8>) -> Result<Out, Error>;
+    fn erased_visit_enum(&mut self, &mut EnumAccess<'de>) -> Result<Out, Error>;
 }
 
 pub trait SeqAccess<'de> {
@@ -424,17 +427,29 @@ impl<'de, T> Visitor<'de> for erase::Visitor<T> where T: serde::de::Visitor<'de>
     fn erased_visit_str(&mut self, v: &str) -> Result<Out, Error> {
         self.take().visit_str(v).map(Out::new)
     }
+    fn erased_visit_borrowed_str(&mut self, v: &'de str) -> Result<Out, Error> {
+        self.take().visit_borrowed_str(v).map(Out::new)
+    }
     fn erased_visit_string(&mut self, v: String) -> Result<Out, Error> {
         self.take().visit_string(v).map(Out::new)
     }
-    fn erased_visit_unit(&mut self) -> Result<Out, Error> {
-        self.take().visit_unit().map(Out::new)
+    fn erased_visit_bytes(&mut self, v: &[u8]) -> Result<Out, Error> {
+        self.take().visit_bytes(v).map(Out::new)
+    }
+    fn erased_visit_borrowed_bytes(&mut self, v: &'de [u8]) -> Result<Out, Error> {
+        self.take().visit_borrowed_bytes(v).map(Out::new)
+    }
+    fn erased_visit_byte_buf(&mut self, v: Vec<u8>) -> Result<Out, Error> {
+        self.take().visit_byte_buf(v).map(Out::new)
     }
     fn erased_visit_none(&mut self) -> Result<Out, Error> {
         self.take().visit_none().map(Out::new)
     }
     fn erased_visit_some(&mut self, deserializer: &mut Deserializer<'de>) -> Result<Out, Error> {
         self.take().visit_some(deserializer).map(Out::new)
+    }
+    fn erased_visit_unit(&mut self) -> Result<Out, Error> {
+        self.take().visit_unit().map(Out::new)
     }
     fn erased_visit_newtype_struct(&mut self, deserializer: &mut Deserializer<'de>) -> Result<Out, Error> {
         self.take().visit_newtype_struct(deserializer).map(Out::new)
@@ -445,11 +460,8 @@ impl<'de, T> Visitor<'de> for erase::Visitor<T> where T: serde::de::Visitor<'de>
     fn erased_visit_map(&mut self, map: &mut MapAccess<'de>) -> Result<Out, Error> {
         self.take().visit_map(map).map(Out::new)
     }
-    fn erased_visit_bytes(&mut self, v: &[u8]) -> Result<Out, Error> {
-        self.take().visit_bytes(v).map(Out::new)
-    }
-    fn erased_visit_byte_buf(&mut self, v: Vec<u8>) -> Result<Out, Error> {
-        self.take().visit_byte_buf(v).map(Out::new)
+    fn erased_visit_enum(&mut self, data: &mut EnumAccess<'de>) -> Result<Out, Error> {
+        self.take().visit_enum(data).map(Out::new)
     }
 }
 
@@ -688,11 +700,20 @@ impl<'de, 'a> serde::de::Visitor<'de> for &'a mut Visitor<'de> {
     fn visit_str<E>(self, v: &str) -> Result<Out, E> where E: serde::de::Error {
         self.erased_visit_str(v).map_err(unerase)
     }
+    fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Out, E> where E: serde::de::Error {
+        self.erased_visit_borrowed_str(v).map_err(unerase)
+    }
     fn visit_string<E>(self, v: String) -> Result<Out, E> where E: serde::de::Error {
         self.erased_visit_string(v).map_err(unerase)
     }
-    fn visit_unit<E>(self) -> Result<Out, E> where E: serde::de::Error {
-        self.erased_visit_unit().map_err(unerase)
+    fn visit_bytes<E>(self, v: &[u8]) -> Result<Out, E> where E: serde::de::Error {
+        self.erased_visit_bytes(v).map_err(unerase)
+    }
+    fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Out, E> where E: serde::de::Error {
+        self.erased_visit_borrowed_bytes(v).map_err(unerase)
+    }
+    fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Out, E> where E: serde::de::Error {
+        self.erased_visit_byte_buf(v).map_err(unerase)
     }
     fn visit_none<E>(self) -> Result<Out, E> where E: serde::de::Error {
         self.erased_visit_none().map_err(unerase)
@@ -700,6 +721,9 @@ impl<'de, 'a> serde::de::Visitor<'de> for &'a mut Visitor<'de> {
     fn visit_some<D>(self, deserializer: D) -> Result<Out, D::Error> where D: serde::Deserializer<'de> {
         let mut erased = erase::Deserializer { state: Some(deserializer) };
         self.erased_visit_some(&mut erased).map_err(unerase)
+    }
+    fn visit_unit<E>(self) -> Result<Out, E> where E: serde::de::Error {
+        self.erased_visit_unit().map_err(unerase)
     }
     fn visit_newtype_struct<D>(self, deserializer: D) -> Result<Out, D::Error> where D: serde::Deserializer<'de> {
         let mut erased = erase::Deserializer { state: Some(deserializer) };
@@ -717,11 +741,11 @@ impl<'de, 'a> serde::de::Visitor<'de> for &'a mut Visitor<'de> {
         };
         self.erased_visit_map(&mut erased).map_err(unerase)
     }
-    fn visit_bytes<E>(self, v: &[u8]) -> Result<Out, E> where E: serde::de::Error {
-        self.erased_visit_bytes(v).map_err(unerase)
-    }
-    fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Out, E> where E: serde::de::Error {
-        self.erased_visit_byte_buf(v).map_err(unerase)
+    fn visit_enum<V>(self, data: V) -> Result<Out, V::Error> where V: serde::de::EnumAccess<'de> {
+        let mut erased = erase::EnumAccess {
+            state: Some(data),
+        };
+        self.erased_visit_enum(&mut erased).map_err(unerase)
     }
 }
 
