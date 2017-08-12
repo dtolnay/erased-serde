@@ -980,6 +980,12 @@ mod tests {
     }
 
     #[test]
+    fn test_borrowed() {
+        let bytes = br#""borrowed""#.to_owned();
+        test_json::<&str>(&bytes);
+    }
+
+    #[test]
     fn assert_deserializer() {
         fn assert<'de, T: serde::Deserializer<'de>>() {}
 
