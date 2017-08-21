@@ -105,6 +105,33 @@ fn main() {
 }
 ```
 
+## How it works
+
+This crate is based on a general technique for building trait objects of traits
+that have generic methods (like all of Serde's traits). [This example code]
+demonstrates the technique applied to a simplified case of a single generic
+method. [Try it in the playground.]
+
+[This example code]: https://github.com/dtolnay/erased-serde/blob/master/explanation/main.rs
+[Try it in the playground.]: https://play.rust-lang.org/?gist=2e839b72e3660eeee988b271bf487fc8
+
+In erased-serde things are a bit more complicated than in the example for three
+reasons but the idea is the same.
+
+- We need to deal with trait methods that take `self` by value -- effectively by
+  implementing the object-safe trait for `Option<T>` where `T` implements the
+  real trait.
+- We need to deal with traits that have associated types like `Serializer::Ok`
+  and `Visitor::Value` -- by carefully short-term stashing things behind a
+  pointer.
+- We need to support trait methods that have a generic type in the return type
+  but none of the argument types, like `SeqAccess::next_element` -- this can be
+  flipped around into a callback style where the return value is instead passed
+  on to a generic argument.
+
+In the future maybe the Rust compiler will be able to apply this technique
+automatically to any trait that is not already object safe by the current rules.
+
 ## License
 
 Licensed under either of
