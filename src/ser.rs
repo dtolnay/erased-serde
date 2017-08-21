@@ -229,7 +229,7 @@ mod erase {
     }
 }
 
-impl<T: ?Sized> Serializer for erase::Serializer<T> where T: serde::Serializer {
+impl<T> Serializer for erase::Serializer<T> where T: serde::Serializer {
     fn erased_serialize_bool(&mut self, v: bool) -> Result<Ok, Error> {
         self.take().serialize_bool(v).map(Ok::new).map_err(erase)
     }
