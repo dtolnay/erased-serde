@@ -318,21 +318,52 @@ impl<T> Serializer for erase::Serializer<T> where T: serde::Serializer {
 
 // IMPL SERDE FOR ERASED SERDE /////////////////////////////////////////////////
 
-macro_rules! impl_serialize_for_trait_object {
-    (Serialize $(+ $traits:ident)*) => {
-        impl<'a> serde::Serialize for Serialize + 'a $(+ $traits)* {
-            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: serde::Serializer {
-                let mut erased = erase::Serializer { state: Some(serializer) };
-                self.erased_serialize(&mut erased).map(Ok::take).map_err(unerase)
-            }
-        }
-    };
+/// Serialize the given type-erased serializable value.
+///
+/// This can be used to implement `serde::Serialize` for trait objects that have
+/// `erased_serde::Serialize` as a supertrait.
+///
+/// ```
+/// # extern crate serde;
+/// # extern crate erased_serde;
+/// #
+/// trait Event: erased_serde::Serialize {
+///     /* ... */
+/// }
+///
+/// impl<'a> serde::Serialize for Event + 'a {
+///     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+///         where S: serde::Serializer
+///     {
+///         erased_serde::serialize(self, serializer)
+///     }
+/// }
+/// #
+/// # fn main() {}
+/// ```
+///
+/// Since this is reasonably common, the `serialize_trait_object!` macro
+/// generates such a Serialize impl.
+///
+/// ```
+/// #[macro_use]
+/// extern crate erased_serde;
+/// #
+/// # trait Event: erased_serde::Serialize {}
+///
+/// serialize_trait_object!(Event);
+/// #
+/// # fn main() {}
+/// ```
+pub fn serialize<T: ?Sized, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where T: Serialize,
+          S: serde::Serializer
+{
+    let mut erased = erase::Serializer { state: Some(serializer) };
+    value.erased_serialize(&mut erased).map(Ok::take).map_err(unerase)
 }
 
-impl_serialize_for_trait_object!(Serialize);
-impl_serialize_for_trait_object!(Serialize + Send);
-impl_serialize_for_trait_object!(Serialize + Sync);
-impl_serialize_for_trait_object!(Serialize + Send + Sync);
+serialize_trait_object!(Serialize);
 
 macro_rules! impl_serializer_for_trait_object {
     ($ty:ty) => {
