@@ -100,6 +100,9 @@ extern crate serde_derive;
 #[cfg(test)]
 extern crate serde_json;
 
+#[macro_use]
+mod macros;
+
 mod any;
 mod de;
 mod error;
@@ -107,4 +110,8 @@ mod ser;
 
 pub use de::{deserialize, Deserializer};
 pub use error::Error;
-pub use ser::{Serialize, Serializer};
+pub use ser::{serialize, Serialize, Serializer};
+
+// Not public API.
+#[doc(hidden)]
+pub mod private;
