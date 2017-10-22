@@ -117,6 +117,7 @@ pub trait Deserializer<'de> {
     fn erased_deserialize_identifier(&mut self, &mut Visitor<'de>) -> Result<Out, Error>;
     fn erased_deserialize_enum(&mut self, name: &'static str, variants: &'static [&'static str], &mut Visitor<'de>) -> Result<Out, Error>;
     fn erased_deserialize_ignored_any(&mut self, &mut Visitor<'de>) -> Result<Out, Error>;
+    fn erased_is_human_readable(&self) -> bool;
 }
 
 pub trait Visitor<'de> {
@@ -237,6 +238,9 @@ mod erase {
     impl<D> Deserializer<D> {
         pub(crate) fn take(&mut self) -> D {
             self.state.take().unwrap()
+        }
+        pub(crate) fn as_ref(&self) -> &D {
+            self.state.as_ref().unwrap()
         }
     }
 
@@ -379,6 +383,9 @@ impl<'de, T> Deserializer<'de> for erase::Deserializer<T> where T: serde::Deseri
     }
     fn erased_deserialize_ignored_any(&mut self, visitor: &mut Visitor<'de>) -> Result<Out, Error> {
         self.take().deserialize_ignored_any(visitor).map_err(erase)
+    }
+    fn erased_is_human_readable(&self) -> bool {
+        self.as_ref().is_human_readable()
     }
 }
 
@@ -641,6 +648,9 @@ macro_rules! impl_deserializer_for_trait_object {
                 let mut erased = erase::Visitor { state: Some(visitor) };
                 self.erased_deserialize_ignored_any(&mut erased).map(Out::take)
             }
+            fn is_human_readable(&self) -> bool {
+                self.erased_is_human_readable()
+            }
         }
     };
 }
@@ -894,6 +904,9 @@ macro_rules! deref_erased_deserializer {
             }
             fn erased_deserialize_ignored_any(&mut self, visitor: &mut Visitor<'de>) -> Result<Out, Error> {
                 (**self).erased_deserialize_ignored_any(visitor)
+            }
+            fn erased_is_human_readable(&self) -> bool {
+                (**self).erased_is_human_readable()
             }
         }
     };

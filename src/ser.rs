@@ -131,6 +131,7 @@ pub trait Serializer {
     fn erased_serialize_map(&mut self, len: Option<usize>) -> Result<Map, Error>;
     fn erased_serialize_struct(&mut self, name: &'static str, len: usize) -> Result<Struct, Error>;
     fn erased_serialize_struct_variant(&mut self, name: &'static str, variant_index: u32, variant: &'static str, len: usize) -> Result<StructVariant, Error>;
+    fn erased_is_human_readable(&self) -> bool;
 }
 
 impl Serializer {
@@ -226,6 +227,9 @@ mod erase {
         pub(crate) fn take(&mut self) -> S {
             self.state.take().unwrap()
         }
+        pub(crate) fn as_ref(&self) -> &S {
+            self.state.as_ref().unwrap()
+        }
     }
 }
 
@@ -313,6 +317,9 @@ impl<T> Serializer for erase::Serializer<T> where T: serde::Serializer {
     }
     fn erased_serialize_struct_variant(&mut self, name: &'static str, variant_index: u32, variant: &'static str, len: usize) -> Result<StructVariant, Error> {
         self.take().serialize_struct_variant(name, variant_index, variant, len).map(StructVariant::new).map_err(erase)
+    }
+    fn erased_is_human_readable(&self) -> bool {
+        self.as_ref().is_human_readable()
     }
 }
 
@@ -460,6 +467,9 @@ macro_rules! impl_serializer_for_trait_object {
             }
             fn serialize_struct_variant(self, name: &'static str, variant_index: u32, variant: &'static str, len: usize) -> Result<StructVariant<'a>, Error> {
                 self.erased_serialize_struct_variant(name, variant_index, variant, len)
+            }
+            fn is_human_readable(&self) -> bool {
+                self.erased_is_human_readable()
             }
         }
     };
@@ -803,6 +813,9 @@ macro_rules! deref_erased_serializer {
             }
             fn erased_serialize_struct_variant(&mut self, name: &'static str, variant_index: u32, variant: &'static str, len: usize) -> Result<StructVariant, Error> {
                 (**self).erased_serialize_struct_variant(name, variant_index, variant, len)
+            }
+            fn erased_is_human_readable(&self) -> bool {
+                (**self).erased_is_human_readable()
             }
         }
     };
