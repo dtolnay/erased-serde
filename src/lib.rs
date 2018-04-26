@@ -71,7 +71,7 @@
 //!
 //!     // Construct some deserializers.
 //!     let json = &mut serde_json::de::Deserializer::from_slice(JSON);
-//!     let cbor = &mut serde_cbor::de::Deserializer::new(CBOR);
+//!     let cbor = &mut serde_cbor::de::Deserializer::from_slice(CBOR);
 //!
 //!     // The values in this map are boxed trait objects, which is not possible
 //!     // with the normal serde::Deserializer because of object safety.
