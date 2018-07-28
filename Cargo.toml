@@ -7,7 +7,7 @@ description = "Type-erased Serialize and Serializer traits"
 repository = "https://github.com/dtolnay/erased-serde"
 documentation = "https://github.com/dtolnay/erased-serde"
 keywords = ["serde", "erasure"]
-include = ["Cargo.toml", "src/**/*.rs"]
+include = ["Cargo.toml", "src/**/*.rs", "LICENSE-*"]
 
 [dependencies]
 serde = "1.0"
