@@ -92,6 +92,7 @@
 
 #![cfg_attr(feature = "unstable-debug", feature(core_intrinsics))]
 
+#[macro_use]
 extern crate serde;
 
 #[cfg(test)]
