@@ -88,7 +88,7 @@
 //! }
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/erased-serde/0.3.5")]
+#![doc(html_root_url = "https://docs.rs/erased-serde/0.3.6")]
 
 #![cfg_attr(feature = "unstable-debug", feature(core_intrinsics))]
 
