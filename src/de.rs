@@ -99,12 +99,8 @@ pub trait Deserializer<'de> {
     fn erased_deserialize_i32(&mut self, &mut Visitor<'de>) -> Result<Out, Error>;
     fn erased_deserialize_i64(&mut self, &mut Visitor<'de>) -> Result<Out, Error>;
     serde_if_integer128! {
-        fn erased_deserialize_i128(&mut self, &mut Visitor<'de>) -> Result<Out, Error> {
-            Err(<Error as serde::de::Error>::custom("erased I128 is not supported"))
-        }
-        fn erased_deserialize_u128(&mut self, &mut Visitor<'de>) -> Result<Out, Error> {
-            Err(<Error as serde::de::Error>::custom("erased U128 is not supported"))
-        }
+        fn erased_deserialize_i128(&mut self, &mut Visitor<'de>) -> Result<Out, Error>;
+        fn erased_deserialize_u128(&mut self, &mut Visitor<'de>) -> Result<Out, Error>;
     }
     fn erased_deserialize_f32(&mut self, &mut Visitor<'de>) -> Result<Out, Error>;
     fn erased_deserialize_f64(&mut self, &mut Visitor<'de>) -> Result<Out, Error>;
@@ -140,12 +136,8 @@ pub trait Visitor<'de> {
     fn erased_visit_u32(&mut self, u32) -> Result<Out, Error>;
     fn erased_visit_u64(&mut self, u64) -> Result<Out, Error>;
     serde_if_integer128! {
-        fn erased_visit_i128(&mut self, i128) -> Result<Out, Error> {
-            Err(<Error as serde::de::Error>::custom("erased U128 is not supported"))
-        }
-        fn erased_visit_u128(&mut self, u128) -> Result<Out, Error> {
-            Err(<Error as serde::de::Error>::custom("erased I128 is not supported"))
-        }
+        fn erased_visit_i128(&mut self, i128) -> Result<Out, Error>;
+        fn erased_visit_u128(&mut self, u128) -> Result<Out, Error>;
     }
     fn erased_visit_f32(&mut self, f32) -> Result<Out, Error>;
     fn erased_visit_f64(&mut self, f64) -> Result<Out, Error>;
@@ -344,11 +336,11 @@ impl<'de, T> Deserializer<'de> for erase::Deserializer<T> where T: serde::Deseri
         self.take().deserialize_i64(visitor).map_err(erase)
     }
     serde_if_integer128! {
-        fn erased_deserialize_u128(&mut self, visitor: &mut Visitor<'de>) -> Result<Out, Error> {
-            self.take().deserialize_u128(visitor).map_err(erase)
-        }
         fn erased_deserialize_i128(&mut self, visitor: &mut Visitor<'de>) -> Result<Out, Error> {
             self.take().deserialize_i128(visitor).map_err(erase)
+        }
+        fn erased_deserialize_u128(&mut self, visitor: &mut Visitor<'de>) -> Result<Out, Error> {
+            self.take().deserialize_u128(visitor).map_err(erase)
         }
     }
     fn erased_deserialize_f32(&mut self, visitor: &mut Visitor<'de>) -> Result<Out, Error> {
@@ -443,6 +435,14 @@ impl<'de, T> Visitor<'de> for erase::Visitor<T> where T: serde::de::Visitor<'de>
     }
     fn erased_visit_u64(&mut self, v: u64) -> Result<Out, Error> {
         self.take().visit_u64(v).map(Out::new)
+    }
+    serde_if_integer128! {
+        fn erased_visit_i128(&mut self, v: i128) -> Result<Out, Error> {
+            self.take().visit_i128(v).map(Out::new)
+        }
+        fn erased_visit_u128(&mut self, v: u128) -> Result<Out, Error> {
+            self.take().visit_u128(v).map(Out::new)
+        }
     }
     fn erased_visit_f32(&mut self, v: f32) -> Result<Out, Error> {
         self.take().visit_f32(v).map(Out::new)
