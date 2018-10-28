@@ -9,5 +9,5 @@ rust:
   - 1.19.0
 
 script:
-  - cargo build --verbose
-  - cargo test --verbose
+  - cargo build
+  - cargo test
