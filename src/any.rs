@@ -36,13 +36,22 @@ impl Any {
         // https://github.com/rust-lang/rust/issues/41681
         #[cfg(not(feature = "unstable-debug"))]
         {
-            Any { ptr, drop, fingerprint }
+            Any {
+                ptr,
+                drop,
+                fingerprint,
+            }
         }
 
         #[cfg(feature = "unstable-debug")]
         {
             let type_name = unsafe { intrinsics::type_name::<T>() };
-            Any { ptr, drop, fingerprint, type_name }
+            Any {
+                ptr,
+                drop,
+                fingerprint,
+                type_name,
+            }
         }
     }
 

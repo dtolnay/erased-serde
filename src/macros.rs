@@ -139,7 +139,11 @@ mod tests {
 
     #[test]
     fn test_where_clause() {
-        trait Trait<T>: Serialize where T: Clone {}
+        trait Trait<T>: Serialize
+        where
+            T: Clone,
+        {
+        }
 
         serialize_trait_object!(<T> Trait<T> where T: Clone);
         assert_serialize::<Trait<u32>>();
