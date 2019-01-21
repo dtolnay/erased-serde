@@ -9,8 +9,11 @@ pub struct Error {
     msg: String,
 }
 
+/// Result type alias where the error is `erased_serde::Error`.
+pub type Result<T> = std::result::Result<T, Error>;
+
 impl Display for Error {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         self.msg.fmt(formatter)
     }
 }

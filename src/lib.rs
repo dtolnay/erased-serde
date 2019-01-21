@@ -110,7 +110,7 @@ mod error;
 mod ser;
 
 pub use de::{deserialize, Deserializer};
-pub use error::Error;
+pub use error::{Error, Result};
 pub use ser::{serialize, Serialize, Serializer};
 
 // Not public API.
