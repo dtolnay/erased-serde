@@ -20,6 +20,12 @@ three traits contain generic methods which cannot be made into a trait object.
 
 ["object safety" rules]: http://huonw.github.io/blog/2015/01/object-safety/
 
+This library should be considered a low-level building block for interacting
+with Serde APIs in an object-safe way. Most use cases will require higher level
+functionality such as provided by [`typetag`] which uses this crate internally.
+
+[`typetag`]: https://github.com/dtolnay/typetag
+
 **The traits in this crate work seamlessly with any existing Serde `Serialize`
 and `Deserialize` type and any existing Serde `Serializer` and `Deserializer`
 format.**
