@@ -14,7 +14,7 @@ readme = "README.md"
 serde = "1.0.63"
 
 [dev-dependencies]
-serde_cbor = "0.8"
+serde_cbor = "0.9"
 serde_derive = "1.0"
 serde_json = "1.0"
 
