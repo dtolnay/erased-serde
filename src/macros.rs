@@ -93,7 +93,7 @@ macro_rules! __internal_serialize_trait_object {
 
     // The impl.
     (impl ($($generics:tt)*) ($($path:tt)*) ($($bound:tt)*)) => {
-        impl<'erased, $($generics)*> $crate::private::serde::Serialize for $($path)* + 'erased where $($bound)* {
+        impl<'erased, $($generics)*> $crate::private::serde::Serialize for dyn $($path)* + 'erased where $($bound)* {
             fn serialize<S>(&self, serializer: S) -> $crate::private::Result<S::Ok, S::Error> where S: $crate::private::serde::Serializer {
                 $crate::serialize(self, serializer)
             }
@@ -115,8 +115,8 @@ mod tests {
         trait Trait: Serialize {}
 
         serialize_trait_object!(Trait);
-        assert_serialize::<Trait>();
-        assert_serialize::<Trait + Send>();
+        assert_serialize::<dyn Trait>();
+        assert_serialize::<dyn Trait + Send>();
     }
 
     #[test]
@@ -124,8 +124,8 @@ mod tests {
         trait Trait<T>: Serialize {}
 
         serialize_trait_object!(<T> Trait<T>);
-        assert_serialize::<Trait<u32>>();
-        assert_serialize::<Trait<u32> + Send>();
+        assert_serialize::<dyn Trait<u32>>();
+        assert_serialize::<dyn Trait<u32> + Send>();
     }
 
     #[test]
@@ -133,8 +133,8 @@ mod tests {
         trait Trait<T: PartialEq<T>, U>: Serialize {}
 
         serialize_trait_object!(<T: PartialEq<T>, U> Trait<T, U>);
-        assert_serialize::<Trait<u32, ()>>();
-        assert_serialize::<Trait<u32, ()> + Send>();
+        assert_serialize::<dyn Trait<u32, ()>>();
+        assert_serialize::<dyn Trait<u32, ()> + Send>();
     }
 
     #[test]
@@ -146,7 +146,7 @@ mod tests {
         }
 
         serialize_trait_object!(<T> Trait<T> where T: Clone);
-        assert_serialize::<Trait<u32>>();
-        assert_serialize::<Trait<u32> + Send>();
+        assert_serialize::<dyn Trait<u32>>();
+        assert_serialize::<dyn Trait<u32> + Send>();
     }
 }
