@@ -11,9 +11,3 @@ rust:
 script:
   - cargo build
   - cargo test
-
-matrix:
-  include:
-    - rust: 1.19.0
-      script:
-        - cargo build
