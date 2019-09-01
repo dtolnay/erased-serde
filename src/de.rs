@@ -123,7 +123,8 @@ pub trait Deserializer<'de> {
         &mut dyn Visitor<'de>,
     ) -> Result<Out, Error>;
     fn erased_deserialize_seq(&mut self, &mut dyn Visitor<'de>) -> Result<Out, Error>;
-    fn erased_deserialize_tuple(&mut self, len: usize, &mut dyn Visitor<'de>) -> Result<Out, Error>;
+    fn erased_deserialize_tuple(&mut self, len: usize, &mut dyn Visitor<'de>)
+        -> Result<Out, Error>;
     fn erased_deserialize_tuple_struct(
         &mut self,
         name: &'static str,
@@ -404,7 +405,10 @@ where
     fn erased_deserialize_bytes(&mut self, visitor: &mut dyn Visitor<'de>) -> Result<Out, Error> {
         self.take().deserialize_bytes(visitor).map_err(erase)
     }
-    fn erased_deserialize_byte_buf(&mut self, visitor: &mut dyn Visitor<'de>) -> Result<Out, Error> {
+    fn erased_deserialize_byte_buf(
+        &mut self,
+        visitor: &mut dyn Visitor<'de>,
+    ) -> Result<Out, Error> {
         self.take().deserialize_byte_buf(visitor).map_err(erase)
     }
     fn erased_deserialize_option(&mut self, visitor: &mut dyn Visitor<'de>) -> Result<Out, Error> {
@@ -464,7 +468,10 @@ where
             .deserialize_struct(name, fields, visitor)
             .map_err(erase)
     }
-    fn erased_deserialize_identifier(&mut self, visitor: &mut dyn Visitor<'de>) -> Result<Out, Error> {
+    fn erased_deserialize_identifier(
+        &mut self,
+        visitor: &mut dyn Visitor<'de>,
+    ) -> Result<Out, Error> {
         self.take().deserialize_identifier(visitor).map_err(erase)
     }
     fn erased_deserialize_enum(
@@ -477,7 +484,10 @@ where
             .deserialize_enum(name, variants, visitor)
             .map_err(erase)
     }
-    fn erased_deserialize_ignored_any(&mut self, visitor: &mut dyn Visitor<'de>) -> Result<Out, Error> {
+    fn erased_deserialize_ignored_any(
+        &mut self,
+        visitor: &mut dyn Visitor<'de>,
+    ) -> Result<Out, Error> {
         self.take().deserialize_ignored_any(visitor).map_err(erase)
     }
     fn erased_is_human_readable(&self) -> bool {
@@ -557,7 +567,10 @@ where
     fn erased_visit_none(&mut self) -> Result<Out, Error> {
         self.take().visit_none().map(Out::new)
     }
-    fn erased_visit_some(&mut self, deserializer: &mut dyn Deserializer<'de>) -> Result<Out, Error> {
+    fn erased_visit_some(
+        &mut self,
+        deserializer: &mut dyn Deserializer<'de>,
+    ) -> Result<Out, Error> {
         self.take().visit_some(deserializer).map(Out::new)
     }
     fn erased_visit_unit(&mut self) -> Result<Out, Error> {
@@ -599,7 +612,10 @@ impl<'de, T> MapAccess<'de> for erase::MapAccess<T>
 where
     T: serde::de::MapAccess<'de>,
 {
-    fn erased_next_key(&mut self, seed: &mut dyn DeserializeSeed<'de>) -> Result<Option<Out>, Error> {
+    fn erased_next_key(
+        &mut self,
+        seed: &mut dyn DeserializeSeed<'de>,
+    ) -> Result<Option<Out>, Error> {
         self.as_mut().next_key_seed(seed).map_err(erase)
     }
     fn erased_next_value(&mut self, seed: &mut dyn DeserializeSeed<'de>) -> Result<Out, Error> {
@@ -1047,8 +1063,11 @@ pub struct Variant<'de> {
     unit_variant: fn(Any) -> Result<(), Error>,
     visit_newtype: fn(Any, seed: &mut dyn DeserializeSeed<'de>) -> Result<Out, Error>,
     tuple_variant: fn(Any, len: usize, visitor: &mut dyn Visitor<'de>) -> Result<Out, Error>,
-    struct_variant:
-        fn(Any, fields: &'static [&'static str], visitor: &mut dyn Visitor<'de>) -> Result<Out, Error>,
+    struct_variant: fn(
+        Any,
+        fields: &'static [&'static str],
+        visitor: &mut dyn Visitor<'de>,
+    ) -> Result<Out, Error>,
 }
 
 impl<'de> serde::de::VariantAccess<'de> for Variant<'de> {
