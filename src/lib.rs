@@ -3,8 +3,8 @@
 //! objects](https://doc.rust-lang.org/book/trait-objects.html).
 //!
 //! The usual Serde `Serialize`, `Serializer` and `Deserializer` traits cannot
-//! be used as trait objects like `&Serialize` or boxed trait objects like
-//! `Box<Serialize>` because of Rust's ["object safety"
+//! be used as trait objects like `&dyn Serialize` or boxed trait objects like
+//! `Box<dyn Serialize>` because of Rust's ["object safety"
 //! rules](http://huonw.github.io/blog/2015/01/object-safety/). In particular,
 //! all three traits contain generic methods which cannot be made into a trait
 //! object.
@@ -33,13 +33,13 @@
 //!     // The values in this map are boxed trait objects. Ordinarily this would not
 //!     // be possible with serde::Serializer because of object safety, but type
 //!     // erasure makes it possible with erased_serde::Serializer.
-//!     let mut formats: Map<&str, Box<Serializer>> = Map::new();
+//!     let mut formats: Map<&str, Box<dyn Serializer>> = Map::new();
 //!     formats.insert("json", Box::new(Serializer::erase(json)));
 //!     formats.insert("cbor", Box::new(Serializer::erase(cbor)));
 //!
 //!     // These are boxed trait objects as well. Same thing here - type erasure
 //!     // makes this possible.
-//!     let mut values: Map<&str, Box<Serialize>> = Map::new();
+//!     let mut values: Map<&str, Box<dyn Serialize>> = Map::new();
 //!     values.insert("vec", Box::new(vec!["a", "b"]));
 //!     values.insert("int", Box::new(65536));
 //!
@@ -75,7 +75,7 @@
 //!
 //!     // The values in this map are boxed trait objects, which is not possible
 //!     // with the normal serde::Deserializer because of object safety.
-//!     let mut formats: Map<&str, Box<Deserializer>> = Map::new();
+//!     let mut formats: Map<&str, Box<dyn Deserializer>> = Map::new();
 //!     formats.insert("json", Box::new(Deserializer::erase(json)));
 //!     formats.insert("cbor", Box::new(Deserializer::erase(cbor)));
 //!
