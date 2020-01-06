@@ -1,13 +1,22 @@
 //! This crate provides type-erased versions of Serde's `Serialize`, `Serializer`
-//! and `Deserializer` traits that can be used as [trait
-//! objects](https://doc.rust-lang.org/book/trait-objects.html).
+//! and `Deserializer` traits that can be used as [trait objects].
+//!
+//! [trait objects]: https://doc.rust-lang.org/book/trait-objects.html
 //!
 //! The usual Serde `Serialize`, `Serializer` and `Deserializer` traits cannot
 //! be used as trait objects like `&dyn Serialize` or boxed trait objects like
-//! `Box<dyn Serialize>` because of Rust's ["object safety"
-//! rules](http://huonw.github.io/blog/2015/01/object-safety/). In particular,
-//! all three traits contain generic methods which cannot be made into a trait
-//! object.
+//! `Box<dyn Serialize>` because of Rust's ["object safety" rules]. In
+//! particular, all three traits contain generic methods which cannot be made
+//! into a trait object.
+//!
+//! ["object safety" rules]: http://huonw.github.io/blog/2015/01/object-safety/
+//!
+//! This library should be considered a low-level building block for interacting
+//! with Serde APIs in an object-safe way. Most use cases will require higher
+//! level functionality such as provided by [`typetag`] which uses this crate
+//! internally.
+//!
+//! [`typetag`]: https://github.com/dtolnay/typetag
 //!
 //! **The traits in this crate work seamlessly with any existing Serde
 //! `Serialize` and `Deserialize` type and any existing Serde `Serializer` and
