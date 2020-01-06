@@ -1,8 +1,4 @@
-use std;
-use std::error;
 use std::fmt::{self, Display};
-
-use serde;
 
 /// Error when a `Serializer` or `Deserializer` trait object fails.
 #[derive(Debug)]
@@ -19,7 +15,7 @@ impl Display for Error {
     }
 }
 
-impl error::Error for Error {
+impl std::error::Error for Error {
     fn description(&self) -> &str {
         &self.msg
     }

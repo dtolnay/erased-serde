@@ -40,14 +40,9 @@ erased-serde = "0.3"
 ## Serialization
 
 ```rust
-extern crate erased_serde;
-extern crate serde_json;
-extern crate serde_cbor;
-
+use erased_serde::{Serialize, Serializer};
 use std::collections::BTreeMap as Map;
 use std::io;
-
-use erased_serde::{Serialize, Serializer};
 
 fn main() {
     // Construct some serializers.
@@ -81,13 +76,8 @@ fn main() {
 ## Deserialization
 
 ```rust
-extern crate erased_serde;
-extern crate serde_json;
-extern crate serde_cbor;
-
-use std::collections::BTreeMap as Map;
-
 use erased_serde::Deserializer;
+use std::collections::BTreeMap as Map;
 
 fn main() {
     static JSON: &'static [u8] = br#"{"A": 65, "B": 66}"#;

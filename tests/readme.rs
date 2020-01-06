@@ -1,11 +1,6 @@
-extern crate erased_serde;
-extern crate serde_cbor;
-extern crate serde_json;
-
+use erased_serde::{Deserializer, Serialize, Serializer};
 use std::collections::BTreeMap as Map;
 use std::io;
-
-use erased_serde::{Deserializer, Serialize, Serializer};
 
 #[test]
 fn serialization() {

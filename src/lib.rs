@@ -25,14 +25,9 @@
 //! ## Serialization
 //!
 //! ```rust
-//! extern crate erased_serde;
-//! extern crate serde_json;
-//! extern crate serde_cbor;
-//!
+//! use erased_serde::{Serialize, Serializer};
 //! use std::collections::BTreeMap as Map;
 //! use std::io;
-//!
-//! use erased_serde::{Serialize, Serializer};
 //!
 //! fn main() {
 //!     // Construct some serializers.
@@ -66,13 +61,8 @@
 //! ## Deserialization
 //!
 //! ```rust
-//! extern crate erased_serde;
-//! extern crate serde_json;
-//! extern crate serde_cbor;
-//!
-//! use std::collections::BTreeMap as Map;
-//!
 //! use erased_serde::Deserializer;
+//! use std::collections::BTreeMap as Map;
 //!
 //! fn main() {
 //!     static JSON: &'static [u8] = br#"{"A": 65, "B": 66}"#;
@@ -101,15 +91,6 @@
 #![cfg_attr(feature = "unstable-debug", feature(core_intrinsics))]
 
 #[macro_use]
-extern crate serde;
-
-#[cfg(test)]
-#[macro_use]
-extern crate serde_derive;
-#[cfg(test)]
-extern crate serde_json;
-
-#[macro_use]
 mod macros;
 
 mod any;
@@ -117,9 +98,9 @@ mod de;
 mod error;
 mod ser;
 
-pub use de::{deserialize, Deserializer};
-pub use error::{Error, Result};
-pub use ser::{serialize, Serialize, Serializer};
+pub use crate::de::{deserialize, Deserializer};
+pub use crate::error::{Error, Result};
+pub use crate::ser::{serialize, Serialize, Serializer};
 
 // Not public API.
 #[doc(hidden)]

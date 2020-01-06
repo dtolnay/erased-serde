@@ -9,6 +9,7 @@ documentation = "https://github.com/dtolnay/erased-serde"
 keywords = ["serde", "erasure"]
 include = ["Cargo.toml", "src/**/*.rs", "LICENSE-*", "README.md"]
 readme = "README.md"
+edition = "2018"
 
 [dependencies]
 serde = "1.0.63"

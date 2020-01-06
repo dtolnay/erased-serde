@@ -1,14 +1,12 @@
-use std::fmt::Display;
-use std::marker::PhantomData;
-
-use serde;
+use crate::any::Any;
+use crate::error::Error;
 use serde::ser::{
     SerializeMap, SerializeSeq, SerializeStruct, SerializeStructVariant, SerializeTuple,
     SerializeTupleStruct, SerializeTupleVariant,
 };
-
-use any::Any;
-use error::Error;
+use serde::serde_if_integer128;
+use std::fmt::Display;
+use std::marker::PhantomData;
 
 // TRAITS //////////////////////////////////////////////////////////////////////
 
@@ -18,14 +16,9 @@ use error::Error;
 /// `&erased_serde::Serialize` or `Box<erased_serde::Serialize>` trait object.
 ///
 /// ```rust
-/// extern crate erased_serde;
-/// extern crate serde_json;
-/// extern crate serde_cbor;
-///
+/// use erased_serde::{Serialize, Serializer};
 /// use std::collections::BTreeMap as Map;
 /// use std::io;
-///
-/// use erased_serde::{Serialize, Serializer};
 ///
 /// fn main() {
 ///     // Construct some serializers.
@@ -56,7 +49,7 @@ use error::Error;
 /// }
 /// ```
 pub trait Serialize {
-    fn erased_serialize(&self, &mut dyn Serializer) -> Result<Ok, Error>;
+    fn erased_serialize(&self, v: &mut dyn Serializer) -> Result<Ok, Error>;
 }
 
 /// An object-safe equivalent of Serde's `Serializer` trait.
@@ -66,14 +59,9 @@ pub trait Serialize {
 /// using `erased_serde::Serializer::erase`.
 ///
 /// ```rust
-/// extern crate erased_serde;
-/// extern crate serde_json;
-/// extern crate serde_cbor;
-///
+/// use erased_serde::{Serialize, Serializer};
 /// use std::collections::BTreeMap as Map;
 /// use std::io;
-///
-/// use erased_serde::{Serialize, Serializer};
 ///
 /// fn main() {
 ///     // Construct some serializers.
@@ -104,26 +92,26 @@ pub trait Serialize {
 /// }
 /// ```
 pub trait Serializer {
-    fn erased_serialize_bool(&mut self, bool) -> Result<Ok, Error>;
-    fn erased_serialize_i8(&mut self, i8) -> Result<Ok, Error>;
-    fn erased_serialize_i16(&mut self, i16) -> Result<Ok, Error>;
-    fn erased_serialize_i32(&mut self, i32) -> Result<Ok, Error>;
-    fn erased_serialize_i64(&mut self, i64) -> Result<Ok, Error>;
-    fn erased_serialize_u8(&mut self, u8) -> Result<Ok, Error>;
-    fn erased_serialize_u16(&mut self, u16) -> Result<Ok, Error>;
-    fn erased_serialize_u32(&mut self, u32) -> Result<Ok, Error>;
-    fn erased_serialize_u64(&mut self, u64) -> Result<Ok, Error>;
+    fn erased_serialize_bool(&mut self, v: bool) -> Result<Ok, Error>;
+    fn erased_serialize_i8(&mut self, v: i8) -> Result<Ok, Error>;
+    fn erased_serialize_i16(&mut self, v: i16) -> Result<Ok, Error>;
+    fn erased_serialize_i32(&mut self, v: i32) -> Result<Ok, Error>;
+    fn erased_serialize_i64(&mut self, v: i64) -> Result<Ok, Error>;
+    fn erased_serialize_u8(&mut self, v: u8) -> Result<Ok, Error>;
+    fn erased_serialize_u16(&mut self, v: u16) -> Result<Ok, Error>;
+    fn erased_serialize_u32(&mut self, v: u32) -> Result<Ok, Error>;
+    fn erased_serialize_u64(&mut self, v: u64) -> Result<Ok, Error>;
     serde_if_integer128! {
-        fn erased_serialize_i128(&mut self, i128) -> Result<Ok, Error>;
-        fn erased_serialize_u128(&mut self, u128) -> Result<Ok, Error>;
+        fn erased_serialize_i128(&mut self, v: i128) -> Result<Ok, Error>;
+        fn erased_serialize_u128(&mut self, v: u128) -> Result<Ok, Error>;
     }
-    fn erased_serialize_f32(&mut self, f32) -> Result<Ok, Error>;
-    fn erased_serialize_f64(&mut self, f64) -> Result<Ok, Error>;
-    fn erased_serialize_char(&mut self, char) -> Result<Ok, Error>;
-    fn erased_serialize_str(&mut self, &str) -> Result<Ok, Error>;
-    fn erased_serialize_bytes(&mut self, &[u8]) -> Result<Ok, Error>;
+    fn erased_serialize_f32(&mut self, v: f32) -> Result<Ok, Error>;
+    fn erased_serialize_f64(&mut self, v: f64) -> Result<Ok, Error>;
+    fn erased_serialize_char(&mut self, v: char) -> Result<Ok, Error>;
+    fn erased_serialize_str(&mut self, v: &str) -> Result<Ok, Error>;
+    fn erased_serialize_bytes(&mut self, v: &[u8]) -> Result<Ok, Error>;
     fn erased_serialize_none(&mut self) -> Result<Ok, Error>;
-    fn erased_serialize_some(&mut self, &dyn Serialize) -> Result<Ok, Error>;
+    fn erased_serialize_some(&mut self, v: &dyn Serialize) -> Result<Ok, Error>;
     fn erased_serialize_unit(&mut self) -> Result<Ok, Error>;
     fn erased_serialize_unit_struct(&mut self, name: &'static str) -> Result<Ok, Error>;
     fn erased_serialize_unit_variant(
@@ -135,14 +123,14 @@ pub trait Serializer {
     fn erased_serialize_newtype_struct(
         &mut self,
         name: &'static str,
-        &dyn Serialize,
+        v: &dyn Serialize,
     ) -> Result<Ok, Error>;
     fn erased_serialize_newtype_variant(
         &mut self,
         name: &'static str,
         variant_index: u32,
         variant: &'static str,
-        &dyn Serialize,
+        v: &dyn Serialize,
     ) -> Result<Ok, Error>;
     fn erased_serialize_seq(&mut self, len: Option<usize>) -> Result<Seq, Error>;
     fn erased_serialize_tuple(&mut self, len: usize) -> Result<Tuple, Error>;
@@ -174,14 +162,9 @@ impl dyn Serializer {
     /// Convert any Serde `Serializer` to a trait object.
     ///
     /// ```rust
-    /// extern crate erased_serde;
-    /// extern crate serde_json;
-    /// extern crate serde_cbor;
-    ///
+    /// use erased_serde::{Serialize, Serializer};
     /// use std::collections::BTreeMap as Map;
     /// use std::io;
-    ///
-    /// use erased_serde::{Serialize, Serializer};
     ///
     /// fn main() {
     ///     // Construct some serializers.
@@ -438,9 +421,6 @@ where
 /// `erased_serde::Serialize` as a supertrait.
 ///
 /// ```
-/// # extern crate serde;
-/// # extern crate erased_serde;
-/// #
 /// trait Event: erased_serde::Serialize {
 ///     /* ... */
 /// }
@@ -452,22 +432,17 @@ where
 ///         erased_serde::serialize(self, serializer)
 ///     }
 /// }
-/// #
-/// # fn main() {}
 /// ```
 ///
 /// Since this is reasonably common, the `serialize_trait_object!` macro
 /// generates such a Serialize impl.
 ///
 /// ```
-/// #[macro_use]
-/// extern crate erased_serde;
+/// use erased_serde::serialize_trait_object;
 /// #
 /// # trait Event: erased_serde::Serialize {}
 ///
 /// serialize_trait_object!(Event);
-/// #
-/// # fn main() {}
 /// ```
 pub fn serialize<T: ?Sized, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
 where
@@ -1004,7 +979,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json;
+    use serde_derive::Serialize;
 
     fn test_json<T>(t: T)
     where
