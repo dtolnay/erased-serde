@@ -2,36 +2,30 @@
 /// `erased_serde::Serialize` as a supertrait.
 ///
 /// ```
-/// #[macro_use]
-/// extern crate erased_serde;
+/// use erased_serde::serialize_trait_object;
 ///
 /// trait Event: erased_serde::Serialize {
 ///     /* ... */
 /// }
 ///
-/// serialize_trait_object!(Event);
-/// #
-/// # fn main() {}
+/// erased_serde::serialize_trait_object!(Event);
 /// ```
 ///
 /// The macro supports traits that have type parameters and/or `where` clauses.
 ///
 /// ```
-/// # #[macro_use]
-/// # extern crate erased_serde;
+/// # use erased_serde::serialize_trait_object;
 /// #
 /// trait Difficult<T>: erased_serde::Serialize where T: Copy {
 ///     /* ... */
 /// }
 ///
 /// serialize_trait_object!(<T> Difficult<T> where T: Copy);
-/// #
-/// # fn main() {}
 /// ```
 #[macro_export]
 macro_rules! serialize_trait_object {
     ($($path:tt)+) => {
-        __internal_serialize_trait_object!(begin $($path)+);
+        $crate::__internal_serialize_trait_object!(begin $($path)+);
     };
 }
 
@@ -40,55 +34,55 @@ macro_rules! serialize_trait_object {
 macro_rules! __internal_serialize_trait_object {
     // Invocation started with `<`, parse generics.
     (begin < $($rest:tt)*) => {
-        __internal_serialize_trait_object!(generics () () $($rest)*);
+        $crate::__internal_serialize_trait_object!(generics () () $($rest)*);
     };
 
     // Invocation did not start with `<`.
     (begin $first:tt $($rest:tt)*) => {
-        __internal_serialize_trait_object!(path () ($first) $($rest)*);
+        $crate::__internal_serialize_trait_object!(path () ($first) $($rest)*);
     };
 
     // End of generics.
     (generics ($($generics:tt)*) () > $($rest:tt)*) => {
-        __internal_serialize_trait_object!(path ($($generics)*) () $($rest)*);
+        $crate::__internal_serialize_trait_object!(path ($($generics)*) () $($rest)*);
     };
 
     // Generics open bracket.
     (generics ($($generics:tt)*) ($($brackets:tt)*) < $($rest:tt)*) => {
-        __internal_serialize_trait_object!(generics ($($generics)* <) ($($brackets)* <) $($rest)*);
+        $crate::__internal_serialize_trait_object!(generics ($($generics)* <) ($($brackets)* <) $($rest)*);
     };
 
     // Generics close bracket.
     (generics ($($generics:tt)*) (< $($brackets:tt)*) > $($rest:tt)*) => {
-        __internal_serialize_trait_object!(generics ($($generics)* >) ($($brackets)*) $($rest)*);
+        $crate::__internal_serialize_trait_object!(generics ($($generics)* >) ($($brackets)*) $($rest)*);
     };
 
     // Token inside of generics.
     (generics ($($generics:tt)*) ($($brackets:tt)*) $first:tt $($rest:tt)*) => {
-        __internal_serialize_trait_object!(generics ($($generics)* $first) ($($brackets)*) $($rest)*);
+        $crate::__internal_serialize_trait_object!(generics ($($generics)* $first) ($($brackets)*) $($rest)*);
     };
 
     // End with `where` clause.
     (path ($($generics:tt)*) ($($path:tt)*) where $($rest:tt)*) => {
-        __internal_serialize_trait_object!(sendsync ($($generics)*) ($($path)*) ($($rest)*));
+        $crate::__internal_serialize_trait_object!(sendsync ($($generics)*) ($($path)*) ($($rest)*));
     };
 
     // End without `where` clause.
     (path ($($generics:tt)*) ($($path:tt)*)) => {
-        __internal_serialize_trait_object!(sendsync ($($generics)*) ($($path)*) ());
+        $crate::__internal_serialize_trait_object!(sendsync ($($generics)*) ($($path)*) ());
     };
 
     // Token inside of path.
     (path ($($generics:tt)*) ($($path:tt)*) $first:tt $($rest:tt)*) => {
-        __internal_serialize_trait_object!(path ($($generics)*) ($($path)* $first) $($rest)*);
+        $crate::__internal_serialize_trait_object!(path ($($generics)*) ($($path)* $first) $($rest)*);
     };
 
     // Expand into four impls.
     (sendsync ($($generics:tt)*) ($($path:tt)*) ($($bound:tt)*)) => {
-        __internal_serialize_trait_object!(impl ($($generics)*) ($($path)*) ($($bound)*));
-        __internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Send) ($($bound)*));
-        __internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Sync) ($($bound)*));
-        __internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Send + $crate::private::Sync) ($($bound)*));
+        $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)*) ($($bound)*));
+        $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Send) ($($bound)*));
+        $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Sync) ($($bound)*));
+        $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Send + $crate::private::Sync) ($($bound)*));
     };
 
     // The impl.
@@ -105,8 +99,7 @@ macro_rules! __internal_serialize_trait_object {
 
 #[cfg(test)]
 mod tests {
-    use serde;
-    use Serialize;
+    use crate::Serialize;
 
     fn assert_serialize<T: ?Sized + serde::Serialize>() {}
 
