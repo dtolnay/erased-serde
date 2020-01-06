@@ -996,8 +996,7 @@ fn unerase<E>(e: Error) -> E
 where
     E: serde::ser::Error,
 {
-    use std::error::Error;
-    E::custom(e.description())
+    E::custom(e)
 }
 
 // TEST ////////////////////////////////////////////////////////////////////////
