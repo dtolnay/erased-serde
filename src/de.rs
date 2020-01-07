@@ -1,7 +1,14 @@
-use crate::any::Any;
-use crate::error::Error;
+use crate::{
+    any::Any,
+    error::Error,
+    private::std::{
+        boxed::Box,
+        fmt::{self, Display},
+        string::String,
+        vec::Vec,
+    },
+};
 use serde::serde_if_integer128;
-use std::fmt::{self, Display};
 
 /// Deserialize a value of type `T` from the given trait object.
 ///
@@ -1229,8 +1236,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::private::std::{borrow::ToOwned, fmt::Debug};
     use serde_derive::Deserialize;
-    use std::fmt::Debug;
 
     fn test_json<'de, T>(json: &'de [u8])
     where

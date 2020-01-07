@@ -1,7 +1,7 @@
-use std::mem;
+use crate::private::std::{boxed::Box, mem};
 
 #[cfg(feature = "unstable-debug")]
-use std::intrinsics;
+use crate::private::std::intrinsics;
 
 pub struct Any {
     ptr: *mut (),

@@ -1,12 +1,13 @@
-use crate::any::Any;
-use crate::error::Error;
+use crate::{
+    any::Any,
+    error::Error,
+    private::std::{boxed::Box, fmt::Display, marker::PhantomData},
+};
 use serde::ser::{
     SerializeMap, SerializeSeq, SerializeStruct, SerializeStructVariant, SerializeTuple,
     SerializeTupleStruct, SerializeTupleVariant,
 };
 use serde::serde_if_integer128;
-use std::fmt::Display;
-use std::marker::PhantomData;
 
 // TRAITS //////////////////////////////////////////////////////////////////////
 
@@ -979,6 +980,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::private::std::{vec, vec::Vec};
     use serde_derive::Serialize;
 
     fn test_json<T>(t: T)

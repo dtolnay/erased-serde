@@ -1,4 +1,7 @@
-use std::fmt::{self, Display};
+use crate::private::std::{
+    fmt::{self, Display},
+    string::{String, ToString},
+};
 
 /// Error when a `Serializer` or `Deserializer` trait object fails.
 #[derive(Debug)]
@@ -7,7 +10,7 @@ pub struct Error {
 }
 
 /// Result type alias where the error is `erased_serde::Error`.
-pub type Result<T> = std::result::Result<T, Error>;
+pub type Result<T> = crate::private::std::result::Result<T, Error>;
 
 impl Display for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -15,11 +18,15 @@ impl Display for Error {
     }
 }
 
-impl std::error::Error for Error {
+#[cfg(feature = "std")]
+impl crate::private::std::error::Error for Error {
     fn description(&self) -> &str {
         &self.msg
     }
 }
+
+#[cfg(not(feature = "std"))]
+impl serde::ser::StdError for Error {}
 
 impl serde::ser::Error for Error {
     fn custom<T: Display>(msg: T) -> Self {

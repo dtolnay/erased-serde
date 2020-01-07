@@ -88,7 +88,11 @@
 //! ```
 
 #![doc(html_root_url = "https://docs.rs/erased-serde/0.3.10")]
+#![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(feature = "unstable-debug", feature(core_intrinsics))]
+
+#[cfg(not(feature = "std"))]
+extern crate alloc;
 
 #[macro_use]
 mod macros;
