@@ -28,3 +28,6 @@ path = "tests/readme.rs"
 
 [badges]
 travis-ci = { repository = "dtolnay/erased-serde" }
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
