@@ -24,7 +24,7 @@ use serde::serde_if_integer128;
 /// fn main() {
 ///     // Construct some serializers.
 ///     let json = &mut serde_json::ser::Serializer::new(io::stdout());
-///     let cbor = &mut serde_cbor::ser::Serializer::new(io::stdout());
+///     let cbor = &mut serde_cbor::ser::Serializer::new(serde_cbor::ser::IoWrite::new(io::stdout()));
 ///
 ///     // The values in this map are boxed trait objects. Ordinarily this would not
 ///     // be possible with serde::Serializer because of object safety, but type
@@ -67,7 +67,7 @@ pub trait Serialize {
 /// fn main() {
 ///     // Construct some serializers.
 ///     let json = &mut serde_json::ser::Serializer::new(io::stdout());
-///     let cbor = &mut serde_cbor::ser::Serializer::new(io::stdout());
+///     let cbor = &mut serde_cbor::ser::Serializer::new(serde_cbor::ser::IoWrite::new(io::stdout()));
 ///
 ///     // The values in this map are boxed trait objects. Ordinarily this would not
 ///     // be possible with serde::Serializer because of object safety, but type
@@ -170,7 +170,7 @@ impl dyn Serializer {
     /// fn main() {
     ///     // Construct some serializers.
     ///     let json = &mut serde_json::ser::Serializer::new(io::stdout());
-    ///     let cbor = &mut serde_cbor::ser::Serializer::new(io::stdout());
+    ///     let cbor = &mut serde_cbor::ser::Serializer::new(serde_cbor::ser::IoWrite::new(io::stdout()));
     ///
     ///     // The values in this map are boxed trait objects. Ordinarily this would not
     ///     // be possible with serde::Serializer because of object safety, but type
