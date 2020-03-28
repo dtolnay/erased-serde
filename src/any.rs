@@ -1,7 +1,7 @@
 use std::mem;
 
 #[cfg(feature = "unstable-debug")]
-use std::intrinsics;
+use std::any;
 
 pub struct Any {
     ptr: *mut (),
@@ -45,7 +45,7 @@ impl Any {
 
         #[cfg(feature = "unstable-debug")]
         {
-            let type_name = unsafe { intrinsics::type_name::<T>() };
+            let type_name = any::type_name::<T>();
             Any {
                 ptr,
                 drop,
@@ -83,7 +83,7 @@ impl Any {
     #[cfg(feature = "unstable-debug")]
     fn invalid_cast_to<T>(&self) -> ! {
         let from = self.type_name;
-        let to = unsafe { intrinsics::type_name::<T>() };
+        let to = any::type_name::<T>();
         panic!("invalid cast: {} to {}", from, to);
     }
 }
