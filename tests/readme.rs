@@ -1,3 +1,5 @@
+// Please also update README.md when making changes to this code.
+
 use erased_serde::{Deserializer, Serialize, Serializer};
 use std::collections::BTreeMap as Map;
 use std::io;
