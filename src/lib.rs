@@ -31,8 +31,8 @@
 //!
 //! fn main() {
 //!     // Construct some serializers.
-//!     let json = &mut serde_json::ser::Serializer::new(io::stdout());
-//!     let cbor = &mut serde_cbor::ser::Serializer::new(serde_cbor::ser::IoWrite::new(io::stdout()));
+//!     let json = &mut serde_json::Serializer::new(io::stdout());
+//!     let cbor = &mut serde_cbor::Serializer::new(serde_cbor::ser::IoWrite::new(io::stdout()));
 //!
 //!     // The values in this map are boxed trait objects. Ordinarily this would not
 //!     // be possible with serde::Serializer because of object safety, but type
@@ -69,8 +69,8 @@
 //!     static CBOR: &'static [u8] = &[162, 97, 65, 24, 65, 97, 66, 24, 66];
 //!
 //!     // Construct some deserializers.
-//!     let json = &mut serde_json::de::Deserializer::from_slice(JSON);
-//!     let cbor = &mut serde_cbor::de::Deserializer::from_slice(CBOR);
+//!     let json = &mut serde_json::Deserializer::from_slice(JSON);
+//!     let cbor = &mut serde_cbor::Deserializer::from_slice(CBOR);
 //!
 //!     // The values in this map are boxed trait objects, which is not possible
 //!     // with the normal serde::Deserializer because of object safety.

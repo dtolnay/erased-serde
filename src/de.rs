@@ -15,8 +15,8 @@ use serde::serde_if_integer128;
 ///     static CBOR: &'static [u8] = &[162, 97, 65, 24, 65, 97, 66, 24, 66];
 ///
 ///     // Construct some deserializers.
-///     let json = &mut serde_json::de::Deserializer::from_slice(JSON);
-///     let cbor = &mut serde_cbor::de::Deserializer::from_slice(CBOR);
+///     let json = &mut serde_json::Deserializer::from_slice(JSON);
+///     let cbor = &mut serde_cbor::Deserializer::from_slice(CBOR);
 ///
 ///     // The values in this map are boxed trait objects, which is not possible
 ///     // with the normal serde::Deserializer because of object safety.
@@ -60,8 +60,8 @@ pub trait DeserializeSeed<'de> {
 ///     static CBOR: &'static [u8] = &[162, 97, 65, 24, 65, 97, 66, 24, 66];
 ///
 ///     // Construct some deserializers.
-///     let json = &mut serde_json::de::Deserializer::from_slice(JSON);
-///     let cbor = &mut serde_cbor::de::Deserializer::from_slice(CBOR);
+///     let json = &mut serde_json::Deserializer::from_slice(JSON);
+///     let cbor = &mut serde_cbor::Deserializer::from_slice(CBOR);
 ///
 ///     // The values in this map are boxed trait objects, which is not possible
 ///     // with the normal serde::Deserializer because of object safety.
@@ -214,8 +214,8 @@ impl<'de> dyn Deserializer<'de> {
     ///     static CBOR: &'static [u8] = &[162, 97, 65, 24, 65, 97, 66, 24, 66];
     ///
     ///     // Construct some deserializers.
-    ///     let json = &mut serde_json::de::Deserializer::from_slice(JSON);
-    ///     let cbor = &mut serde_cbor::de::Deserializer::from_slice(CBOR);
+    ///     let json = &mut serde_json::Deserializer::from_slice(JSON);
+    ///     let cbor = &mut serde_cbor::Deserializer::from_slice(CBOR);
     ///
     ///     // The values in this map are boxed trait objects, which is not possible
     ///     // with the normal serde::Deserializer because of object safety.
