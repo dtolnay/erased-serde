@@ -1,0 +1,17 @@
+[package]
+name = "erased-serde-test"
+version = "0.0.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+edition = "2018"
+publish = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = ["std"]
+std = ["erased-serde/std"]
+alloc = ["erased-serde/alloc"]
+
+[dependencies]
+erased-serde = { path = "../..", default-features = false }

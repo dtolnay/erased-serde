@@ -88,6 +88,20 @@
 //! ```
 
 #![doc(html_root_url = "https://docs.rs/erased-serde/0.3.10")]
+#![cfg_attr(not(feature = "std"), no_std)]
+
+mod alloc {
+    #[cfg(not(feature = "std"))]
+    extern crate alloc;
+
+    #[cfg(feature = "std")]
+    use std as alloc;
+
+    pub use self::alloc::borrow::ToOwned;
+    pub use self::alloc::boxed::Box;
+    pub use self::alloc::string::{String, ToString};
+    pub use self::alloc::{vec, vec::Vec};
+}
 
 #[macro_use]
 mod macros;
@@ -95,6 +109,7 @@ mod macros;
 mod any;
 mod de;
 mod error;
+mod features_check;
 mod ser;
 
 pub use crate::de::{deserialize, Deserializer};

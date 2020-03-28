@@ -12,7 +12,7 @@ readme = "README.md"
 edition = "2018"
 
 [dependencies]
-serde = "1.0.63"
+serde = { version = "1.0.63", default-features = false }
 
 [dev-dependencies]
 serde_cbor = "0.9"
@@ -20,6 +20,10 @@ serde_derive = "1.0"
 serde_json = "1.0"
 
 [features]
+# Note: at least one of "std" or "alloc" must be enabled.
+default = ["std"]
+std = ["serde/std"]
+alloc = ["serde/alloc"] # requires Rust 1.36+
 unstable-debug = []
 
 [[test]]
@@ -28,6 +32,9 @@ path = "tests/readme.rs"
 
 [badges]
 travis-ci = { repository = "dtolnay/erased-serde" }
+
+[workspace]
+members = ["tests/crate"]
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

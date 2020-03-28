@@ -1,7 +1,8 @@
-use std::mem;
+use crate::alloc::Box;
+use core::mem;
 
 #[cfg(feature = "unstable-debug")]
-use std::any;
+use core::any;
 
 pub struct Any {
     ptr: *mut (),
