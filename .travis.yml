@@ -8,10 +8,14 @@ rust:
   - nightly
 
 script:
-  - cargo build
+  - cargo check
+  - cargo check --manifest-path tests/crate/Cargo.toml
+  - cargo check --manifest-path tests/crate/Cargo.toml --no-default-features --features alloc
   - cargo test
 
 matrix:
   include:
     - rust: 1.31.0
-      script: cargo check
+      script:
+        - cargo check
+        - cargo check --manifest-path tests/crate/Cargo.toml

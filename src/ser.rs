@@ -1,12 +1,13 @@
+use crate::alloc::Box;
 use crate::any::Any;
 use crate::error::Error;
+use core::fmt::Display;
+use core::marker::PhantomData;
 use serde::ser::{
     SerializeMap, SerializeSeq, SerializeStruct, SerializeStructVariant, SerializeTuple,
     SerializeTupleStruct, SerializeTupleVariant,
 };
 use serde::serde_if_integer128;
-use std::fmt::Display;
-use std::marker::PhantomData;
 
 // TRAITS //////////////////////////////////////////////////////////////////////
 
@@ -595,6 +596,13 @@ macro_rules! impl_serializer_for_trait_object {
             ) -> Result<StructVariant<'a>, Error> {
                 self.erased_serialize_struct_variant(name, variant_index, variant, len)
             }
+            #[cfg(not(any(feature = "std", feature = "alloc")))]
+            fn collect_str<T: ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error>
+            where
+                T: Display,
+            {
+                unreachable!()
+            }
             fn is_human_readable(&self) -> bool {
                 self.erased_is_human_readable()
             }
@@ -979,6 +987,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::alloc::{vec, Vec};
     use serde_derive::Serialize;
 
     fn test_json<T>(t: T)
