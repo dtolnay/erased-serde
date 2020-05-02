@@ -30,9 +30,6 @@ unstable-debug = []
 name = "test"
 path = "tests/readme.rs"
 
-[badges]
-travis-ci = { repository = "dtolnay/erased-serde" }
-
 [workspace]
 members = ["tests/crate"]
 
