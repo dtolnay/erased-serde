@@ -1,7 +1,7 @@
 Erased Serde
 ============
 
-[![Build Status](https://api.travis-ci.org/dtolnay/erased-serde.svg?branch=master)](https://travis-ci.org/dtolnay/erased-serde)
+[![Build Status](https://img.shields.io/github/workflow/status/dtolnay/erased-serde/CI/master)](https://github.com/dtolnay/erased-serde/actions?query=branch%3Amaster)
 [![Latest Version](https://img.shields.io/crates/v/erased-serde.svg)](https://crates.io/crates/erased-serde)
 
 This crate provides type-erased versions of Serde's `Serialize`, `Serializer`
