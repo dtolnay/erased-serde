@@ -31,7 +31,7 @@ name = "test"
 path = "tests/readme.rs"
 
 [workspace]
-members = ["tests/crate"]
+members = ["explanation", "tests/crate"]
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
