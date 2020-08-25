@@ -20,28 +20,28 @@ impl<'a, T: ?Sized> Generic for Box<T> where T: Generic {
 // This is an object-safe equivalent that interoperates seamlessly.
 
 trait ErasedGeneric {
-    fn erased_fn(&self, querializer: &Querializer);
+    fn erased_fn(&self, querializer: &dyn Querializer);
 }
 
-impl Generic for ErasedGeneric {
+impl Generic for dyn ErasedGeneric {
     // Depending on the trait method signatures and the upstream
     // impls, could also implement for:
     //
-    //   - &'a ErasedGeneric
-    //   - &'a (ErasedGeneric + Send)
-    //   - &'a (ErasedGeneric + Sync)
-    //   - &'a (ErasedGeneric + Send + Sync)
-    //   - Box<ErasedGeneric>
-    //   - Box<ErasedGeneric + Send>
-    //   - Box<ErasedGeneric + Sync>
-    //   - Box<ErasedGeneric + Send + Sync>
+    //   - &'a dyn ErasedGeneric
+    //   - &'a (dyn ErasedGeneric + Send)
+    //   - &'a (dyn ErasedGeneric + Sync)
+    //   - &'a (dyn ErasedGeneric + Send + Sync)
+    //   - Box<dyn ErasedGeneric>
+    //   - Box<dyn ErasedGeneric + Send>
+    //   - Box<dyn ErasedGeneric + Sync>
+    //   - Box<dyn ErasedGeneric + Send + Sync>
     fn generic_fn<Q: Querializer>(&self, querializer: Q) {
         self.erased_fn(&querializer)
     }
 }
 
 impl<T> ErasedGeneric for T where T: Generic {
-    fn erased_fn(&self, querializer: &Querializer) {
+    fn erased_fn(&self, querializer: &dyn Querializer) {
         self.generic_fn(querializer)
     }
 }
@@ -58,7 +58,7 @@ fn main() {
     }
 
     // Construct a trait object.
-    let trait_object: Box<ErasedGeneric> = Box::new(S);
+    let trait_object: Box<dyn ErasedGeneric> = Box::new(S);
 
     // Seamlessly invoke the generic method on the trait object.
     //
