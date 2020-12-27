@@ -95,7 +95,7 @@
 //! }
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/erased-serde/0.3.12")]
+#![doc(html_root_url = "https://docs.rs/erased-serde/0.3.13")]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 mod alloc {
