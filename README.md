@@ -82,8 +82,8 @@ use erased_serde::Deserializer;
 use std::collections::BTreeMap as Map;
 
 fn main() {
-    static JSON: &'static [u8] = br#"{"A": 65, "B": 66}"#;
-    static CBOR: &'static [u8] = &[162, 97, 65, 24, 65, 97, 66, 24, 66];
+    static JSON: &[u8] = br#"{"A": 65, "B": 66}"#;
+    static CBOR: &[u8] = &[162, 97, 65, 24, 65, 97, 66, 24, 66];
 
     // Construct some deserializers.
     let json = &mut serde_json::Deserializer::from_slice(JSON);
