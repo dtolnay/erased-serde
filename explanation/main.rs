@@ -10,7 +10,10 @@ trait Generic {
 
 impl<'a, T: ?Sized> Querializer for &'a T where T: Querializer {}
 
-impl<'a, T: ?Sized> Generic for Box<T> where T: Generic {
+impl<'a, T: ?Sized> Generic for Box<T>
+where
+    T: Generic,
+{
     fn generic_fn<Q: Querializer>(&self, querializer: Q) {
         (**self).generic_fn(querializer)
     }
@@ -40,7 +43,10 @@ impl Generic for dyn ErasedGeneric {
     }
 }
 
-impl<T> ErasedGeneric for T where T: Generic {
+impl<T> ErasedGeneric for T
+where
+    T: Generic,
+{
     fn erased_fn(&self, querializer: &dyn Querializer) {
         self.generic_fn(querializer)
     }
