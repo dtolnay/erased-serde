@@ -97,7 +97,13 @@
 
 #![doc(html_root_url = "https://docs.rs/erased-serde/0.3.13")]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![allow(clippy::needless_doctest_main)]
+#![allow(
+    clippy::items_after_statements,
+    clippy::missing_errors_doc,
+    clippy::needless_doctest_main,
+    clippy::unused_self,
+    clippy::wildcard_imports
+)]
 
 mod alloc {
     #[cfg(not(feature = "std"))]
