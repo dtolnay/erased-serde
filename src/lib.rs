@@ -97,6 +97,7 @@
 
 #![doc(html_root_url = "https://docs.rs/erased-serde/0.3.13")]
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(clippy::needless_doctest_main)]
 
 mod alloc {
     #[cfg(not(feature = "std"))]
