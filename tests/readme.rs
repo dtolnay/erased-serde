@@ -14,8 +14,8 @@ fn serialization() {
     // be possible with serde::Serializer because of object safety, but type
     // erasure makes it possible with erased_serde::Serializer.
     let mut formats: Map<&str, Box<dyn Serializer>> = Map::new();
-    formats.insert("json", Box::new(Serializer::erase(json)));
-    formats.insert("cbor", Box::new(Serializer::erase(cbor)));
+    formats.insert("json", Box::new(<dyn Serializer>::erase(json)));
+    formats.insert("cbor", Box::new(<dyn Serializer>::erase(cbor)));
 
     // These are boxed trait objects as well. Same thing here - type erasure
     // makes this possible.
@@ -45,8 +45,8 @@ fn deserialization() {
     // The values in this map are boxed trait objects, which is not possible
     // with the normal serde::Deserializer because of object safety.
     let mut formats: Map<&str, Box<dyn Deserializer>> = Map::new();
-    formats.insert("json", Box::new(Deserializer::erase(json)));
-    formats.insert("cbor", Box::new(Deserializer::erase(cbor)));
+    formats.insert("json", Box::new(<dyn Deserializer>::erase(json)));
+    formats.insert("cbor", Box::new(<dyn Deserializer>::erase(cbor)));
 
     // Pick a Deserializer out of the formats map.
     let format = formats.get_mut("json").unwrap();
