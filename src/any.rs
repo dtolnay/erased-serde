@@ -85,7 +85,7 @@ impl Any {
 
     // This is unsafe -- caller is responsible that T is the correct type.
     pub(crate) fn view<T>(&mut self) -> &mut T {
-        if self.fingerprint != Fingerprint::of::<T>() {
+        if cfg!(not(miri)) && self.fingerprint != Fingerprint::of::<T>() {
             self.invalid_cast_to::<T>();
         }
 
@@ -100,7 +100,7 @@ impl Any {
 
     // This is unsafe -- caller is responsible that T is the correct type.
     pub(crate) fn take<T>(mut self) -> T {
-        if self.fingerprint != Fingerprint::of::<T>() {
+        if cfg!(not(miri)) && self.fingerprint != Fingerprint::of::<T>() {
             self.invalid_cast_to::<T>();
         }
 
@@ -168,6 +168,7 @@ impl Fingerprint {
     }
 }
 
+#[cfg(not(miri))]
 #[test]
 fn test_fingerprint() {
     assert_eq!(Fingerprint::of::<usize>(), Fingerprint::of::<usize>());
