@@ -1,17 +1,33 @@
 use crate::alloc::Box;
+#[cfg(no_maybe_uninit)]
+use core::marker::PhantomData;
 use core::mem;
+#[cfg(not(no_maybe_uninit))]
+use core::mem::MaybeUninit;
+use core::ptr;
 
 #[cfg(feature = "unstable-debug")]
 use core::any;
 
 pub struct Any {
-    ptr: *mut (),
-    drop: fn(*mut ()),
+    value: Value,
+    drop: fn(&mut Value),
     fingerprint: Fingerprint,
 
     /// For panic messages only. Not used for comparison.
     #[cfg(feature = "unstable-debug")]
     type_name: &'static str,
+}
+
+union Value {
+    ptr: *mut (),
+    inline: [MaybeUninit<usize>; 2],
+}
+
+fn is_small<T>() -> bool {
+    cfg!(not(no_maybe_uninit))
+        && mem::size_of::<T>() <= mem::size_of::<Value>()
+        && mem::align_of::<T>() <= mem::align_of::<Value>()
 }
 
 // These functions are all unsafe. They are not exposed to the user. Declaring
@@ -29,16 +45,27 @@ impl Any {
     //
     // Now `a.view()` and `a.take()` return references to a dead String.
     pub(crate) fn new<T>(t: T) -> Self {
-        let ptr = Box::into_raw(Box::new(t)) as *mut ();
-        let drop = |ptr| drop(unsafe { Box::from_raw(ptr as *mut T) });
+        let value: Value;
+        let drop: fn(&mut Value);
         let fingerprint = Fingerprint::of::<T>();
+
+        if is_small::<T>() {
+            let mut inline = [MaybeUninit::uninit(); 2];
+            unsafe { ptr::write(inline.as_mut_ptr() as *mut T, t) };
+            value = Value { inline };
+            drop = |value| unsafe { ptr::drop_in_place(value.inline.as_mut_ptr() as *mut T) };
+        } else {
+            let ptr = Box::into_raw(Box::new(t)) as *mut ();
+            value = Value { ptr };
+            drop = |value| mem::drop(unsafe { Box::from_raw(value.ptr as *mut T) });
+        };
 
         // Once attributes on struct literal fields are stable, do that instead.
         // https://github.com/rust-lang/rust/issues/41681
         #[cfg(not(feature = "unstable-debug"))]
         {
             Any {
-                ptr,
+                value,
                 drop,
                 fingerprint,
             }
@@ -48,7 +75,7 @@ impl Any {
         {
             let type_name = any::type_name::<T>();
             Any {
-                ptr,
+                value,
                 drop,
                 fingerprint,
                 type_name,
@@ -61,19 +88,33 @@ impl Any {
         if self.fingerprint != Fingerprint::of::<T>() {
             self.invalid_cast_to::<T>();
         }
-        let ptr = self.ptr as *mut T;
+
+        let ptr = if is_small::<T>() {
+            unsafe { self.value.inline.as_mut_ptr() as *mut T }
+        } else {
+            unsafe { self.value.ptr as *mut T }
+        };
+
         unsafe { &mut *ptr }
     }
 
     // This is unsafe -- caller is responsible that T is the correct type.
-    pub(crate) fn take<T>(self) -> T {
+    pub(crate) fn take<T>(mut self) -> T {
         if self.fingerprint != Fingerprint::of::<T>() {
             self.invalid_cast_to::<T>();
         }
-        let ptr = self.ptr as *mut T;
-        let box_t = unsafe { Box::from_raw(ptr) };
-        mem::forget(self);
-        *box_t
+
+        if is_small::<T>() {
+            let ptr = unsafe { self.value.inline.as_mut_ptr() as *mut T };
+            let value = unsafe { ptr::read(ptr) };
+            mem::forget(self);
+            value
+        } else {
+            let ptr = unsafe { self.value.ptr as *mut T };
+            let box_t = unsafe { Box::from_raw(ptr) };
+            mem::forget(self);
+            *box_t
+        }
     }
 
     #[cfg(not(feature = "unstable-debug"))]
@@ -91,7 +132,18 @@ impl Any {
 
 impl Drop for Any {
     fn drop(&mut self) {
-        (self.drop)(self.ptr);
+        (self.drop)(&mut self.value);
+    }
+}
+
+#[cfg(no_maybe_uninit)]
+#[derive(Copy, Clone)]
+struct MaybeUninit<T>(PhantomData<T>);
+
+#[cfg(no_maybe_uninit)]
+impl<T> MaybeUninit<T> {
+    fn uninit() -> Self {
+        MaybeUninit(PhantomData)
     }
 }
 
