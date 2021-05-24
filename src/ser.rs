@@ -30,8 +30,8 @@ use serde::serde_if_integer128;
 ///     // be possible with serde::Serializer because of object safety, but type
 ///     // erasure makes it possible with erased_serde::Serializer.
 ///     let mut formats: Map<&str, Box<dyn Serializer>> = Map::new();
-///     formats.insert("json", Box::new(Serializer::erase(json)));
-///     formats.insert("cbor", Box::new(Serializer::erase(cbor)));
+///     formats.insert("json", Box::new(<dyn Serializer>::erase(json)));
+///     formats.insert("cbor", Box::new(<dyn Serializer>::erase(cbor)));
 ///
 ///     // These are boxed trait objects as well. Same thing here - type erasure
 ///     // makes this possible.
@@ -73,8 +73,8 @@ pub trait Serialize {
 ///     // be possible with serde::Serializer because of object safety, but type
 ///     // erasure makes it possible with erased_serde::Serializer.
 ///     let mut formats: Map<&str, Box<dyn Serializer>> = Map::new();
-///     formats.insert("json", Box::new(Serializer::erase(json)));
-///     formats.insert("cbor", Box::new(Serializer::erase(cbor)));
+///     formats.insert("json", Box::new(<dyn Serializer>::erase(json)));
+///     formats.insert("cbor", Box::new(<dyn Serializer>::erase(cbor)));
 ///
 ///     // These are boxed trait objects as well. Same thing here - type erasure
 ///     // makes this possible.
@@ -176,8 +176,8 @@ impl dyn Serializer {
     ///     // be possible with serde::Serializer because of object safety, but type
     ///     // erasure makes it possible with erased_serde::Serializer.
     ///     let mut formats: Map<&str, Box<dyn Serializer>> = Map::new();
-    ///     formats.insert("json", Box::new(Serializer::erase(json)));
-    ///     formats.insert("cbor", Box::new(Serializer::erase(cbor)));
+    ///     formats.insert("json", Box::new(<dyn Serializer>::erase(json)));
+    ///     formats.insert("cbor", Box::new(<dyn Serializer>::erase(cbor)));
     ///
     ///     // These are boxed trait objects as well. Same thing here - type erasure
     ///     // makes this possible.
@@ -1004,7 +1004,7 @@ mod tests {
 
             {
                 let mut ser = serde_json::Serializer::new(&mut buf);
-                let ser: &mut dyn Serializer = &mut Serializer::erase(&mut ser);
+                let ser: &mut dyn Serializer = &mut <dyn Serializer>::erase(&mut ser);
 
                 obj.erased_serialize(ser).unwrap();
             }
@@ -1020,7 +1020,7 @@ mod tests {
 
             {
                 let mut ser = serde_json::Serializer::new(&mut buf);
-                let mut ser: Box<dyn Serializer> = Box::new(Serializer::erase(&mut ser));
+                let mut ser: Box<dyn Serializer> = Box::new(<dyn Serializer>::erase(&mut ser));
 
                 obj.erased_serialize(&mut ser).unwrap();
             }

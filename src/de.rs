@@ -21,8 +21,8 @@ use serde::serde_if_integer128;
 ///     // The values in this map are boxed trait objects, which is not possible
 ///     // with the normal serde::Deserializer because of object safety.
 ///     let mut formats: Map<&str, Box<dyn Deserializer>> = Map::new();
-///     formats.insert("json", Box::new(Deserializer::erase(json)));
-///     formats.insert("cbor", Box::new(Deserializer::erase(cbor)));
+///     formats.insert("json", Box::new(<dyn Deserializer>::erase(json)));
+///     formats.insert("cbor", Box::new(<dyn Deserializer>::erase(cbor)));
 ///
 ///     // Pick a Deserializer out of the formats map.
 ///     let format = formats.get_mut("json").unwrap();
@@ -66,8 +66,8 @@ pub trait DeserializeSeed<'de> {
 ///     // The values in this map are boxed trait objects, which is not possible
 ///     // with the normal serde::Deserializer because of object safety.
 ///     let mut formats: Map<&str, Box<dyn Deserializer>> = Map::new();
-///     formats.insert("json", Box::new(Deserializer::erase(json)));
-///     formats.insert("cbor", Box::new(Deserializer::erase(cbor)));
+///     formats.insert("json", Box::new(<dyn Deserializer>::erase(json)));
+///     formats.insert("cbor", Box::new(<dyn Deserializer>::erase(cbor)));
 ///
 ///     // Pick a Deserializer out of the formats map.
 ///     let format = formats.get_mut("json").unwrap();
@@ -220,8 +220,8 @@ impl<'de> dyn Deserializer<'de> {
     ///     // The values in this map are boxed trait objects, which is not possible
     ///     // with the normal serde::Deserializer because of object safety.
     ///     let mut formats: Map<&str, Box<dyn Deserializer>> = Map::new();
-    ///     formats.insert("json", Box::new(Deserializer::erase(json)));
-    ///     formats.insert("cbor", Box::new(Deserializer::erase(cbor)));
+    ///     formats.insert("json", Box::new(<dyn Deserializer>::erase(json)));
+    ///     formats.insert("cbor", Box::new(<dyn Deserializer>::erase(cbor)));
     ///
     ///     // Pick a Deserializer out of the formats map.
     ///     let format = formats.get_mut("json").unwrap();
@@ -1249,14 +1249,14 @@ mod tests {
         // test borrowed trait object
         {
             let mut de = serde_json::Deserializer::from_slice(json);
-            let de: &mut dyn Deserializer = &mut Deserializer::erase(&mut de);
+            let de: &mut dyn Deserializer = &mut <dyn Deserializer>::erase(&mut de);
             assert_eq!(expected, deserialize::<T>(de).unwrap());
         }
 
         // test boxed trait object
         {
             let mut de = serde_json::Deserializer::from_slice(json);
-            let mut de: Box<dyn Deserializer> = Box::new(Deserializer::erase(&mut de));
+            let mut de: Box<dyn Deserializer> = Box::new(<dyn Deserializer>::erase(&mut de));
             assert_eq!(expected, deserialize::<T>(&mut de).unwrap());
         }
     }
