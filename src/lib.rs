@@ -95,7 +95,7 @@
 //! }
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/erased-serde/0.3.14")]
+#![doc(html_root_url = "https://docs.rs/erased-serde/0.3.15")]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(
     clippy::items_after_statements,
