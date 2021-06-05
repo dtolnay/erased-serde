@@ -101,6 +101,7 @@
     clippy::items_after_statements,
     clippy::missing_errors_doc,
     clippy::needless_doctest_main,
+    clippy::semicolon_if_nothing_returned, // https://github.com/rust-lang/rust-clippy/issues/7324
     clippy::unused_self,
     clippy::wildcard_imports
 )]
