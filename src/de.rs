@@ -363,7 +363,7 @@ where
         self.take().deserialize_i8(visitor).map_err(erase)
     }
     fn erased_deserialize_i16(&mut self, visitor: &mut dyn Visitor<'de>) -> Result<Out, Error> {
-        self.take().deserialize_u16(visitor).map_err(erase)
+        self.take().deserialize_i16(visitor).map_err(erase)
     }
     fn erased_deserialize_i32(&mut self, visitor: &mut dyn Visitor<'de>) -> Result<Out, Error> {
         self.take().deserialize_i32(visitor).map_err(erase)
