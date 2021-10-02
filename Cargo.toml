@@ -9,6 +9,7 @@ documentation = "https://docs.rs/erased-serde"
 keywords = ["serde", "erasure"]
 readme = "README.md"
 edition = "2018"
+rust-version = "1.31"
 
 [dependencies]
 serde = { version = "1.0.63", default-features = false }
