@@ -99,6 +99,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(
     clippy::items_after_statements,
+    clippy::manual_map, // https://github.com/rust-lang/rust-clippy/issues/7820
     clippy::missing_errors_doc,
     clippy::needless_doctest_main,
     clippy::semicolon_if_nothing_returned, // https://github.com/rust-lang/rust-clippy/issues/7324
@@ -126,6 +127,7 @@ mod any;
 mod de;
 mod error;
 mod features_check;
+mod map;
 mod ser;
 
 pub use crate::de::{deserialize, Deserializer};

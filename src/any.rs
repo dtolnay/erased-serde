@@ -30,9 +30,6 @@ fn is_small<T>() -> bool {
         && mem::align_of::<T>() <= mem::align_of::<Value>()
 }
 
-// These functions are all unsafe. They are not exposed to the user. Declaring
-// them as `unsafe fn` would not make the rest of erased-serde any safer or more
-// readable.
 impl Any {
     // This is unsafe -- caller must not hold on to the Any beyond the lifetime
     // of T.
@@ -44,20 +41,20 @@ impl Any {
     //    drop(s);
     //
     // Now `a.view()` and `a.take()` return references to a dead String.
-    pub(crate) fn new<T>(t: T) -> Self {
+    pub(crate) unsafe fn new<T>(t: T) -> Self {
         let value: Value;
         let drop: fn(&mut Value);
         let fingerprint = Fingerprint::of::<T>();
 
         if is_small::<T>() {
             let mut inline = [MaybeUninit::uninit(); 2];
-            unsafe { ptr::write(inline.as_mut_ptr() as *mut T, t) };
+            ptr::write(inline.as_mut_ptr() as *mut T, t);
             value = Value { inline };
-            drop = |value| unsafe { ptr::drop_in_place(value.inline.as_mut_ptr() as *mut T) };
+            drop = |value| ptr::drop_in_place(value.inline.as_mut_ptr() as *mut T);
         } else {
             let ptr = Box::into_raw(Box::new(t)) as *mut ();
             value = Value { ptr };
-            drop = |value| mem::drop(unsafe { Box::from_raw(value.ptr as *mut T) });
+            drop = |value| mem::drop(Box::from_raw(value.ptr as *mut T));
         };
 
         // Once attributes on struct literal fields are stable, do that instead.
@@ -84,34 +81,34 @@ impl Any {
     }
 
     // This is unsafe -- caller is responsible that T is the correct type.
-    pub(crate) fn view<T>(&mut self) -> &mut T {
+    pub(crate) unsafe fn view<T>(&mut self) -> &mut T {
         if cfg!(not(miri)) && self.fingerprint != Fingerprint::of::<T>() {
             self.invalid_cast_to::<T>();
         }
 
         let ptr = if is_small::<T>() {
-            unsafe { self.value.inline.as_mut_ptr() as *mut T }
+            self.value.inline.as_mut_ptr() as *mut T
         } else {
-            unsafe { self.value.ptr as *mut T }
+            self.value.ptr as *mut T
         };
 
-        unsafe { &mut *ptr }
+        &mut *ptr
     }
 
     // This is unsafe -- caller is responsible that T is the correct type.
-    pub(crate) fn take<T>(mut self) -> T {
+    pub(crate) unsafe fn take<T>(mut self) -> T {
         if cfg!(not(miri)) && self.fingerprint != Fingerprint::of::<T>() {
             self.invalid_cast_to::<T>();
         }
 
         if is_small::<T>() {
-            let ptr = unsafe { self.value.inline.as_mut_ptr() as *mut T };
-            let value = unsafe { ptr::read(ptr) };
+            let ptr = self.value.inline.as_mut_ptr() as *mut T;
+            let value = ptr::read(ptr);
             mem::forget(self);
             value
         } else {
-            let ptr = unsafe { self.value.ptr as *mut T };
-            let box_t = unsafe { Box::from_raw(ptr) };
+            let ptr = self.value.ptr as *mut T;
+            let box_t = Box::from_raw(ptr);
             mem::forget(self);
             *box_t
         }
