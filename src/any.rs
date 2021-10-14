@@ -11,7 +11,7 @@ use core::any;
 
 pub struct Any {
     value: Value,
-    drop: fn(&mut Value),
+    drop: unsafe fn(&mut Value),
     fingerprint: Fingerprint,
 
     /// For panic messages only. Not used for comparison.
@@ -43,18 +43,24 @@ impl Any {
     // Now `a.view()` and `a.take()` return references to a dead String.
     pub(crate) unsafe fn new<T>(t: T) -> Self {
         let value: Value;
-        let drop: fn(&mut Value);
+        let drop: unsafe fn(&mut Value);
         let fingerprint = Fingerprint::of::<T>();
 
         if is_small::<T>() {
             let mut inline = [MaybeUninit::uninit(); 2];
-            ptr::write(inline.as_mut_ptr() as *mut T, t);
+            unsafe { ptr::write(inline.as_mut_ptr() as *mut T, t) };
             value = Value { inline };
-            drop = |value| ptr::drop_in_place(value.inline.as_mut_ptr() as *mut T);
+            unsafe fn inline_drop<T>(value: &mut Value) {
+                unsafe { ptr::drop_in_place(value.inline.as_mut_ptr() as *mut T) }
+            }
+            drop = inline_drop::<T>;
         } else {
             let ptr = Box::into_raw(Box::new(t)) as *mut ();
             value = Value { ptr };
-            drop = |value| mem::drop(Box::from_raw(value.ptr as *mut T));
+            unsafe fn ptr_drop<T>(value: &mut Value) {
+                mem::drop(unsafe { Box::from_raw(value.ptr as *mut T) });
+            }
+            drop = ptr_drop::<T>;
         };
 
         // Once attributes on struct literal fields are stable, do that instead.
@@ -87,12 +93,12 @@ impl Any {
         }
 
         let ptr = if is_small::<T>() {
-            self.value.inline.as_mut_ptr() as *mut T
+            unsafe { self.value.inline.as_mut_ptr() as *mut T }
         } else {
-            self.value.ptr as *mut T
+            unsafe { self.value.ptr as *mut T }
         };
 
-        &mut *ptr
+        unsafe { &mut *ptr }
     }
 
     // This is unsafe -- caller is responsible that T is the correct type.
@@ -102,13 +108,13 @@ impl Any {
         }
 
         if is_small::<T>() {
-            let ptr = self.value.inline.as_mut_ptr() as *mut T;
-            let value = ptr::read(ptr);
+            let ptr = unsafe { self.value.inline.as_mut_ptr() as *mut T };
+            let value = unsafe { ptr::read(ptr) };
             mem::forget(self);
             value
         } else {
-            let ptr = self.value.ptr as *mut T;
-            let box_t = Box::from_raw(ptr);
+            let ptr = unsafe { self.value.ptr as *mut T };
+            let box_t = unsafe { Box::from_raw(ptr) };
             mem::forget(self);
             *box_t
         }
@@ -129,7 +135,7 @@ impl Any {
 
 impl Drop for Any {
     fn drop(&mut self) {
-        (self.drop)(&mut self.value);
+        unsafe { (self.drop)(&mut self.value) }
     }
 }
 

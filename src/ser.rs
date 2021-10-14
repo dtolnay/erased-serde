@@ -223,11 +223,13 @@ pub struct Ok {
 
 impl Ok {
     unsafe fn new<T>(t: T) -> Self {
-        Ok { data: Any::new(t) }
+        Ok {
+            data: unsafe { Any::new(t) },
+        }
     }
 
     unsafe fn take<T>(self) -> T {
-        self.data.take()
+        unsafe { self.data.take() }
     }
 }
 
@@ -807,17 +809,39 @@ impl_serializer_for_trait_object!(&'a mut (dyn Serializer + Send + Sync));
 
 pub struct Seq<'a> {
     data: Any,
-    serialize_element: fn(&mut Any, &dyn Serialize) -> Result<(), Error>,
-    end: fn(Any) -> Result<Ok, Error>,
+    serialize_element: unsafe fn(&mut Any, &dyn Serialize) -> Result<(), Error>,
+    end: unsafe fn(Any) -> Result<Ok, Error>,
     lifetime: PhantomData<&'a dyn Serializer>,
 }
 
 impl<'a> Seq<'a> {
-    unsafe fn new<T: serde::ser::SerializeSeq>(data: T) -> Self {
+    unsafe fn new<T>(data: T) -> Self
+    where
+        T: serde::ser::SerializeSeq,
+    {
         Seq {
-            data: Any::new(data),
-            serialize_element: |data, v| data.view::<T>().serialize_element(v).map_err(erase),
-            end: |data| data.take::<T>().end().unsafe_map(Ok::new).map_err(erase),
+            data: unsafe { Any::new(data) },
+            serialize_element: {
+                unsafe fn serialize_element<T>(
+                    data: &mut Any,
+                    v: &dyn Serialize,
+                ) -> Result<(), Error>
+                where
+                    T: serde::ser::SerializeSeq,
+                {
+                    unsafe { data.view::<T>().serialize_element(v).map_err(erase) }
+                }
+                serialize_element::<T>
+            },
+            end: {
+                unsafe fn end<T>(data: Any) -> Result<Ok, Error>
+                where
+                    T: serde::ser::SerializeSeq,
+                {
+                    unsafe { data.take::<T>().end().unsafe_map(Ok::new).map_err(erase) }
+                }
+                end::<T>
+            },
             lifetime: PhantomData,
         }
     }
@@ -831,27 +855,49 @@ impl<'a> SerializeSeq for Seq<'a> {
     where
         T: serde::Serialize,
     {
-        (self.serialize_element)(&mut self.data, &value)
+        unsafe { (self.serialize_element)(&mut self.data, &value) }
     }
 
     fn end(self) -> Result<Ok, Error> {
-        (self.end)(self.data)
+        unsafe { (self.end)(self.data) }
     }
 }
 
 pub struct Tuple<'a> {
     data: Any,
-    serialize_element: fn(&mut Any, &dyn Serialize) -> Result<(), Error>,
-    end: fn(Any) -> Result<Ok, Error>,
+    serialize_element: unsafe fn(&mut Any, &dyn Serialize) -> Result<(), Error>,
+    end: unsafe fn(Any) -> Result<Ok, Error>,
     lifetime: PhantomData<&'a dyn Serializer>,
 }
 
 impl<'a> Tuple<'a> {
-    unsafe fn new<T: serde::ser::SerializeTuple>(data: T) -> Self {
+    unsafe fn new<T>(data: T) -> Self
+    where
+        T: serde::ser::SerializeTuple,
+    {
         Tuple {
-            data: Any::new(data),
-            serialize_element: |data, v| data.view::<T>().serialize_element(v).map_err(erase),
-            end: |data| data.take::<T>().end().unsafe_map(Ok::new).map_err(erase),
+            data: unsafe { Any::new(data) },
+            serialize_element: {
+                unsafe fn serialize_element<T>(
+                    data: &mut Any,
+                    v: &dyn Serialize,
+                ) -> Result<(), Error>
+                where
+                    T: serde::ser::SerializeTuple,
+                {
+                    unsafe { data.view::<T>().serialize_element(v).map_err(erase) }
+                }
+                serialize_element::<T>
+            },
+            end: {
+                unsafe fn end<T>(data: Any) -> Result<Ok, Error>
+                where
+                    T: serde::ser::SerializeTuple,
+                {
+                    unsafe { data.take::<T>().end().unsafe_map(Ok::new).map_err(erase) }
+                }
+                end::<T>
+            },
             lifetime: PhantomData,
         }
     }
@@ -865,27 +911,46 @@ impl<'a> SerializeTuple for Tuple<'a> {
     where
         T: serde::Serialize,
     {
-        (self.serialize_element)(&mut self.data, &value)
+        unsafe { (self.serialize_element)(&mut self.data, &value) }
     }
 
     fn end(self) -> Result<Ok, Error> {
-        (self.end)(self.data)
+        unsafe { (self.end)(self.data) }
     }
 }
 
 pub struct TupleStruct<'a> {
     data: Any,
-    serialize_field: fn(&mut Any, &dyn Serialize) -> Result<(), Error>,
-    end: fn(Any) -> Result<Ok, Error>,
+    serialize_field: unsafe fn(&mut Any, &dyn Serialize) -> Result<(), Error>,
+    end: unsafe fn(Any) -> Result<Ok, Error>,
     lifetime: PhantomData<&'a dyn Serializer>,
 }
 
 impl<'a> TupleStruct<'a> {
-    unsafe fn new<T: serde::ser::SerializeTupleStruct>(data: T) -> Self {
+    unsafe fn new<T>(data: T) -> Self
+    where
+        T: serde::ser::SerializeTupleStruct,
+    {
         TupleStruct {
-            data: Any::new(data),
-            serialize_field: |data, v| data.view::<T>().serialize_field(v).map_err(erase),
-            end: |data| data.take::<T>().end().unsafe_map(Ok::new).map_err(erase),
+            data: unsafe { Any::new(data) },
+            serialize_field: {
+                unsafe fn serialize_field<T>(data: &mut Any, v: &dyn Serialize) -> Result<(), Error>
+                where
+                    T: serde::ser::SerializeTupleStruct,
+                {
+                    unsafe { data.view::<T>().serialize_field(v).map_err(erase) }
+                }
+                serialize_field::<T>
+            },
+            end: {
+                unsafe fn end<T>(data: Any) -> Result<Ok, Error>
+                where
+                    T: serde::ser::SerializeTupleStruct,
+                {
+                    unsafe { data.take::<T>().end().unsafe_map(Ok::new).map_err(erase) }
+                }
+                end::<T>
+            },
             lifetime: PhantomData,
         }
     }
@@ -899,27 +964,46 @@ impl<'a> SerializeTupleStruct for TupleStruct<'a> {
     where
         T: serde::Serialize,
     {
-        (self.serialize_field)(&mut self.data, &value)
+        unsafe { (self.serialize_field)(&mut self.data, &value) }
     }
 
     fn end(self) -> Result<Ok, Error> {
-        (self.end)(self.data)
+        unsafe { (self.end)(self.data) }
     }
 }
 
 pub struct TupleVariant<'a> {
     data: Any,
-    serialize_field: fn(&mut Any, &dyn Serialize) -> Result<(), Error>,
-    end: fn(Any) -> Result<Ok, Error>,
+    serialize_field: unsafe fn(&mut Any, &dyn Serialize) -> Result<(), Error>,
+    end: unsafe fn(Any) -> Result<Ok, Error>,
     lifetime: PhantomData<&'a dyn Serializer>,
 }
 
 impl<'a> TupleVariant<'a> {
-    unsafe fn new<T: serde::ser::SerializeTupleVariant>(data: T) -> Self {
+    unsafe fn new<T>(data: T) -> Self
+    where
+        T: serde::ser::SerializeTupleVariant,
+    {
         TupleVariant {
-            data: Any::new(data),
-            serialize_field: |data, v| data.view::<T>().serialize_field(v).map_err(erase),
-            end: |data| data.take::<T>().end().unsafe_map(Ok::new).map_err(erase),
+            data: unsafe { Any::new(data) },
+            serialize_field: {
+                unsafe fn serialize_field<T>(data: &mut Any, v: &dyn Serialize) -> Result<(), Error>
+                where
+                    T: serde::ser::SerializeTupleVariant,
+                {
+                    unsafe { data.view::<T>().serialize_field(v).map_err(erase) }
+                }
+                serialize_field::<T>
+            },
+            end: {
+                unsafe fn end<T>(data: Any) -> Result<Ok, Error>
+                where
+                    T: serde::ser::SerializeTupleVariant,
+                {
+                    unsafe { data.take::<T>().end().unsafe_map(Ok::new).map_err(erase) }
+                }
+                end::<T>
+            },
             lifetime: PhantomData,
         }
     }
@@ -933,31 +1017,70 @@ impl<'a> SerializeTupleVariant for TupleVariant<'a> {
     where
         T: serde::Serialize,
     {
-        (self.serialize_field)(&mut self.data, &value)
+        unsafe { (self.serialize_field)(&mut self.data, &value) }
     }
 
     fn end(self) -> Result<Ok, Error> {
-        (self.end)(self.data)
+        unsafe { (self.end)(self.data) }
     }
 }
 
 pub struct Map<'a> {
     data: Any,
-    serialize_key: fn(&mut Any, &dyn Serialize) -> Result<(), Error>,
-    serialize_value: fn(&mut Any, &dyn Serialize) -> Result<(), Error>,
-    serialize_entry: fn(&mut Any, &dyn Serialize, &dyn Serialize) -> Result<(), Error>,
-    end: fn(Any) -> Result<Ok, Error>,
+    serialize_key: unsafe fn(&mut Any, &dyn Serialize) -> Result<(), Error>,
+    serialize_value: unsafe fn(&mut Any, &dyn Serialize) -> Result<(), Error>,
+    serialize_entry: unsafe fn(&mut Any, &dyn Serialize, &dyn Serialize) -> Result<(), Error>,
+    end: unsafe fn(Any) -> Result<Ok, Error>,
     lifetime: PhantomData<&'a dyn Serializer>,
 }
 
 impl<'a> Map<'a> {
-    unsafe fn new<T: serde::ser::SerializeMap>(data: T) -> Self {
+    unsafe fn new<T>(data: T) -> Self
+    where
+        T: serde::ser::SerializeMap,
+    {
         Map {
-            data: Any::new(data),
-            serialize_key: |data, v| data.view::<T>().serialize_key(v).map_err(erase),
-            serialize_value: |data, v| data.view::<T>().serialize_value(v).map_err(erase),
-            serialize_entry: |data, k, v| data.view::<T>().serialize_entry(k, v).map_err(erase),
-            end: |data| data.take::<T>().end().unsafe_map(Ok::new).map_err(erase),
+            data: unsafe { Any::new(data) },
+            serialize_key: {
+                unsafe fn serialize_key<T>(data: &mut Any, v: &dyn Serialize) -> Result<(), Error>
+                where
+                    T: serde::ser::SerializeMap,
+                {
+                    unsafe { data.view::<T>().serialize_key(v).map_err(erase) }
+                }
+                serialize_key::<T>
+            },
+            serialize_value: {
+                unsafe fn serialize_value<T>(data: &mut Any, v: &dyn Serialize) -> Result<(), Error>
+                where
+                    T: serde::ser::SerializeMap,
+                {
+                    unsafe { data.view::<T>().serialize_value(v).map_err(erase) }
+                }
+                serialize_value::<T>
+            },
+            serialize_entry: {
+                unsafe fn serialize_entry<T>(
+                    data: &mut Any,
+                    k: &dyn Serialize,
+                    v: &dyn Serialize,
+                ) -> Result<(), Error>
+                where
+                    T: serde::ser::SerializeMap,
+                {
+                    unsafe { data.view::<T>().serialize_entry(k, v).map_err(erase) }
+                }
+                serialize_entry::<T>
+            },
+            end: {
+                unsafe fn end<T>(data: Any) -> Result<Ok, Error>
+                where
+                    T: serde::ser::SerializeMap,
+                {
+                    unsafe { data.take::<T>().end().unsafe_map(Ok::new).map_err(erase) }
+                }
+                end::<T>
+            },
             lifetime: PhantomData,
         }
     }
@@ -971,14 +1094,14 @@ impl<'a> SerializeMap for Map<'a> {
     where
         T: serde::Serialize,
     {
-        (self.serialize_key)(&mut self.data, &key)
+        unsafe { (self.serialize_key)(&mut self.data, &key) }
     }
 
     fn serialize_value<T: ?Sized>(&mut self, value: &T) -> Result<(), Error>
     where
         T: serde::Serialize,
     {
-        (self.serialize_value)(&mut self.data, &value)
+        unsafe { (self.serialize_value)(&mut self.data, &value) }
     }
 
     fn serialize_entry<K: ?Sized, V: ?Sized>(&mut self, key: &K, value: &V) -> Result<(), Error>
@@ -986,27 +1109,50 @@ impl<'a> SerializeMap for Map<'a> {
         K: serde::Serialize,
         V: serde::Serialize,
     {
-        (self.serialize_entry)(&mut self.data, &key, &value)
+        unsafe { (self.serialize_entry)(&mut self.data, &key, &value) }
     }
 
     fn end(self) -> Result<Ok, Error> {
-        (self.end)(self.data)
+        unsafe { (self.end)(self.data) }
     }
 }
 
 pub struct Struct<'a> {
     data: Any,
-    serialize_field: fn(&mut Any, &'static str, &dyn Serialize) -> Result<(), Error>,
-    end: fn(Any) -> Result<Ok, Error>,
+    serialize_field: unsafe fn(&mut Any, &'static str, &dyn Serialize) -> Result<(), Error>,
+    end: unsafe fn(Any) -> Result<Ok, Error>,
     lifetime: PhantomData<&'a dyn Serializer>,
 }
 
 impl<'a> Struct<'a> {
-    unsafe fn new<T: serde::ser::SerializeStruct>(data: T) -> Self {
+    unsafe fn new<T>(data: T) -> Self
+    where
+        T: serde::ser::SerializeStruct,
+    {
         Struct {
-            data: Any::new(data),
-            serialize_field: |data, k, v| data.view::<T>().serialize_field(k, v).map_err(erase),
-            end: |data| data.take::<T>().end().unsafe_map(Ok::new).map_err(erase),
+            data: unsafe { Any::new(data) },
+            serialize_field: {
+                unsafe fn serialize_field<T>(
+                    data: &mut Any,
+                    k: &'static str,
+                    v: &dyn Serialize,
+                ) -> Result<(), Error>
+                where
+                    T: serde::ser::SerializeStruct,
+                {
+                    unsafe { data.view::<T>().serialize_field(k, v).map_err(erase) }
+                }
+                serialize_field::<T>
+            },
+            end: {
+                unsafe fn end<T>(data: Any) -> Result<Ok, Error>
+                where
+                    T: serde::ser::SerializeStruct,
+                {
+                    unsafe { data.take::<T>().end().unsafe_map(Ok::new).map_err(erase) }
+                }
+                end::<T>
+            },
             lifetime: PhantomData,
         }
     }
@@ -1020,27 +1166,50 @@ impl<'a> SerializeStruct for Struct<'a> {
     where
         T: serde::Serialize,
     {
-        (self.serialize_field)(&mut self.data, name, &field)
+        unsafe { (self.serialize_field)(&mut self.data, name, &field) }
     }
 
     fn end(self) -> Result<Ok, Error> {
-        (self.end)(self.data)
+        unsafe { (self.end)(self.data) }
     }
 }
 
 pub struct StructVariant<'a> {
     data: Any,
-    serialize_field: fn(&mut Any, &'static str, &dyn Serialize) -> Result<(), Error>,
-    end: fn(Any) -> Result<Ok, Error>,
+    serialize_field: unsafe fn(&mut Any, &'static str, &dyn Serialize) -> Result<(), Error>,
+    end: unsafe fn(Any) -> Result<Ok, Error>,
     lifetime: PhantomData<&'a dyn Serializer>,
 }
 
 impl<'a> StructVariant<'a> {
-    unsafe fn new<T: serde::ser::SerializeStructVariant>(data: T) -> Self {
+    unsafe fn new<T>(data: T) -> Self
+    where
+        T: serde::ser::SerializeStructVariant,
+    {
         StructVariant {
-            data: Any::new(data),
-            serialize_field: |data, k, v| data.view::<T>().serialize_field(k, v).map_err(erase),
-            end: |data| data.take::<T>().end().unsafe_map(Ok::new).map_err(erase),
+            data: unsafe { Any::new(data) },
+            serialize_field: {
+                unsafe fn serialize_field<T>(
+                    data: &mut Any,
+                    k: &'static str,
+                    v: &dyn Serialize,
+                ) -> Result<(), Error>
+                where
+                    T: serde::ser::SerializeStructVariant,
+                {
+                    unsafe { data.view::<T>().serialize_field(k, v).map_err(erase) }
+                }
+                serialize_field::<T>
+            },
+            end: {
+                unsafe fn end<T>(data: Any) -> Result<Ok, Error>
+                where
+                    T: serde::ser::SerializeStructVariant,
+                {
+                    unsafe { data.take::<T>().end().unsafe_map(Ok::new).map_err(erase) }
+                }
+                end::<T>
+            },
             lifetime: PhantomData,
         }
     }
@@ -1054,11 +1223,11 @@ impl<'a> SerializeStructVariant for StructVariant<'a> {
     where
         T: serde::Serialize,
     {
-        (self.serialize_field)(&mut self.data, name, &field)
+        unsafe { (self.serialize_field)(&mut self.data, name, &field) }
     }
 
     fn end(self) -> Result<Ok, Error> {
-        (self.end)(self.data)
+        unsafe { (self.end)(self.data) }
     }
 }
 

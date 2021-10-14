@@ -97,6 +97,8 @@
 
 #![doc(html_root_url = "https://docs.rs/erased-serde/0.3.16")]
 #![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(not(no_unsafe_op_in_unsafe_fn_lint), deny(unsafe_op_in_unsafe_fn))]
+#![cfg_attr(no_unsafe_op_in_unsafe_fn_lint, allow(unused_unsafe))]
 #![allow(
     clippy::items_after_statements,
     clippy::manual_map, // https://github.com/rust-lang/rust-clippy/issues/7820

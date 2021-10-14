@@ -248,11 +248,11 @@ pub struct Out(Any);
 
 impl Out {
     unsafe fn new<T>(t: T) -> Self {
-        Out(Any::new(t))
+        Out(unsafe { Any::new(t) })
     }
 
     unsafe fn take<T>(self) -> T {
-        self.0.take()
+        unsafe { self.0.take() }
     }
 }
 
@@ -719,7 +719,7 @@ where
                         where
                             T: serde::de::EnumAccess<'de>,
                         {
-                            a.take::<T::Variant>().unit_variant().map_err(erase)
+                            unsafe { a.take::<T::Variant>().unit_variant().map_err(erase) }
                         }
                         unit_variant::<T>
                     },
@@ -731,9 +731,11 @@ where
                         where
                             T: serde::de::EnumAccess<'de>,
                         {
-                            a.take::<T::Variant>()
-                                .newtype_variant_seed(seed)
-                                .map_err(erase)
+                            unsafe {
+                                a.take::<T::Variant>()
+                                    .newtype_variant_seed(seed)
+                                    .map_err(erase)
+                            }
                         }
                         visit_newtype::<T>
                     },
@@ -746,9 +748,11 @@ where
                         where
                             T: serde::de::EnumAccess<'de>,
                         {
-                            a.take::<T::Variant>()
-                                .tuple_variant(len, visitor)
-                                .map_err(erase)
+                            unsafe {
+                                a.take::<T::Variant>()
+                                    .tuple_variant(len, visitor)
+                                    .map_err(erase)
+                            }
                         }
                         tuple_variant::<T>
                     },
@@ -761,9 +765,11 @@ where
                         where
                             T: serde::de::EnumAccess<'de>,
                         {
-                            a.take::<T::Variant>()
-                                .struct_variant(fields, visitor)
-                                .map_err(erase)
+                            unsafe {
+                                a.take::<T::Variant>()
+                                    .struct_variant(fields, visitor)
+                                    .map_err(erase)
+                            }
                         }
                         struct_variant::<T>
                     },
