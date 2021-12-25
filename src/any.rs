@@ -154,7 +154,6 @@ impl<T> MaybeUninit<T> {
 struct Fingerprint {
     size: usize,
     align: usize,
-    id: usize,
 }
 
 impl Fingerprint {
@@ -162,27 +161,15 @@ impl Fingerprint {
         Fingerprint {
             size: mem::size_of::<T>(),
             align: mem::align_of::<T>(),
-            // This is not foolproof -- theoretically Rust or LLVM could
-            // deduplicate some or all of these methods. But in practice it's
-            // great and I am comfortable relying on this in debug mode to catch
-            // bugs early.
-            id: Fingerprint::of::<T> as usize,
         }
     }
 }
 
-#[cfg(not(miri))]
 #[test]
 fn test_fingerprint() {
     assert_eq!(Fingerprint::of::<usize>(), Fingerprint::of::<usize>());
     assert_eq!(Fingerprint::of::<&str>(), Fingerprint::of::<&'static str>());
 
-    assert_ne!(Fingerprint::of::<usize>(), Fingerprint::of::<isize>());
-    assert_ne!(Fingerprint::of::<usize>(), Fingerprint::of::<&usize>());
-    assert_ne!(Fingerprint::of::<&usize>(), Fingerprint::of::<&&usize>());
-    assert_ne!(Fingerprint::of::<&usize>(), Fingerprint::of::<&mut usize>());
-
-    struct A;
-    struct B;
-    assert_ne!(Fingerprint::of::<A>(), Fingerprint::of::<B>());
+    assert_ne!(Fingerprint::of::<u32>(), Fingerprint::of::<[u8; 4]>());
+    assert_ne!(Fingerprint::of::<u32>(), Fingerprint::of::<[u32; 2]>());
 }
