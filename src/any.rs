@@ -154,6 +154,7 @@ impl<T> MaybeUninit<T> {
 struct Fingerprint {
     size: usize,
     align: usize,
+    #[cfg(include_fnptr_in_fingerprint)]
     id: usize,
 }
 
@@ -164,25 +165,30 @@ impl Fingerprint {
             align: mem::align_of::<T>(),
             // This is not foolproof -- theoretically Rust or LLVM could
             // deduplicate some or all of these methods. But in practice it's
-            // great and I am comfortable relying on this in debug mode to catch
+            // great in debug mode when running our own test suite for catching
             // bugs early.
+            #[cfg(include_fnptr_in_fingerprint)]
             id: Fingerprint::of::<T> as usize,
         }
     }
 }
 
-#[cfg(not(miri))]
 #[test]
 fn test_fingerprint() {
     assert_eq!(Fingerprint::of::<usize>(), Fingerprint::of::<usize>());
     assert_eq!(Fingerprint::of::<&str>(), Fingerprint::of::<&'static str>());
 
-    assert_ne!(Fingerprint::of::<usize>(), Fingerprint::of::<isize>());
-    assert_ne!(Fingerprint::of::<usize>(), Fingerprint::of::<&usize>());
-    assert_ne!(Fingerprint::of::<&usize>(), Fingerprint::of::<&&usize>());
-    assert_ne!(Fingerprint::of::<&usize>(), Fingerprint::of::<&mut usize>());
+    assert_ne!(Fingerprint::of::<u32>(), Fingerprint::of::<[u8; 4]>());
+    assert_ne!(Fingerprint::of::<u32>(), Fingerprint::of::<[u32; 2]>());
 
-    struct A;
-    struct B;
-    assert_ne!(Fingerprint::of::<A>(), Fingerprint::of::<B>());
+    if cfg!(all(include_fnptr_in_fingerprint, not(miri))) {
+        assert_ne!(Fingerprint::of::<usize>(), Fingerprint::of::<isize>());
+        assert_ne!(Fingerprint::of::<usize>(), Fingerprint::of::<&usize>());
+        assert_ne!(Fingerprint::of::<&usize>(), Fingerprint::of::<&&usize>());
+        assert_ne!(Fingerprint::of::<&usize>(), Fingerprint::of::<&mut usize>());
+
+        struct A;
+        struct B;
+        assert_ne!(Fingerprint::of::<A>(), Fingerprint::of::<B>());
+    }
 }
