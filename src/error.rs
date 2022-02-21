@@ -16,10 +16,6 @@ impl Display for Error {
     }
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for Error {}
-
-#[cfg(not(feature = "std"))]
 impl serde::ser::StdError for Error {}
 
 impl serde::ser::Error for Error {
