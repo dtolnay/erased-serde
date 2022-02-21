@@ -17,11 +17,7 @@ impl Display for Error {
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for Error {
-    fn description(&self) -> &str {
-        &self.msg
-    }
-}
+impl std::error::Error for Error {}
 
 #[cfg(not(feature = "std"))]
 impl serde::ser::StdError for Error {}
