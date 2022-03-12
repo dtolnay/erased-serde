@@ -584,7 +584,7 @@ where
 ///     /* ... */
 /// }
 ///
-/// impl<'a> serde::Serialize for Event + 'a {
+/// impl<'a> serde::Serialize for dyn Event + 'a {
 ///     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
 ///         where S: serde::Serializer
 ///     {
