@@ -79,11 +79,7 @@ macro_rules! __internal_serialize_trait_object {
 
     // Expand into four impls.
     (sendsync ($($generics:tt)*) ($($path:tt)*) ($($bound:tt)*)) => {
-        $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)*) ($($bound)*));
-        $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Send) ($($bound)*));
-        $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Sync) ($($bound)*));
-        $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Send + $crate::private::Sync) ($($bound)*));
-        const _: () = {
+        $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)*) ($($bound)*) {
             fn __check_erased_serialize_supertrait<__T, $($generics)*>()
             where
                 __T: ?$crate::private::Sized + $($path)*,
@@ -91,11 +87,14 @@ macro_rules! __internal_serialize_trait_object {
             {
                 $crate::private::require_erased_serialize_impl::<__T>();
             }
-        };
+        });
+        $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Send) ($($bound)*));
+        $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Sync) ($($bound)*));
+        $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Send + $crate::private::Sync) ($($bound)*));
     };
 
     // The impl.
-    (impl ($($generics:tt)*) ($($path:tt)*) ($($bound:tt)*)) => {
+    (impl ($($generics:tt)*) ($($path:tt)*) ($($bound:tt)*) $({$($body:tt)*})*) => {
         impl<'erased, $($generics)*> $crate::private::serde::Serialize for dyn $($path)* + 'erased
         where
             $($bound)*
@@ -104,6 +103,7 @@ macro_rules! __internal_serialize_trait_object {
             where
                 S: $crate::private::serde::Serializer,
             {
+                $($($body)*)*
                 $crate::serialize(self, serializer)
             }
         }
