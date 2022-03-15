@@ -87,8 +87,14 @@ macro_rules! __internal_serialize_trait_object {
 
     // The impl.
     (impl ($($generics:tt)*) ($($path:tt)*) ($($bound:tt)*)) => {
-        impl<'erased, $($generics)*> $crate::private::serde::Serialize for dyn $($path)* + 'erased where $($bound)* {
-            fn serialize<S>(&self, serializer: S) -> $crate::private::Result<S::Ok, S::Error> where S: $crate::private::serde::Serializer {
+        impl<'erased, $($generics)*> $crate::private::serde::Serialize for dyn $($path)* + 'erased
+        where
+            $($bound)*
+        {
+            fn serialize<S>(&self, serializer: S) -> $crate::private::Result<S::Ok, S::Error>
+            where
+                S: $crate::private::serde::Serializer,
+            {
                 $crate::serialize(self, serializer)
             }
         }
