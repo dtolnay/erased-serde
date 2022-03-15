@@ -83,6 +83,15 @@ macro_rules! __internal_serialize_trait_object {
         $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Send) ($($bound)*));
         $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Sync) ($($bound)*));
         $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)* + $crate::private::Send + $crate::private::Sync) ($($bound)*));
+        const _: () = {
+            fn __check_erased_serialize_supertrait<__T, $($generics)*>()
+            where
+                __T: ?$crate::private::Sized + $($path)*,
+                $($bound)*
+            {
+                $crate::private::require_erased_serialize_impl::<__T>();
+            }
+        };
     };
 
     // The impl.
