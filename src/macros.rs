@@ -44,7 +44,7 @@ macro_rules! __internal_serialize_trait_object {
 
     // End of generics.
     (generics ($($generics:tt)*) () > $($rest:tt)*) => {
-        $crate::__internal_serialize_trait_object!(path ($($generics)*) () $($rest)*);
+        $crate::__internal_serialize_trait_object!(path ($($generics)*, ) () $($rest)*);
     };
 
     // Generics open bracket.
@@ -80,7 +80,7 @@ macro_rules! __internal_serialize_trait_object {
     // Expand into four impls.
     (sendsync ($($generics:tt)*) ($($path:tt)*) ($($bound:tt)*)) => {
         $crate::__internal_serialize_trait_object!(impl ($($generics)*) ($($path)*) ($($bound)*) {
-            fn __check_erased_serialize_supertrait<__T, $($generics)*>()
+            fn __check_erased_serialize_supertrait<$($generics)*, __T>()
             where
                 __T: ?$crate::private::Sized + $($path)*,
                 $($bound)*
