@@ -13,5 +13,5 @@ note: required by a bound in `require_erased_serialize_impl`
   = note: this error originates in the macro `$crate::__internal_serialize_trait_object` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider further restricting this bound
   |
-90|                 __T + erased_serde::private::serde::Serialize: ?$crate::private::Sized + $($path)*,
-  |                     +++++++++++++++++++++++++++++++++++++++++
+5 | serialize_trait_object!(MyTrait + erased_serde::private::serde::Serialize);
+  |                                 +++++++++++++++++++++++++++++++++++++++++
