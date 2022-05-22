@@ -100,6 +100,7 @@
 #![cfg_attr(not(no_unsafe_op_in_unsafe_fn_lint), deny(unsafe_op_in_unsafe_fn))]
 #![cfg_attr(no_unsafe_op_in_unsafe_fn_lint, allow(unused_unsafe))]
 #![allow(
+    clippy::derive_partial_eq_without_eq,
     clippy::items_after_statements,
     clippy::manual_map, // https://github.com/rust-lang/rust-clippy/issues/7820
     clippy::missing_errors_doc,
