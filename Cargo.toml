@@ -2,13 +2,13 @@
 name = "erased-serde"
 version = "0.3.21"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
-license = "MIT OR Apache-2.0"
 description = "Type-erased Serialize and Serializer traits"
-repository = "https://github.com/dtolnay/erased-serde"
 documentation = "https://docs.rs/erased-serde"
-keywords = ["serde", "erasure"]
-readme = "README.md"
 edition = "2018"
+keywords = ["serde", "erasure"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/dtolnay/erased-serde"
 rust-version = "1.31"
 
 [dependencies]
