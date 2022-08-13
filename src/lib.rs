@@ -139,4 +139,5 @@ pub use crate::ser::{serialize, Serialize, Serializer};
 
 // Not public API.
 #[doc(hidden)]
-pub mod private;
+#[path = "private.rs"]
+pub mod __private;

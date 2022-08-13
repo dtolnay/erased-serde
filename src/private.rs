@@ -1,4 +1,4 @@
-//! Not public API. Used as `$crate::private` by macros.
+//! Not public API. Used as `$crate::__private` by macros.
 
 pub use core::marker::{Send, Sized, Sync};
 pub use core::result::Result;
