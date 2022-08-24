@@ -112,7 +112,7 @@ demonstrates the technique applied to a simplified case of a single generic
 method. [Try it in the playground.]
 
 [This example code]: https://github.com/dtolnay/erased-serde/blob/master/explanation/main.rs
-[Try it in the playground.]: https://play.rust-lang.org/?gist=2e839b72e3660eeee988b271bf487fc8
+[Try it in the playground.]: https://play.rust-lang.org/?gist=c1111875e7462ba3d0190aacb2fc2211
 
 In erased-serde things are a bit more complicated than in the example for three
 reasons but the idea is the same.
