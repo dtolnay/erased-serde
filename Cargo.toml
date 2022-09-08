@@ -28,6 +28,7 @@ default = ["std"]
 std = ["serde/std"]
 alloc = ["serde/alloc"] # requires Rust 1.36+
 unstable-debug = []
+type_name = []
 
 [[test]]
 name = "test"

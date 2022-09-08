@@ -52,6 +52,8 @@ use serde::serde_if_integer128;
 /// ```
 pub trait Serialize {
     fn erased_serialize(&self, v: &mut dyn Serializer) -> Result<Ok, Error>;
+    #[cfg(feature = "type_name")]
+    fn type_name(&self) -> &'static str;
 }
 
 /// An object-safe equivalent of Serde's `Serializer` trait.
@@ -241,6 +243,21 @@ where
 {
     fn erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<Ok, Error> {
         self.serialize(serializer)
+    }
+
+    // Even though the type has been erased, we want to remember some
+    // type identification information so some serializers can query
+    // information from the type (e.g. serde-annotate wants to get
+    // annotations for comments, integer bases and string formats).
+    #[cfg(feature = "type_name")]
+    fn type_name(&self) -> &'static str {
+        let name = std::any::type_name::<T>();
+        // If the type of T is a reference to a type, "de-reference" the name.
+        let mut index = 0;
+        while name.as_bytes().get(index) == Some(&b'&') {
+            index += 1;
+        }
+        &name[index..]
     }
 }
 
