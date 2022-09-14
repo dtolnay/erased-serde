@@ -8,7 +8,6 @@ documentation = "https://docs.rs/erased-serde"
 edition = "2018"
 keywords = ["serde", "erasure"]
 license = "MIT OR Apache-2.0"
-readme = "README.md"
 repository = "https://github.com/dtolnay/erased-serde"
 rust-version = "1.31"
 
