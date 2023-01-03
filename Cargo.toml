@@ -35,5 +35,8 @@ path = "tests/readme.rs"
 [workspace]
 members = ["explanation", "tests/crate"]
 
+[lib]
+doc-scrape-examples = false
+
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
