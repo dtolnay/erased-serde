@@ -63,26 +63,12 @@ impl Any {
             drop = ptr_drop::<T>;
         };
 
-        // Once attributes on struct literal fields are stable, do that instead.
-        // https://github.com/rust-lang/rust/issues/41681
-        #[cfg(not(feature = "unstable-debug"))]
-        {
-            Any {
-                value,
-                drop,
-                fingerprint,
-            }
-        }
-
-        #[cfg(feature = "unstable-debug")]
-        {
-            let type_name = any::type_name::<T>();
-            Any {
-                value,
-                drop,
-                fingerprint,
-                type_name,
-            }
+        Any {
+            value,
+            drop,
+            fingerprint,
+            #[cfg(feature = "unstable-debug")]
+            type_name: any::type_name::<T>(),
         }
     }
 
