@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable]
+        rust: [nightly, beta, stable, 1.56.0]
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v3
@@ -41,18 +41,6 @@ jobs:
       - run: cargo test
         env:
           RUSTFLAGS: --cfg include_fnptr_in_fingerprint ${{env.RUSTFLAGS}}
-
-  msrv:
-    name: Rust 1.31.0
-    needs: pre_ci
-    if: needs.pre_ci.outputs.continue
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@1.31.0
-      - run: cargo check
-      - run: cargo check --manifest-path tests/crate/Cargo.toml
 
   clippy:
     name: Clippy

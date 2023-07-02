@@ -48,17 +48,17 @@ impl Any {
 
         if is_small::<T>() {
             let mut inline = [MaybeUninit::uninit(); 2];
-            unsafe { ptr::write(inline.as_mut_ptr() as *mut T, t) };
+            unsafe { ptr::write(inline.as_mut_ptr().cast::<T>(), t) };
             value = Value { inline };
             unsafe fn inline_drop<T>(value: &mut Value) {
-                unsafe { ptr::drop_in_place(value.inline.as_mut_ptr() as *mut T) }
+                unsafe { ptr::drop_in_place(value.inline.as_mut_ptr().cast::<T>()) }
             }
             drop = inline_drop::<T>;
         } else {
-            let ptr = Box::into_raw(Box::new(t)) as *mut ();
+            let ptr = Box::into_raw(Box::new(t)).cast::<()>();
             value = Value { ptr };
             unsafe fn ptr_drop<T>(value: &mut Value) {
-                mem::drop(unsafe { Box::from_raw(value.ptr as *mut T) });
+                mem::drop(unsafe { Box::from_raw(value.ptr.cast::<T>()) });
             }
             drop = ptr_drop::<T>;
         };
@@ -79,9 +79,9 @@ impl Any {
         }
 
         let ptr = if is_small::<T>() {
-            unsafe { self.value.inline.as_mut_ptr() as *mut T }
+            unsafe { self.value.inline.as_mut_ptr().cast::<T>() }
         } else {
-            unsafe { self.value.ptr as *mut T }
+            unsafe { self.value.ptr.cast::<T>() }
         };
 
         unsafe { &mut *ptr }
@@ -94,12 +94,12 @@ impl Any {
         }
 
         if is_small::<T>() {
-            let ptr = unsafe { self.value.inline.as_mut_ptr() as *mut T };
+            let ptr = unsafe { self.value.inline.as_mut_ptr().cast::<T>() };
             let value = unsafe { ptr::read(ptr) };
             mem::forget(self);
             value
         } else {
-            let ptr = unsafe { self.value.ptr as *mut T };
+            let ptr = unsafe { self.value.ptr.cast::<T>() };
             let box_t = unsafe { Box::from_raw(ptr) };
             mem::forget(self);
             *box_t
