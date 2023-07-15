@@ -8,11 +8,11 @@ trait Generic {
     fn generic_fn<Q: Querializer>(&self, querializer: Q);
 }
 
-impl<'a, T: ?Sized> Querializer for &'a T where T: Querializer {}
+impl<'a, T> Querializer for &'a T where T: ?Sized + Querializer {}
 
-impl<'a, T: ?Sized> Generic for Box<T>
+impl<'a, T> Generic for Box<T>
 where
-    T: Generic,
+    T: ?Sized + Generic,
 {
     fn generic_fn<Q: Querializer>(&self, querializer: Q) {
         (**self).generic_fn(querializer)
