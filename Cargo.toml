@@ -1,6 +1,6 @@
 [package]
 name = "erased-serde"
-version = "0.3.29"
+version = "0.3.30"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 categories = ["encoding", "rust-patterns", "no-std"]
 description = "Type-erased Serialize and Serializer traits"
