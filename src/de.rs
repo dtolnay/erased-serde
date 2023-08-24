@@ -773,7 +773,7 @@ where
 
 // IMPL SERDE FOR ERASED SERDE /////////////////////////////////////////////////
 
-impl<'de, 'a> serde::de::DeserializeSeed<'de> for &'a mut dyn DeserializeSeed<'de> {
+impl<'de> serde::de::DeserializeSeed<'de> for &mut (dyn DeserializeSeed<'de> + '_) {
     type Value = Out;
     fn deserialize<D>(self, deserializer: D) -> Result<Out, D::Error>
     where
@@ -953,16 +953,16 @@ macro_rules! impl_deserializer_for_trait_object {
     };
 }
 
-impl_deserializer_for_trait_object!({'de, 'a} {} &'a mut dyn Deserializer<'de>);
-impl_deserializer_for_trait_object!({'de, 'a} {} &'a mut (dyn Deserializer<'de> + Send));
-impl_deserializer_for_trait_object!({'de, 'a} {} &'a mut (dyn Deserializer<'de> + Sync));
-impl_deserializer_for_trait_object!({'de, 'a} {} &'a mut (dyn Deserializer<'de> + Send + Sync));
+impl_deserializer_for_trait_object!({'de} {} &mut (dyn Deserializer<'de> + '_));
+impl_deserializer_for_trait_object!({'de} {} &mut (dyn Deserializer<'de> + Send + '_));
+impl_deserializer_for_trait_object!({'de} {} &mut (dyn Deserializer<'de> + Sync + '_));
+impl_deserializer_for_trait_object!({'de} {} &mut (dyn Deserializer<'de> + Send + Sync + '_));
 impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de>>);
 impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + Send>);
 impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + Sync>);
 impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + Send + Sync>);
 
-impl<'de, 'a> serde::de::Visitor<'de> for &'a mut dyn Visitor<'de> {
+impl<'de> serde::de::Visitor<'de> for &mut (dyn Visitor<'de> + '_) {
     type Value = Out;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -1171,7 +1171,7 @@ impl<'de, 'a> serde::de::Visitor<'de> for &'a mut dyn Visitor<'de> {
     }
 }
 
-impl<'de, 'a> serde::de::SeqAccess<'de> for &'a mut dyn SeqAccess<'de> {
+impl<'de> serde::de::SeqAccess<'de> for &mut (dyn SeqAccess<'de> + '_) {
     type Error = Error;
 
     fn next_element_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Error>
@@ -1191,7 +1191,7 @@ impl<'de, 'a> serde::de::SeqAccess<'de> for &'a mut dyn SeqAccess<'de> {
     }
 }
 
-impl<'de, 'a> serde::de::MapAccess<'de> for &'a mut dyn MapAccess<'de> {
+impl<'de> serde::de::MapAccess<'de> for &mut (dyn MapAccess<'de> + '_) {
     type Error = Error;
 
     fn next_key_seed<K>(&mut self, seed: K) -> Result<Option<K::Value>, Error>
@@ -1223,7 +1223,7 @@ impl<'de, 'a> serde::de::MapAccess<'de> for &'a mut dyn MapAccess<'de> {
     }
 }
 
-impl<'de, 'a> serde::de::EnumAccess<'de> for &'a mut dyn EnumAccess<'de> {
+impl<'de> serde::de::EnumAccess<'de> for &mut (dyn EnumAccess<'de> + '_) {
     type Error = Error;
     type Variant = Variant<'de>;
 
