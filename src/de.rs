@@ -957,10 +957,10 @@ impl_deserializer_for_trait_object!({'de} {} &mut (dyn Deserializer<'de> + '_));
 impl_deserializer_for_trait_object!({'de} {} &mut (dyn Deserializer<'de> + Send + '_));
 impl_deserializer_for_trait_object!({'de} {} &mut (dyn Deserializer<'de> + Sync + '_));
 impl_deserializer_for_trait_object!({'de} {} &mut (dyn Deserializer<'de> + Send + Sync + '_));
-impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de>>);
-impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + Send>);
-impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + Sync>);
-impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + Send + Sync>);
+impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + '_>);
+impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + Send + '_>);
+impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + Sync + '_>);
+impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + Send + Sync + '_>);
 
 impl<'de> serde::de::Visitor<'de> for &mut (dyn Visitor<'de> + '_) {
     type Value = Out;
