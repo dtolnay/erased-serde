@@ -8,7 +8,6 @@ use serde::ser::{
     SerializeMap, SerializeSeq, SerializeStruct, SerializeStructVariant, SerializeTuple,
     SerializeTupleStruct, SerializeTupleVariant,
 };
-use serde::serde_if_integer128;
 
 // TRAITS //////////////////////////////////////////////////////////////////////
 
@@ -99,14 +98,12 @@ pub trait Serializer {
     fn erased_serialize_i16(&mut self, v: i16) -> Result<Ok, Error>;
     fn erased_serialize_i32(&mut self, v: i32) -> Result<Ok, Error>;
     fn erased_serialize_i64(&mut self, v: i64) -> Result<Ok, Error>;
+    fn erased_serialize_i128(&mut self, v: i128) -> Result<Ok, Error>;
     fn erased_serialize_u8(&mut self, v: u8) -> Result<Ok, Error>;
     fn erased_serialize_u16(&mut self, v: u16) -> Result<Ok, Error>;
     fn erased_serialize_u32(&mut self, v: u32) -> Result<Ok, Error>;
     fn erased_serialize_u64(&mut self, v: u64) -> Result<Ok, Error>;
-    serde_if_integer128! {
-        fn erased_serialize_i128(&mut self, v: i128) -> Result<Ok, Error>;
-        fn erased_serialize_u128(&mut self, v: u128) -> Result<Ok, Error>;
-    }
+    fn erased_serialize_u128(&mut self, v: u128) -> Result<Ok, Error>;
     fn erased_serialize_f32(&mut self, v: f32) -> Result<Ok, Error>;
     fn erased_serialize_f64(&mut self, v: f64) -> Result<Ok, Error>;
     fn erased_serialize_char(&mut self, v: char) -> Result<Ok, Error>;
@@ -309,6 +306,15 @@ where
         }
     }
 
+    fn erased_serialize_i128(&mut self, v: i128) -> Result<Ok, Error> {
+        unsafe {
+            self.take()
+                .serialize_i128(v)
+                .unsafe_map(Ok::new)
+                .map_err(erase)
+        }
+    }
+
     fn erased_serialize_u8(&mut self, v: u8) -> Result<Ok, Error> {
         unsafe {
             self.take()
@@ -345,23 +351,12 @@ where
         }
     }
 
-    serde_if_integer128! {
-        fn erased_serialize_i128(&mut self, v: i128) -> Result<Ok, Error> {
-            unsafe {
-                self.take()
-                    .serialize_i128(v)
-                    .unsafe_map(Ok::new)
-                    .map_err(erase)
-            }
-        }
-
-        fn erased_serialize_u128(&mut self, v: u128) -> Result<Ok, Error> {
-            unsafe {
-                self.take()
-                    .serialize_u128(v)
-                    .unsafe_map(Ok::new)
-                    .map_err(erase)
-            }
+    fn erased_serialize_u128(&mut self, v: u128) -> Result<Ok, Error> {
+        unsafe {
+            self.take()
+                .serialize_u128(v)
+                .unsafe_map(Ok::new)
+                .map_err(erase)
         }
     }
 
@@ -654,6 +649,10 @@ macro_rules! impl_serializer_for_trait_object {
                 self.erased_serialize_i64(v)
             }
 
+            fn serialize_i128(self, v: i128) -> Result<Ok, Error> {
+                self.erased_serialize_i128(v)
+            }
+
             fn serialize_u8(self, v: u8) -> Result<Ok, Error> {
                 self.erased_serialize_u8(v)
             }
@@ -670,14 +669,8 @@ macro_rules! impl_serializer_for_trait_object {
                 self.erased_serialize_u64(v)
             }
 
-            serde_if_integer128! {
-                fn serialize_i128(self, v: i128) -> Result<Ok, Error> {
-                    self.erased_serialize_i128(v)
-                }
-
-                fn serialize_u128(self, v: u128) -> Result<Ok, Error> {
-                    self.erased_serialize_u128(v)
-                }
+            fn serialize_u128(self, v: u128) -> Result<Ok, Error> {
+                self.erased_serialize_u128(v)
             }
 
             fn serialize_f32(self, v: f32) -> Result<Ok, Error> {
@@ -1261,6 +1254,10 @@ macro_rules! deref_erased_serializer {
                 (**self).erased_serialize_i64(v)
             }
 
+            fn erased_serialize_i128(&mut self, v: i128) -> Result<Ok, Error> {
+                (**self).erased_serialize_i128(v)
+            }
+
             fn erased_serialize_u8(&mut self, v: u8) -> Result<Ok, Error> {
                 (**self).erased_serialize_u8(v)
             }
@@ -1277,14 +1274,8 @@ macro_rules! deref_erased_serializer {
                 (**self).erased_serialize_u64(v)
             }
 
-            serde_if_integer128! {
-                fn erased_serialize_i128(&mut self, v: i128) -> Result<Ok, Error> {
-                    (**self).erased_serialize_i128(v)
-                }
-
-                fn erased_serialize_u128(&mut self, v: u128) -> Result<Ok, Error> {
-                    (**self).erased_serialize_u128(v)
-                }
+            fn erased_serialize_u128(&mut self, v: u128) -> Result<Ok, Error> {
+                (**self).erased_serialize_u128(v)
             }
 
             fn erased_serialize_f32(&mut self, v: f32) -> Result<Ok, Error> {
