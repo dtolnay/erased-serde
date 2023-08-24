@@ -787,8 +787,8 @@ impl<'de> serde::de::DeserializeSeed<'de> for &mut (dyn DeserializeSeed<'de> + '
 }
 
 macro_rules! impl_deserializer_for_trait_object {
-    ({$($generics:tt)*} {$($mut:tt)*} $ty:ty) => {
-        impl <$($generics)*> serde::Deserializer<'de> for $ty {
+    ({$($mut:tt)*} $ty:ty) => {
+        impl<'de> serde::Deserializer<'de> for $ty {
             type Error = Error;
 
             fn deserialize_any<V>($($mut)* self, visitor: V) -> Result<V::Value, Error> where V: serde::de::Visitor<'de> {
@@ -953,14 +953,14 @@ macro_rules! impl_deserializer_for_trait_object {
     };
 }
 
-impl_deserializer_for_trait_object!({'de} {} &mut (dyn Deserializer<'de> + '_));
-impl_deserializer_for_trait_object!({'de} {} &mut (dyn Deserializer<'de> + Send + '_));
-impl_deserializer_for_trait_object!({'de} {} &mut (dyn Deserializer<'de> + Sync + '_));
-impl_deserializer_for_trait_object!({'de} {} &mut (dyn Deserializer<'de> + Send + Sync + '_));
-impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + '_>);
-impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + Send + '_>);
-impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + Sync + '_>);
-impl_deserializer_for_trait_object!({'de} {mut} Box<dyn Deserializer<'de> + Send + Sync + '_>);
+impl_deserializer_for_trait_object!({} &mut (dyn Deserializer<'de> + '_));
+impl_deserializer_for_trait_object!({} &mut (dyn Deserializer<'de> + Send + '_));
+impl_deserializer_for_trait_object!({} &mut (dyn Deserializer<'de> + Sync + '_));
+impl_deserializer_for_trait_object!({} &mut (dyn Deserializer<'de> + Send + Sync + '_));
+impl_deserializer_for_trait_object!({mut} Box<dyn Deserializer<'de> + '_>);
+impl_deserializer_for_trait_object!({mut} Box<dyn Deserializer<'de> + Send + '_>);
+impl_deserializer_for_trait_object!({mut} Box<dyn Deserializer<'de> + Sync + '_>);
+impl_deserializer_for_trait_object!({mut} Box<dyn Deserializer<'de> + Send + Sync + '_>);
 
 impl<'de> serde::de::Visitor<'de> for &mut (dyn Visitor<'de> + '_) {
     type Value = Out;
