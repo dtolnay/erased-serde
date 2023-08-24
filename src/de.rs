@@ -1427,11 +1427,11 @@ macro_rules! deref_erased_deserializer {
     };
 }
 
-deref_erased_deserializer!(<'de, 'a> Deserializer<'de> for Box<dyn Deserializer<'de> + 'a>);
-deref_erased_deserializer!(<'de, 'a> Deserializer<'de> for Box<dyn Deserializer<'de> + Send + 'a>);
-deref_erased_deserializer!(<'de, 'a> Deserializer<'de> for Box<dyn Deserializer<'de> + Sync + 'a>);
-deref_erased_deserializer!(<'de, 'a> Deserializer<'de> for Box<dyn Deserializer<'de> + Send + Sync + 'a>);
-deref_erased_deserializer!(<'de, 'a, T: ?Sized + Deserializer<'de>> Deserializer<'de> for &'a mut T);
+deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de> + '_>);
+deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de> + Send + '_>);
+deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de> + Sync + '_>);
+deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de> + Send + Sync + '_>);
+deref_erased_deserializer!(<'de, T: ?Sized + Deserializer<'de>> Deserializer<'de> for &mut T);
 
 // ERROR ///////////////////////////////////////////////////////////////////////
 
