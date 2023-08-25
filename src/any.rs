@@ -1,10 +1,6 @@
 use crate::alloc::Box;
 use core::any::{Any as _, TypeId};
-#[cfg(no_maybe_uninit)]
-use core::marker::PhantomData;
-use core::mem;
-#[cfg(not(no_maybe_uninit))]
-use core::mem::MaybeUninit;
+use core::mem::{self, MaybeUninit};
 use core::ptr;
 
 #[cfg(feature = "unstable-debug")]
@@ -26,8 +22,7 @@ union Value {
 }
 
 fn is_small<T>() -> bool {
-    cfg!(not(no_maybe_uninit))
-        && mem::size_of::<T>() <= mem::size_of::<Value>()
+    mem::size_of::<T>() <= mem::size_of::<Value>()
         && mem::align_of::<T>() <= mem::align_of::<Value>()
 }
 
@@ -123,17 +118,6 @@ impl Any {
 impl Drop for Any {
     fn drop(&mut self) {
         unsafe { (self.drop)(&mut self.value) }
-    }
-}
-
-#[cfg(no_maybe_uninit)]
-#[derive(Copy, Clone)]
-struct MaybeUninit<T>(PhantomData<T>);
-
-#[cfg(no_maybe_uninit)]
-impl<T> MaybeUninit<T> {
-    fn uninit() -> Self {
-        MaybeUninit(PhantomData)
     }
 }
 
