@@ -38,9 +38,6 @@ jobs:
       - run: cargo check --manifest-path tests/crate/Cargo.toml
       - run: cargo check --manifest-path tests/crate/Cargo.toml --no-default-features --features alloc
       - run: cargo test
-      - run: cargo test
-        env:
-          RUSTFLAGS: --cfg include_fnptr_in_fingerprint ${{env.RUSTFLAGS}}
 
   minimal:
     name: Minimal versions
