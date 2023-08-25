@@ -10,11 +10,6 @@ fn main() {
         None => return,
     };
 
-    if compiler < 36 {
-        // https://doc.rust-lang.org/std/mem/union.MaybeUninit.html
-        println!("cargo:rustc-cfg=no_maybe_uninit");
-    }
-
     if compiler < 52 {
         // #![deny(unsafe_op_in_unsafe_fn)].
         // https://github.com/rust-lang/rust/issues/71668
