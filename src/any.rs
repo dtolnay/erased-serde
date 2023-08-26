@@ -71,7 +71,7 @@ impl Any {
 
     // This is unsafe -- caller is responsible that T is the correct type.
     pub(crate) unsafe fn view<T>(&mut self) -> &mut T {
-        if cfg!(not(miri)) && self.type_id != non_static_type_id::<T>() {
+        if self.type_id != non_static_type_id::<T>() {
             self.invalid_cast_to::<T>();
         }
 
@@ -86,7 +86,7 @@ impl Any {
 
     // This is unsafe -- caller is responsible that T is the correct type.
     pub(crate) unsafe fn take<T>(mut self) -> T {
-        if cfg!(not(miri)) && self.type_id != non_static_type_id::<T>() {
+        if self.type_id != non_static_type_id::<T>() {
             self.invalid_cast_to::<T>();
         }
 
