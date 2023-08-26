@@ -10,7 +10,7 @@ use core::any;
 pub struct Any {
     value: Value,
     drop: unsafe fn(&mut Value),
-    fingerprint: Fingerprint,
+    type_id: TypeId,
 
     /// For panic messages only. Not used for comparison.
     #[cfg(feature = "unstable-debug")]
@@ -41,7 +41,7 @@ impl Any {
     pub(crate) unsafe fn new<T>(t: T) -> Self {
         let value: Value;
         let drop: unsafe fn(&mut Value);
-        let fingerprint = Fingerprint::of::<T>();
+        let type_id = non_static_type_id::<T>();
 
         if is_small::<T>() {
             let mut inline = [MaybeUninit::uninit(); 2];
@@ -63,7 +63,7 @@ impl Any {
         Any {
             value,
             drop,
-            fingerprint,
+            type_id,
             #[cfg(feature = "unstable-debug")]
             type_name: any::type_name::<T>(),
         }
@@ -71,7 +71,7 @@ impl Any {
 
     // This is unsafe -- caller is responsible that T is the correct type.
     pub(crate) unsafe fn view<T>(&mut self) -> &mut T {
-        if cfg!(not(miri)) && self.fingerprint != Fingerprint::of::<T>() {
+        if cfg!(not(miri)) && self.type_id != non_static_type_id::<T>() {
             self.invalid_cast_to::<T>();
         }
 
@@ -86,7 +86,7 @@ impl Any {
 
     // This is unsafe -- caller is responsible that T is the correct type.
     pub(crate) unsafe fn take<T>(mut self) -> T {
-        if cfg!(not(miri)) && self.fingerprint != Fingerprint::of::<T>() {
+        if cfg!(not(miri)) && self.type_id != non_static_type_id::<T>() {
             self.invalid_cast_to::<T>();
         }
 
@@ -137,37 +137,43 @@ impl<T: ?Sized> NonStaticAny for PhantomData<T> {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
-struct Fingerprint {
-    type_id: TypeId,
-}
-
-impl Fingerprint {
-    fn of<T>() -> Fingerprint {
-        let non_static_thing = &PhantomData::<T> as &dyn NonStaticAny;
-        let thing = unsafe {
-            mem::transmute::<&dyn NonStaticAny, &(dyn NonStaticAny + 'static)>(non_static_thing)
-        };
-        Fingerprint {
-            type_id: NonStaticAny::get_type_id(thing),
-        }
-    }
+fn non_static_type_id<T>() -> TypeId {
+    let non_static_thing = &PhantomData::<T>;
+    let thing = unsafe {
+        mem::transmute::<&dyn NonStaticAny, &(dyn NonStaticAny + 'static)>(non_static_thing)
+    };
+    NonStaticAny::get_type_id(thing)
 }
 
 #[test]
-fn test_fingerprint() {
-    assert_eq!(Fingerprint::of::<usize>(), Fingerprint::of::<usize>());
-    assert_eq!(Fingerprint::of::<&str>(), Fingerprint::of::<&'static str>());
+fn test_non_static_type_id() {
+    assert_eq!(non_static_type_id::<usize>(), non_static_type_id::<usize>());
+    assert_eq!(
+        non_static_type_id::<&str>(),
+        non_static_type_id::<&'static str>()
+    );
 
-    assert_ne!(Fingerprint::of::<u32>(), Fingerprint::of::<[u8; 4]>());
-    assert_ne!(Fingerprint::of::<u32>(), Fingerprint::of::<[u32; 2]>());
+    assert_ne!(non_static_type_id::<u32>(), non_static_type_id::<[u8; 4]>());
+    assert_ne!(
+        non_static_type_id::<u32>(),
+        non_static_type_id::<[u32; 2]>()
+    );
 
-    assert_ne!(Fingerprint::of::<usize>(), Fingerprint::of::<isize>());
-    assert_ne!(Fingerprint::of::<usize>(), Fingerprint::of::<&usize>());
-    assert_ne!(Fingerprint::of::<&usize>(), Fingerprint::of::<&&usize>());
-    assert_ne!(Fingerprint::of::<&usize>(), Fingerprint::of::<&mut usize>());
+    assert_ne!(non_static_type_id::<usize>(), non_static_type_id::<isize>());
+    assert_ne!(
+        non_static_type_id::<usize>(),
+        non_static_type_id::<&usize>()
+    );
+    assert_ne!(
+        non_static_type_id::<&usize>(),
+        non_static_type_id::<&&usize>()
+    );
+    assert_ne!(
+        non_static_type_id::<&usize>(),
+        non_static_type_id::<&mut usize>()
+    );
 
     struct A;
     struct B;
-    assert_ne!(Fingerprint::of::<A>(), Fingerprint::of::<B>());
+    assert_ne!(non_static_type_id::<A>(), non_static_type_id::<B>());
 }
