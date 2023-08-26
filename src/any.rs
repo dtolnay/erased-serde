@@ -1,5 +1,6 @@
 use crate::alloc::Box;
-use core::any::{Any as _, TypeId};
+use core::any::TypeId;
+use core::marker::PhantomData;
 use core::mem::{self, MaybeUninit};
 use core::ptr;
 
@@ -121,6 +122,21 @@ impl Drop for Any {
     }
 }
 
+trait NonStaticAny {
+    fn get_type_id(&self) -> TypeId
+    where
+        Self: 'static;
+}
+
+impl<T: ?Sized> NonStaticAny for PhantomData<T> {
+    fn get_type_id(&self) -> TypeId
+    where
+        Self: 'static,
+    {
+        TypeId::of::<T>()
+    }
+}
+
 #[derive(Debug, Eq, PartialEq)]
 struct Fingerprint {
     type_id: TypeId,
@@ -128,8 +144,12 @@ struct Fingerprint {
 
 impl Fingerprint {
     fn of<T>() -> Fingerprint {
+        let non_static_thing = &PhantomData::<T> as &dyn NonStaticAny;
+        let thing = unsafe {
+            mem::transmute::<&dyn NonStaticAny, &(dyn NonStaticAny + 'static)>(non_static_thing)
+        };
         Fingerprint {
-            type_id: (|| {}).type_id(),
+            type_id: NonStaticAny::get_type_id(thing),
         }
     }
 }
