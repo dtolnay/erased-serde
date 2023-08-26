@@ -137,7 +137,7 @@ impl<T: ?Sized> NonStaticAny for PhantomData<T> {
     }
 }
 
-fn non_static_type_id<T>() -> TypeId {
+fn non_static_type_id<T: ?Sized>() -> TypeId {
     let non_static_thing = &PhantomData::<T>;
     let thing = unsafe {
         mem::transmute::<&dyn NonStaticAny, &(dyn NonStaticAny + 'static)>(non_static_thing)
