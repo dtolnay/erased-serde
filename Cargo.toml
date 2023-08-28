@@ -25,7 +25,7 @@ trybuild = { version = "1.0.83", features = ["diff"] }
 # Note: at least one of "std" or "alloc" must be enabled.
 default = ["std"]
 std = ["alloc", "serde/std"]
-alloc = ["serde/alloc"] # requires Rust 1.36+
+alloc = ["serde/alloc"]
 unstable-debug = []
 
 [[test]]
