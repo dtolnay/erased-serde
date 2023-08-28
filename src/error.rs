@@ -1,4 +1,4 @@
-use crate::alloc::{String, ToString};
+use alloc::string::{String, ToString};
 use core::fmt::{self, Display};
 
 /// Error when a `Serializer` or `Deserializer` trait object fails.

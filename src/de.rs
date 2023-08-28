@@ -1,9 +1,11 @@
-use crate::alloc::Box;
-#[cfg(feature = "alloc")]
-use crate::alloc::{String, Vec};
 use crate::any::Any;
 use crate::error::Error;
 use crate::map::{OptionExt, ResultExt};
+use alloc::boxed::Box;
+#[cfg(feature = "alloc")]
+use alloc::string::String;
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
 use core::fmt::{self, Display};
 
 /// Deserialize a value of type `T` from the given trait object.
@@ -1549,7 +1551,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::alloc::ToOwned;
+    use alloc::borrow::ToOwned;
     use core::fmt::Debug;
     use serde_derive::Deserialize;
 

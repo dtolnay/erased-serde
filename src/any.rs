@@ -1,4 +1,4 @@
-use crate::alloc::Box;
+use alloc::boxed::Box;
 use core::any::TypeId;
 use core::marker::PhantomData;
 use core::mem::{self, MaybeUninit};

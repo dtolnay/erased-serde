@@ -1,7 +1,7 @@
-use crate::alloc::Box;
 use crate::any::Any;
 use crate::error::Error;
 use crate::map::ResultExt;
+use alloc::boxed::Box;
 use core::fmt::Display;
 use core::marker::PhantomData;
 use serde::ser::{
@@ -1388,7 +1388,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::alloc::{vec, Vec};
+    use alloc::{vec, vec::Vec};
     use serde_derive::Serialize;
 
     fn test_json<T>(t: T)
