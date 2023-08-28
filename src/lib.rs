@@ -111,18 +111,7 @@
     clippy::wildcard_imports
 )]
 
-mod alloc {
-    #[cfg(not(feature = "std"))]
-    extern crate alloc;
-
-    #[cfg(feature = "std")]
-    use std as alloc;
-
-    pub use self::alloc::borrow::ToOwned;
-    pub use self::alloc::boxed::Box;
-    pub use self::alloc::string::{String, ToString};
-    pub use self::alloc::{vec, vec::Vec};
-}
+extern crate alloc;
 
 #[macro_use]
 mod macros;
