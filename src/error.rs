@@ -1,4 +1,5 @@
 use alloc::borrow::ToOwned;
+use alloc::boxed::Box;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 use core::fmt::{self, Debug, Display};
@@ -6,7 +7,7 @@ use serde::de::Expected;
 
 /// Error when a `Serializer` or `Deserializer` trait object fails.
 pub struct Error {
-    imp: ErrorImpl,
+    imp: Box<ErrorImpl>,
 }
 
 /// Result type alias where the error is `erased_serde::Error`.
@@ -81,78 +82,78 @@ enum Unexpected {
 
 impl serde::ser::Error for Error {
     fn custom<T: Display>(msg: T) -> Self {
-        let imp = ErrorImpl::Custom(msg.to_string());
+        let imp = Box::new(ErrorImpl::Custom(msg.to_string()));
         Error { imp }
     }
 }
 
 impl serde::de::Error for Error {
     fn custom<T: Display>(msg: T) -> Self {
-        let imp = ErrorImpl::Custom(msg.to_string());
+        let imp = Box::new(ErrorImpl::Custom(msg.to_string()));
         Error { imp }
     }
 
     fn invalid_type(unexpected: serde::de::Unexpected, expected: &dyn Expected) -> Self {
-        let imp = ErrorImpl::InvalidType {
+        let imp = Box::new(ErrorImpl::InvalidType {
             unexpected: Unexpected::from_serde(unexpected),
             expected: expected.to_string(),
-        };
+        });
         Error { imp }
     }
 
     fn invalid_value(unexpected: serde::de::Unexpected, expected: &dyn Expected) -> Self {
-        let imp = ErrorImpl::InvalidValue {
+        let imp = Box::new(ErrorImpl::InvalidValue {
             unexpected: Unexpected::from_serde(unexpected),
             expected: expected.to_string(),
-        };
+        });
         Error { imp }
     }
 
     fn invalid_length(len: usize, expected: &dyn Expected) -> Self {
-        let imp = ErrorImpl::InvalidLength {
+        let imp = Box::new(ErrorImpl::InvalidLength {
             len,
             expected: expected.to_string(),
-        };
+        });
         Error { imp }
     }
 
     fn unknown_variant(variant: &str, expected: &'static [&'static str]) -> Self {
-        let imp = ErrorImpl::UnknownVariant {
+        let imp = Box::new(ErrorImpl::UnknownVariant {
             variant: variant.to_owned(),
             expected,
-        };
+        });
         Error { imp }
     }
 
     fn unknown_field(field: &str, expected: &'static [&'static str]) -> Self {
-        let imp = ErrorImpl::UnknownField {
+        let imp = Box::new(ErrorImpl::UnknownField {
             field: field.to_owned(),
             expected,
-        };
+        });
         Error { imp }
     }
 
     fn missing_field(field: &'static str) -> Self {
-        let imp = ErrorImpl::MissingField { field };
+        let imp = Box::new(ErrorImpl::MissingField { field });
         Error { imp }
     }
 
     fn duplicate_field(field: &'static str) -> Self {
-        let imp = ErrorImpl::DuplicateField { field };
+        let imp = Box::new(ErrorImpl::DuplicateField { field });
         Error { imp }
     }
 }
 
 impl Error {
     pub(crate) fn as_serde_ser_error<E: serde::ser::Error>(&self) -> E {
-        match &self.imp {
+        match self.imp.as_ref() {
             ErrorImpl::Custom(msg) => E::custom(msg),
             _ => unreachable!(),
         }
     }
 
     pub(crate) fn as_serde_de_error<E: serde::de::Error>(&self) -> E {
-        match &self.imp {
+        match self.imp.as_ref() {
             ErrorImpl::Custom(msg) => E::custom(msg),
             ErrorImpl::InvalidType {
                 unexpected,
