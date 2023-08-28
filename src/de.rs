@@ -1,4 +1,6 @@
-use crate::alloc::*;
+use crate::alloc::Box;
+#[cfg(any(feature = "std", feature = "alloc"))]
+use crate::alloc::{String, Vec};
 use crate::any::Any;
 use crate::error::Error;
 use crate::map::{OptionExt, ResultExt};
