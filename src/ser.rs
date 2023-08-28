@@ -1380,7 +1380,7 @@ fn unerase<E>(e: Error) -> E
 where
     E: serde::ser::Error,
 {
-    E::custom(e)
+    e.as_serde_ser_error()
 }
 
 // TEST ////////////////////////////////////////////////////////////////////////
