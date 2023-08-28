@@ -33,3 +33,13 @@ impl serde::de::Error for Error {
         }
     }
 }
+
+impl Error {
+    pub(crate) fn as_serde_ser_error<E: serde::ser::Error>(&self) -> E {
+        E::custom(self)
+    }
+
+    pub(crate) fn as_serde_de_error<E: serde::de::Error>(&self) -> E {
+        E::custom(self)
+    }
+}
