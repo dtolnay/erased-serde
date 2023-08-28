@@ -1,8 +1,7 @@
 use crate::any::Any;
-use crate::error::Error;
+use crate::error::{erase_ser as erase, unerase_ser as unerase, Error};
 use crate::map::ResultExt;
 use alloc::boxed::Box;
-use core::fmt::Display;
 use core::marker::PhantomData;
 use serde::ser::{
     SerializeMap, SerializeSeq, SerializeStruct, SerializeStructVariant, SerializeTuple,
@@ -1366,22 +1365,6 @@ deref_erased_serializer!(<'a> Serializer for Box<dyn Serializer + Send + 'a>);
 deref_erased_serializer!(<'a> Serializer for Box<dyn Serializer + Sync + 'a>);
 deref_erased_serializer!(<'a> Serializer for Box<dyn Serializer + Send + Sync + 'a>);
 deref_erased_serializer!(<'a, T: ?Sized + Serializer> Serializer for &'a mut T);
-
-// ERROR ///////////////////////////////////////////////////////////////////////
-
-fn erase<E>(e: E) -> Error
-where
-    E: Display,
-{
-    serde::ser::Error::custom(e)
-}
-
-fn unerase<E>(e: Error) -> E
-where
-    E: serde::ser::Error,
-{
-    e.as_serde_ser_error()
-}
 
 // TEST ////////////////////////////////////////////////////////////////////////
 
