@@ -1,12 +1,12 @@
 use crate::any::Any;
-use crate::error::Error;
+use crate::error::{erase_de as erase, unerase_de as unerase, Error};
 use crate::map::{OptionExt, ResultExt};
 use alloc::boxed::Box;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
-use core::fmt::{self, Display};
+use core::fmt;
 
 /// Deserialize a value of type `T` from the given trait object.
 ///
@@ -1529,22 +1529,6 @@ deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de>
 deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de> + Sync + '_>);
 deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de> + Send + Sync + '_>);
 deref_erased_deserializer!(<'de, T: ?Sized + Deserializer<'de>> Deserializer<'de> for &mut T);
-
-// ERROR ///////////////////////////////////////////////////////////////////////
-
-fn erase<E>(e: E) -> Error
-where
-    E: Display,
-{
-    serde::de::Error::custom(e)
-}
-
-fn unerase<E>(e: Error) -> E
-where
-    E: serde::de::Error,
-{
-    e.as_serde_de_error()
-}
 
 // TEST ////////////////////////////////////////////////////////////////////////
 

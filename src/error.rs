@@ -13,6 +13,34 @@ pub struct Error {
 /// Result type alias where the error is `erased_serde::Error`.
 pub type Result<T> = core::result::Result<T, Error>;
 
+pub(crate) fn erase_ser<E>(e: E) -> Error
+where
+    E: serde::ser::Error,
+{
+    serde::ser::Error::custom(e)
+}
+
+pub(crate) fn unerase_ser<E>(e: Error) -> E
+where
+    E: serde::ser::Error,
+{
+    e.as_serde_ser_error()
+}
+
+pub(crate) fn erase_de<E>(e: E) -> Error
+where
+    E: serde::de::Error,
+{
+    serde::de::Error::custom(e)
+}
+
+pub(crate) fn unerase_de<E>(e: Error) -> E
+where
+    E: serde::de::Error,
+{
+    e.as_serde_de_error()
+}
+
 impl Display for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let error = self.as_serde_de_error::<serde::de::value::Error>();
@@ -145,14 +173,14 @@ impl serde::de::Error for Error {
 }
 
 impl Error {
-    pub(crate) fn as_serde_ser_error<E: serde::ser::Error>(&self) -> E {
+    fn as_serde_ser_error<E: serde::ser::Error>(&self) -> E {
         match self.imp.as_ref() {
             ErrorImpl::Custom(msg) => E::custom(msg),
             _ => unreachable!(),
         }
     }
 
-    pub(crate) fn as_serde_de_error<E: serde::de::Error>(&self) -> E {
+    fn as_serde_de_error<E: serde::de::Error>(&self) -> E {
         match self.imp.as_ref() {
             ErrorImpl::Custom(msg) => E::custom(msg),
             ErrorImpl::InvalidType {
