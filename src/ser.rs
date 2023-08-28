@@ -785,7 +785,7 @@ macro_rules! impl_serializer_for_trait_object {
                 self.erased_serialize_struct_variant(name, variant_index, variant, len)
             }
 
-            #[cfg(not(any(feature = "std", feature = "alloc")))]
+            #[cfg(not(feature = "alloc"))]
             fn collect_str<T>(self, value: &T) -> Result<Self::Ok, Self::Error>
             where
                 T: ?Sized + Display,

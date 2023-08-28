@@ -1,5 +1,5 @@
 use crate::alloc::Box;
-#[cfg(any(feature = "std", feature = "alloc"))]
+#[cfg(feature = "alloc")]
 use crate::alloc::{String, Vec};
 use crate::any::Any;
 use crate::error::Error;
@@ -159,11 +159,11 @@ pub trait Visitor<'de> {
     fn erased_visit_char(&mut self, v: char) -> Result<Out, Error>;
     fn erased_visit_str(&mut self, v: &str) -> Result<Out, Error>;
     fn erased_visit_borrowed_str(&mut self, v: &'de str) -> Result<Out, Error>;
-    #[cfg(any(feature = "std", feature = "alloc"))]
+    #[cfg(feature = "alloc")]
     fn erased_visit_string(&mut self, v: String) -> Result<Out, Error>;
     fn erased_visit_bytes(&mut self, v: &[u8]) -> Result<Out, Error>;
     fn erased_visit_borrowed_bytes(&mut self, v: &'de [u8]) -> Result<Out, Error>;
-    #[cfg(any(feature = "std", feature = "alloc"))]
+    #[cfg(feature = "alloc")]
     fn erased_visit_byte_buf(&mut self, v: Vec<u8>) -> Result<Out, Error>;
     fn erased_visit_none(&mut self) -> Result<Out, Error>;
     fn erased_visit_some(&mut self, d: &mut dyn Deserializer<'de>) -> Result<Out, Error>;
@@ -592,7 +592,7 @@ where
         unsafe { self.take().visit_borrowed_str(v).unsafe_map(Out::new) }
     }
 
-    #[cfg(any(feature = "std", feature = "alloc"))]
+    #[cfg(feature = "alloc")]
     fn erased_visit_string(&mut self, v: String) -> Result<Out, Error> {
         unsafe { self.take().visit_string(v).unsafe_map(Out::new) }
     }
@@ -605,7 +605,7 @@ where
         unsafe { self.take().visit_borrowed_bytes(v).unsafe_map(Out::new) }
     }
 
-    #[cfg(any(feature = "std", feature = "alloc"))]
+    #[cfg(feature = "alloc")]
     fn erased_visit_byte_buf(&mut self, v: Vec<u8>) -> Result<Out, Error> {
         unsafe { self.take().visit_byte_buf(v).unsafe_map(Out::new) }
     }
@@ -1176,7 +1176,7 @@ impl<'de> serde::de::Visitor<'de> for &mut (dyn Visitor<'de> + '_) {
         self.erased_visit_borrowed_str(v).map_err(unerase)
     }
 
-    #[cfg(any(feature = "std", feature = "alloc"))]
+    #[cfg(feature = "alloc")]
     fn visit_string<E>(self, v: String) -> Result<Out, E>
     where
         E: serde::de::Error,
@@ -1198,7 +1198,7 @@ impl<'de> serde::de::Visitor<'de> for &mut (dyn Visitor<'de> + '_) {
         self.erased_visit_borrowed_bytes(v).map_err(unerase)
     }
 
-    #[cfg(any(feature = "std", feature = "alloc"))]
+    #[cfg(feature = "alloc")]
     fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Out, E>
     where
         E: serde::de::Error,
