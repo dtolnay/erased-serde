@@ -53,7 +53,7 @@ use serde::ser::{
 /// This trait is sealed and can only be implemented via a `serde::Serialize`
 /// impl.
 pub trait Serialize: sealed::serialize::Sealed {
-    fn erased_serialize(&self, v: &mut dyn Serializer) -> Result<Ok, Error>;
+    fn erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<Ok, Error>;
 }
 
 /// An object-safe equivalent of Serde's `Serializer` trait.
@@ -116,7 +116,7 @@ pub trait Serializer: sealed::serializer::Sealed {
     fn erased_serialize_str(&mut self, v: &str) -> Result<Ok, Error>;
     fn erased_serialize_bytes(&mut self, v: &[u8]) -> Result<Ok, Error>;
     fn erased_serialize_none(&mut self) -> Result<Ok, Error>;
-    fn erased_serialize_some(&mut self, v: &dyn Serialize) -> Result<Ok, Error>;
+    fn erased_serialize_some(&mut self, value: &dyn Serialize) -> Result<Ok, Error>;
     fn erased_serialize_unit(&mut self) -> Result<Ok, Error>;
     fn erased_serialize_unit_struct(&mut self, name: &'static str) -> Result<Ok, Error>;
     fn erased_serialize_unit_variant(
@@ -128,14 +128,14 @@ pub trait Serializer: sealed::serializer::Sealed {
     fn erased_serialize_newtype_struct(
         &mut self,
         name: &'static str,
-        v: &dyn Serialize,
+        value: &dyn Serialize,
     ) -> Result<Ok, Error>;
     fn erased_serialize_newtype_variant(
         &mut self,
         name: &'static str,
         variant_index: u32,
         variant: &'static str,
-        v: &dyn Serialize,
+        value: &dyn Serialize,
     ) -> Result<Ok, Error>;
     fn erased_serialize_seq(&mut self, len: Option<usize>) -> Result<Seq, Error>;
     fn erased_serialize_tuple(&mut self, len: usize) -> Result<Tuple, Error>;
@@ -422,10 +422,10 @@ where
         }
     }
 
-    fn erased_serialize_some(&mut self, v: &dyn Serialize) -> Result<Ok, Error> {
+    fn erased_serialize_some(&mut self, value: &dyn Serialize) -> Result<Ok, Error> {
         unsafe {
             self.take()
-                .serialize_some(v)
+                .serialize_some(value)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
         }
@@ -466,11 +466,11 @@ where
     fn erased_serialize_newtype_struct(
         &mut self,
         name: &'static str,
-        v: &dyn Serialize,
+        value: &dyn Serialize,
     ) -> Result<Ok, Error> {
         unsafe {
             self.take()
-                .serialize_newtype_struct(name, v)
+                .serialize_newtype_struct(name, value)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
         }
@@ -481,11 +481,11 @@ where
         name: &'static str,
         variant_index: u32,
         variant: &'static str,
-        v: &dyn Serialize,
+        value: &dyn Serialize,
     ) -> Result<Ok, Error> {
         unsafe {
             self.take()
-                .serialize_newtype_variant(name, variant_index, variant, v)
+                .serialize_newtype_variant(name, variant_index, variant, value)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
         }
@@ -708,11 +708,11 @@ macro_rules! impl_serializer_for_trait_object {
                 self.erased_serialize_none()
             }
 
-            fn serialize_some<T>(self, v: &T) -> Result<Ok, Error>
+            fn serialize_some<T>(self, value: &T) -> Result<Ok, Error>
             where
                 T: ?Sized + serde::Serialize,
             {
-                self.erased_serialize_some(&v)
+                self.erased_serialize_some(&value)
             }
 
             fn serialize_unit(self) -> Result<Ok, Error> {
@@ -732,11 +732,11 @@ macro_rules! impl_serializer_for_trait_object {
                 self.erased_serialize_unit_variant(name, variant_index, variant)
             }
 
-            fn serialize_newtype_struct<T>(self, name: &'static str, v: &T) -> Result<Ok, Error>
+            fn serialize_newtype_struct<T>(self, name: &'static str, value: &T) -> Result<Ok, Error>
             where
                 T: ?Sized + serde::Serialize,
             {
-                self.erased_serialize_newtype_struct(name, &v)
+                self.erased_serialize_newtype_struct(name, &value)
             }
 
             fn serialize_newtype_variant<T>(
@@ -744,12 +744,12 @@ macro_rules! impl_serializer_for_trait_object {
                 name: &'static str,
                 variant_index: u32,
                 variant: &'static str,
-                v: &T,
+                value: &T,
             ) -> Result<Ok, Error>
             where
                 T: ?Sized + serde::Serialize,
             {
-                self.erased_serialize_newtype_variant(name, variant_index, variant, &v)
+                self.erased_serialize_newtype_variant(name, variant_index, variant, &value)
             }
 
             fn serialize_seq(self, len: Option<usize>) -> Result<Seq<'a>, Error> {
@@ -889,12 +889,12 @@ impl<'a> Tuple<'a> {
             serialize_element: {
                 unsafe fn serialize_element<T>(
                     data: &mut Any,
-                    v: &dyn Serialize,
+                    value: &dyn Serialize,
                 ) -> Result<(), Error>
                 where
                     T: serde::ser::SerializeTuple,
                 {
-                    unsafe { data.as_ref::<T>().serialize_element(v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_element(value).map_err(erase) }
                 }
                 serialize_element::<T>
             },
@@ -943,11 +943,14 @@ impl<'a> TupleStruct<'a> {
         TupleStruct {
             data: unsafe { Any::new(data) },
             serialize_field: {
-                unsafe fn serialize_field<T>(data: &mut Any, v: &dyn Serialize) -> Result<(), Error>
+                unsafe fn serialize_field<T>(
+                    data: &mut Any,
+                    value: &dyn Serialize,
+                ) -> Result<(), Error>
                 where
                     T: serde::ser::SerializeTupleStruct,
                 {
-                    unsafe { data.as_ref::<T>().serialize_field(v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_field(value).map_err(erase) }
                 }
                 serialize_field::<T>
             },
@@ -996,11 +999,14 @@ impl<'a> TupleVariant<'a> {
         TupleVariant {
             data: unsafe { Any::new(data) },
             serialize_field: {
-                unsafe fn serialize_field<T>(data: &mut Any, v: &dyn Serialize) -> Result<(), Error>
+                unsafe fn serialize_field<T>(
+                    data: &mut Any,
+                    value: &dyn Serialize,
+                ) -> Result<(), Error>
                 where
                     T: serde::ser::SerializeTupleVariant,
                 {
-                    unsafe { data.as_ref::<T>().serialize_field(v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_field(value).map_err(erase) }
                 }
                 serialize_field::<T>
             },
@@ -1051,33 +1057,40 @@ impl<'a> Map<'a> {
         Map {
             data: unsafe { Any::new(data) },
             serialize_key: {
-                unsafe fn serialize_key<T>(data: &mut Any, v: &dyn Serialize) -> Result<(), Error>
+                unsafe fn serialize_key<T>(data: &mut Any, key: &dyn Serialize) -> Result<(), Error>
                 where
                     T: serde::ser::SerializeMap,
                 {
-                    unsafe { data.as_ref::<T>().serialize_key(v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_key(key).map_err(erase) }
                 }
                 serialize_key::<T>
             },
             serialize_value: {
-                unsafe fn serialize_value<T>(data: &mut Any, v: &dyn Serialize) -> Result<(), Error>
+                unsafe fn serialize_value<T>(
+                    data: &mut Any,
+                    value: &dyn Serialize,
+                ) -> Result<(), Error>
                 where
                     T: serde::ser::SerializeMap,
                 {
-                    unsafe { data.as_ref::<T>().serialize_value(v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_value(value).map_err(erase) }
                 }
                 serialize_value::<T>
             },
             serialize_entry: {
                 unsafe fn serialize_entry<T>(
                     data: &mut Any,
-                    k: &dyn Serialize,
-                    v: &dyn Serialize,
+                    key: &dyn Serialize,
+                    value: &dyn Serialize,
                 ) -> Result<(), Error>
                 where
                     T: serde::ser::SerializeMap,
                 {
-                    unsafe { data.as_ref::<T>().serialize_entry(k, v).map_err(erase) }
+                    unsafe {
+                        data.as_ref::<T>()
+                            .serialize_entry(key, value)
+                            .map_err(erase)
+                    }
                 }
                 serialize_entry::<T>
             },
@@ -1143,13 +1156,17 @@ impl<'a> Struct<'a> {
             serialize_field: {
                 unsafe fn serialize_field<T>(
                     data: &mut Any,
-                    k: &'static str,
-                    v: &dyn Serialize,
+                    key: &'static str,
+                    value: &dyn Serialize,
                 ) -> Result<(), Error>
                 where
                     T: serde::ser::SerializeStruct,
                 {
-                    unsafe { data.as_ref::<T>().serialize_field(k, v).map_err(erase) }
+                    unsafe {
+                        data.as_ref::<T>()
+                            .serialize_field(key, value)
+                            .map_err(erase)
+                    }
                 }
                 serialize_field::<T>
             },
@@ -1171,11 +1188,11 @@ impl<'a> SerializeStruct for Struct<'a> {
     type Ok = Ok;
     type Error = Error;
 
-    fn serialize_field<T>(&mut self, name: &'static str, field: &T) -> Result<(), Error>
+    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<(), Error>
     where
         T: ?Sized + serde::Serialize,
     {
-        unsafe { (self.serialize_field)(&mut self.data, name, &field) }
+        unsafe { (self.serialize_field)(&mut self.data, key, &value) }
     }
 
     fn end(self) -> Result<Ok, Error> {
@@ -1200,13 +1217,17 @@ impl<'a> StructVariant<'a> {
             serialize_field: {
                 unsafe fn serialize_field<T>(
                     data: &mut Any,
-                    k: &'static str,
-                    v: &dyn Serialize,
+                    key: &'static str,
+                    value: &dyn Serialize,
                 ) -> Result<(), Error>
                 where
                     T: serde::ser::SerializeStructVariant,
                 {
-                    unsafe { data.as_ref::<T>().serialize_field(k, v).map_err(erase) }
+                    unsafe {
+                        data.as_ref::<T>()
+                            .serialize_field(key, value)
+                            .map_err(erase)
+                    }
                 }
                 serialize_field::<T>
             },
@@ -1228,11 +1249,11 @@ impl<'a> SerializeStructVariant for StructVariant<'a> {
     type Ok = Ok;
     type Error = Error;
 
-    fn serialize_field<T>(&mut self, name: &'static str, field: &T) -> Result<(), Error>
+    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<(), Error>
     where
         T: ?Sized + serde::Serialize,
     {
-        unsafe { (self.serialize_field)(&mut self.data, name, &field) }
+        unsafe { (self.serialize_field)(&mut self.data, key, &value) }
     }
 
     fn end(self) -> Result<Ok, Error> {
@@ -1313,8 +1334,8 @@ macro_rules! deref_erased_serializer {
                 (**self).erased_serialize_none()
             }
 
-            fn erased_serialize_some(&mut self, v: &dyn Serialize) -> Result<Ok, Error> {
-                (**self).erased_serialize_some(v)
+            fn erased_serialize_some(&mut self, value: &dyn Serialize) -> Result<Ok, Error> {
+                (**self).erased_serialize_some(value)
             }
 
             fn erased_serialize_unit(&mut self) -> Result<Ok, Error> {
@@ -1329,12 +1350,12 @@ macro_rules! deref_erased_serializer {
                 (**self).erased_serialize_unit_variant(name, variant_index, variant)
             }
 
-            fn erased_serialize_newtype_struct(&mut self, name: &'static str, v: &dyn Serialize) -> Result<Ok, Error> {
-                (**self).erased_serialize_newtype_struct(name, v)
+            fn erased_serialize_newtype_struct(&mut self, name: &'static str, value: &dyn Serialize) -> Result<Ok, Error> {
+                (**self).erased_serialize_newtype_struct(name, value)
             }
 
-            fn erased_serialize_newtype_variant(&mut self, name: &'static str, variant_index: u32, variant: &'static str, v: &dyn Serialize) -> Result<Ok, Error> {
-                (**self).erased_serialize_newtype_variant(name, variant_index, variant, v)
+            fn erased_serialize_newtype_variant(&mut self, name: &'static str, variant_index: u32, variant: &'static str, value: &dyn Serialize) -> Result<Ok, Error> {
+                (**self).erased_serialize_newtype_variant(name, variant_index, variant, value)
             }
 
             fn erased_serialize_seq(&mut self, len: Option<usize>) -> Result<Seq, Error> {
