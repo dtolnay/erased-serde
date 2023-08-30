@@ -122,6 +122,7 @@ mod de;
 mod error;
 mod features_check;
 mod map;
+mod sealed;
 mod ser;
 
 pub use crate::de::{deserialize, Deserializer};
