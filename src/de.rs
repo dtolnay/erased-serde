@@ -1,6 +1,7 @@
 use crate::any::Any;
 use crate::error::{erase_de as erase, unerase_de as unerase, Error};
 use crate::map::{OptionExt, ResultExt};
+use crate::sealed::deserializer::Sealed;
 use alloc::boxed::Box;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
@@ -81,7 +82,10 @@ pub trait DeserializeSeed<'de> {
 ///     println!("{}", data["A"] + data["B"]);
 /// }
 /// ```
-pub trait Deserializer<'de> {
+///
+/// This trait is sealed and can only be implemented via a
+/// `serde::Deserializer<'de>` impl.
+pub trait Deserializer<'de>: Sealed {
     fn erased_deserialize_any(&mut self, v: &mut dyn Visitor<'de>) -> Result<Out, Error>;
     fn erased_deserialize_bool(&mut self, v: &mut dyn Visitor<'de>) -> Result<Out, Error>;
     fn erased_deserialize_i8(&mut self, v: &mut dyn Visitor<'de>) -> Result<Out, Error>;
@@ -521,6 +525,8 @@ where
         self.as_ref().is_human_readable()
     }
 }
+
+impl<'de, T> Sealed for erase::Deserializer<T> where T: serde::Deserializer<'de> {}
 
 impl<'de, T> Visitor<'de> for erase::Visitor<T>
 where
@@ -1391,8 +1397,8 @@ impl<'de> serde::de::VariantAccess<'de> for Variant<'de> {
 // IMPL ERASED SERDE FOR ERASED SERDE //////////////////////////////////////////
 
 macro_rules! deref_erased_deserializer {
-    ($($imp:tt)+) => {
-        impl $($imp)+ {
+    (<'de $(, $T:ident)*> Deserializer<'de> for $ty:ty $(where $($where:tt)*)?) => {
+        impl<'de $(, $T)*> Deserializer<'de> for $ty $(where $($where)*)? {
             fn erased_deserialize_any(&mut self, visitor: &mut dyn Visitor<'de>) -> Result<Out, Error> {
                 (**self).erased_deserialize_any(visitor)
             }
@@ -1521,6 +1527,8 @@ macro_rules! deref_erased_deserializer {
                 (**self).erased_is_human_readable()
             }
         }
+
+        impl<'de $(, $T)*> Sealed for $ty $(where $($where)*)? {}
     };
 }
 
@@ -1528,7 +1536,7 @@ deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de>
 deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de> + Send + '_>);
 deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de> + Sync + '_>);
 deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de> + Send + Sync + '_>);
-deref_erased_deserializer!(<'de, T: ?Sized + Deserializer<'de>> Deserializer<'de> for &mut T);
+deref_erased_deserializer!(<'de, T> Deserializer<'de> for &mut T where T: ?Sized + Deserializer<'de>);
 
 // TEST ////////////////////////////////////////////////////////////////////////
 

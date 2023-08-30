@@ -1,6 +1,7 @@
 use crate::any::Any;
 use crate::error::{erase_ser as erase, unerase_ser as unerase, Error};
 use crate::map::ResultExt;
+use crate::sealed;
 use alloc::boxed::Box;
 use core::marker::PhantomData;
 use serde::ser::{
@@ -48,7 +49,10 @@ use serde::ser::{
 ///     value.erased_serialize(format).unwrap();
 /// }
 /// ```
-pub trait Serialize {
+///
+/// This trait is sealed and can only be implemented via a `serde::Serialize`
+/// impl.
+pub trait Serialize: sealed::serialize::Sealed {
     fn erased_serialize(&self, v: &mut dyn Serializer) -> Result<Ok, Error>;
 }
 
@@ -91,7 +95,10 @@ pub trait Serialize {
 ///     value.erased_serialize(format).unwrap();
 /// }
 /// ```
-pub trait Serializer {
+///
+/// This trait is sealed and can only be implemented via a `serde::Serializer`
+/// impl.
+pub trait Serializer: sealed::serializer::Sealed {
     fn erased_serialize_bool(&mut self, v: bool) -> Result<Ok, Error>;
     fn erased_serialize_i8(&mut self, v: i8) -> Result<Ok, Error>;
     fn erased_serialize_i16(&mut self, v: i16) -> Result<Ok, Error>;
@@ -239,6 +246,8 @@ where
         self.serialize(serializer)
     }
 }
+
+impl<T> sealed::serialize::Sealed for T where T: ?Sized + serde::Serialize {}
 
 mod erase {
     pub struct Serializer<S> {
@@ -565,6 +574,8 @@ where
         self.as_ref().is_human_readable()
     }
 }
+
+impl<T> sealed::serializer::Sealed for erase::Serializer<T> where T: serde::Serializer {}
 
 // IMPL SERDE FOR ERASED SERDE /////////////////////////////////////////////////
 
@@ -1231,8 +1242,8 @@ impl<'a> SerializeStructVariant for StructVariant<'a> {
 // IMPL ERASED SERDE FOR ERASED SERDE //////////////////////////////////////////
 
 macro_rules! deref_erased_serializer {
-    ($($imp:tt)+) => {
-        impl $($imp)+ {
+    (<'a $(, $T:ident)*> Serializer for $ty:ty $(where $($where:tt)*)?) => {
+        impl<'a $(, $T)*> Serializer for $ty $(where $($where)*)? {
             fn erased_serialize_bool(&mut self, v: bool) -> Result<Ok, Error> {
                 (**self).erased_serialize_bool(v)
             }
@@ -1357,6 +1368,8 @@ macro_rules! deref_erased_serializer {
                 (**self).erased_is_human_readable()
             }
         }
+
+        impl<'a $(, $T)*> sealed::serializer::Sealed for $ty $(where $($where)*)? {}
     };
 }
 
@@ -1364,7 +1377,7 @@ deref_erased_serializer!(<'a> Serializer for Box<dyn Serializer + 'a>);
 deref_erased_serializer!(<'a> Serializer for Box<dyn Serializer + Send + 'a>);
 deref_erased_serializer!(<'a> Serializer for Box<dyn Serializer + Sync + 'a>);
 deref_erased_serializer!(<'a> Serializer for Box<dyn Serializer + Send + Sync + 'a>);
-deref_erased_serializer!(<'a, T: ?Sized + Serializer> Serializer for &'a mut T);
+deref_erased_serializer!(<'a, T> Serializer for &'a mut T where T: ?Sized + Serializer);
 
 // TEST ////////////////////////////////////////////////////////////////////////
 
