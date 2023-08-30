@@ -4,6 +4,7 @@ use crate::map::ResultExt;
 use crate::sealed;
 use alloc::boxed::Box;
 use core::marker::PhantomData;
+use core::mem::MaybeUninit;
 use serde::ser::{
     SerializeMap, SerializeSeq, SerializeStruct, SerializeStructVariant, SerializeTuple,
     SerializeTupleStruct, SerializeTupleVariant,
@@ -56,7 +57,11 @@ pub trait Serialize: sealed::serialize::Sealed {
     fn erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<(), Error>;
 
     #[doc(hidden)]
-    fn do_erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<Ok, Error>;
+    fn do_erased_serialize(
+        &self,
+        serializer: &mut dyn Serializer,
+        out: &mut MaybeUninit<Result<Ok, Error>>,
+    );
 }
 
 /// An object-safe equivalent of Serde's `Serializer` trait.
@@ -102,67 +107,94 @@ pub trait Serialize: sealed::serialize::Sealed {
 /// This trait is sealed and can only be implemented via a `serde::Serializer`
 /// impl.
 pub trait Serializer: sealed::serializer::Sealed {
-    fn erased_serialize_bool(&mut self, v: bool) -> Result<Ok, Error>;
-    fn erased_serialize_i8(&mut self, v: i8) -> Result<Ok, Error>;
-    fn erased_serialize_i16(&mut self, v: i16) -> Result<Ok, Error>;
-    fn erased_serialize_i32(&mut self, v: i32) -> Result<Ok, Error>;
-    fn erased_serialize_i64(&mut self, v: i64) -> Result<Ok, Error>;
-    fn erased_serialize_i128(&mut self, v: i128) -> Result<Ok, Error>;
-    fn erased_serialize_u8(&mut self, v: u8) -> Result<Ok, Error>;
-    fn erased_serialize_u16(&mut self, v: u16) -> Result<Ok, Error>;
-    fn erased_serialize_u32(&mut self, v: u32) -> Result<Ok, Error>;
-    fn erased_serialize_u64(&mut self, v: u64) -> Result<Ok, Error>;
-    fn erased_serialize_u128(&mut self, v: u128) -> Result<Ok, Error>;
-    fn erased_serialize_f32(&mut self, v: f32) -> Result<Ok, Error>;
-    fn erased_serialize_f64(&mut self, v: f64) -> Result<Ok, Error>;
-    fn erased_serialize_char(&mut self, v: char) -> Result<Ok, Error>;
-    fn erased_serialize_str(&mut self, v: &str) -> Result<Ok, Error>;
-    fn erased_serialize_bytes(&mut self, v: &[u8]) -> Result<Ok, Error>;
-    fn erased_serialize_none(&mut self) -> Result<Ok, Error>;
-    fn erased_serialize_some(&mut self, value: &dyn Serialize) -> Result<Ok, Error>;
-    fn erased_serialize_unit(&mut self) -> Result<Ok, Error>;
-    fn erased_serialize_unit_struct(&mut self, name: &'static str) -> Result<Ok, Error>;
+    fn erased_serialize_bool(&mut self, v: bool, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_i8(&mut self, v: i8, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_i16(&mut self, v: i16, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_i32(&mut self, v: i32, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_i64(&mut self, v: i64, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_i128(&mut self, v: i128, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_u8(&mut self, v: u8, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_u16(&mut self, v: u16, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_u32(&mut self, v: u32, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_u64(&mut self, v: u64, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_u128(&mut self, v: u128, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_f32(&mut self, v: f32, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_f64(&mut self, v: f64, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_char(&mut self, v: char, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_str(&mut self, v: &str, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_bytes(&mut self, v: &[u8], out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_none(&mut self, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_some(
+        &mut self,
+        value: &dyn Serialize,
+        out: &mut MaybeUninit<Result<Ok, Error>>,
+    );
+    fn erased_serialize_unit(&mut self, out: &mut MaybeUninit<Result<Ok, Error>>);
+    fn erased_serialize_unit_struct(
+        &mut self,
+        name: &'static str,
+        out: &mut MaybeUninit<Result<Ok, Error>>,
+    );
     fn erased_serialize_unit_variant(
         &mut self,
         name: &'static str,
         variant_index: u32,
         variant: &'static str,
-    ) -> Result<Ok, Error>;
+        out: &mut MaybeUninit<Result<Ok, Error>>,
+    );
     fn erased_serialize_newtype_struct(
         &mut self,
         name: &'static str,
         value: &dyn Serialize,
-    ) -> Result<Ok, Error>;
+        out: &mut MaybeUninit<Result<Ok, Error>>,
+    );
     fn erased_serialize_newtype_variant(
         &mut self,
         name: &'static str,
         variant_index: u32,
         variant: &'static str,
         value: &dyn Serialize,
-    ) -> Result<Ok, Error>;
-    fn erased_serialize_seq(&mut self, len: Option<usize>) -> Result<Seq, Error>;
-    fn erased_serialize_tuple(&mut self, len: usize) -> Result<Tuple, Error>;
+        out: &mut MaybeUninit<Result<Ok, Error>>,
+    );
+    fn erased_serialize_seq(
+        &mut self,
+        len: Option<usize>,
+        out: &mut MaybeUninit<Result<Seq, Error>>,
+    );
+    fn erased_serialize_tuple(&mut self, len: usize, out: &mut MaybeUninit<Result<Tuple, Error>>);
     fn erased_serialize_tuple_struct(
         &mut self,
         name: &'static str,
         len: usize,
-    ) -> Result<TupleStruct, Error>;
+        out: &mut MaybeUninit<Result<TupleStruct, Error>>,
+    );
     fn erased_serialize_tuple_variant(
         &mut self,
         name: &'static str,
         variant_index: u32,
         variant: &'static str,
         len: usize,
-    ) -> Result<TupleVariant, Error>;
-    fn erased_serialize_map(&mut self, len: Option<usize>) -> Result<Map, Error>;
-    fn erased_serialize_struct(&mut self, name: &'static str, len: usize) -> Result<Struct, Error>;
+        out: &mut MaybeUninit<Result<TupleVariant, Error>>,
+    );
+    fn erased_serialize_map(
+        &mut self,
+        len: Option<usize>,
+        out: &mut MaybeUninit<Result<Map, Error>>,
+    );
+    fn erased_serialize_struct(
+        &mut self,
+        name: &'static str,
+        len: usize,
+        out: &mut MaybeUninit<Result<Struct, Error>>,
+    );
     fn erased_serialize_struct_variant(
         &mut self,
         name: &'static str,
         variant_index: u32,
         variant: &'static str,
         len: usize,
-    ) -> Result<StructVariant, Error>;
+        out: &mut MaybeUninit<Result<StructVariant, Error>>,
+    );
     fn erased_is_human_readable(&self) -> bool;
 }
 
@@ -246,11 +278,15 @@ where
     T: ?Sized + serde::Serialize,
 {
     fn erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<(), Error> {
-        self.do_erased_serialize(serializer).map(drop)
+        self.serialize(serializer).map(drop)
     }
 
-    fn do_erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<Ok, Error> {
-        self.serialize(serializer)
+    fn do_erased_serialize(
+        &self,
+        serializer: &mut dyn Serializer,
+        out: &mut MaybeUninit<Result<Ok, Error>>,
+    ) {
+        out.write(self.serialize(serializer));
     }
 }
 
@@ -276,184 +312,192 @@ impl<T> Serializer for erase::Serializer<T>
 where
     T: serde::Serializer,
 {
-    fn erased_serialize_bool(&mut self, v: bool) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_bool(&mut self, v: bool, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_bool(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_i8(&mut self, v: i8) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_i8(&mut self, v: i8, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_i8(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_i16(&mut self, v: i16) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_i16(&mut self, v: i16, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_i16(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_i32(&mut self, v: i32) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_i32(&mut self, v: i32, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_i32(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_i64(&mut self, v: i64) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_i64(&mut self, v: i64, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_i64(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_i128(&mut self, v: i128) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_i128(&mut self, v: i128, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_i128(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_u8(&mut self, v: u8) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_u8(&mut self, v: u8, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_u8(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_u16(&mut self, v: u16) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_u16(&mut self, v: u16, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_u16(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_u32(&mut self, v: u32) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_u32(&mut self, v: u32, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_u32(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_u64(&mut self, v: u64) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_u64(&mut self, v: u64, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_u64(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_u128(&mut self, v: u128) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_u128(&mut self, v: u128, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_u128(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_f32(&mut self, v: f32) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_f32(&mut self, v: f32, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_f32(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_f64(&mut self, v: f64) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_f64(&mut self, v: f64, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_f64(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_char(&mut self, v: char) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_char(&mut self, v: char, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_char(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_str(&mut self, v: &str) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_str(&mut self, v: &str, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_str(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_bytes(&mut self, v: &[u8]) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_bytes(&mut self, v: &[u8], out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_bytes(v)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_none(&mut self) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_none(&mut self, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_none()
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_some(&mut self, value: &dyn Serialize) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_some(
+        &mut self,
+        value: &dyn Serialize,
+        out: &mut MaybeUninit<Result<Ok, Error>>,
+    ) {
+        out.write(unsafe {
             self.take()
                 .serialize_some(value)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_unit(&mut self) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_unit(&mut self, out: &mut MaybeUninit<Result<Ok, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_unit()
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_unit_struct(&mut self, name: &'static str) -> Result<Ok, Error> {
-        unsafe {
+    fn erased_serialize_unit_struct(
+        &mut self,
+        name: &'static str,
+        out: &mut MaybeUninit<Result<Ok, Error>>,
+    ) {
+        out.write(unsafe {
             self.take()
                 .serialize_unit_struct(name)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
     fn erased_serialize_unit_variant(
@@ -461,26 +505,28 @@ where
         name: &'static str,
         variant_index: u32,
         variant: &'static str,
-    ) -> Result<Ok, Error> {
-        unsafe {
+        out: &mut MaybeUninit<Result<Ok, Error>>,
+    ) {
+        out.write(unsafe {
             self.take()
                 .serialize_unit_variant(name, variant_index, variant)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
     fn erased_serialize_newtype_struct(
         &mut self,
         name: &'static str,
         value: &dyn Serialize,
-    ) -> Result<Ok, Error> {
-        unsafe {
+        out: &mut MaybeUninit<Result<Ok, Error>>,
+    ) {
+        out.write(unsafe {
             self.take()
                 .serialize_newtype_struct(name, value)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
     fn erased_serialize_newtype_variant(
@@ -489,44 +535,50 @@ where
         variant_index: u32,
         variant: &'static str,
         value: &dyn Serialize,
-    ) -> Result<Ok, Error> {
-        unsafe {
+        out: &mut MaybeUninit<Result<Ok, Error>>,
+    ) {
+        out.write(unsafe {
             self.take()
                 .serialize_newtype_variant(name, variant_index, variant, value)
                 .unsafe_map(Ok::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_seq(&mut self, len: Option<usize>) -> Result<Seq, Error> {
-        unsafe {
+    fn erased_serialize_seq(
+        &mut self,
+        len: Option<usize>,
+        out: &mut MaybeUninit<Result<Seq, Error>>,
+    ) {
+        out.write(unsafe {
             self.take()
                 .serialize_seq(len)
                 .unsafe_map(Seq::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_tuple(&mut self, len: usize) -> Result<Tuple, Error> {
-        unsafe {
+    fn erased_serialize_tuple(&mut self, len: usize, out: &mut MaybeUninit<Result<Tuple, Error>>) {
+        out.write(unsafe {
             self.take()
                 .serialize_tuple(len)
                 .unsafe_map(Tuple::new)
                 .map_err(erase)
-        }
+        });
     }
 
     fn erased_serialize_tuple_struct(
         &mut self,
         name: &'static str,
         len: usize,
-    ) -> Result<TupleStruct, Error> {
-        unsafe {
+        out: &mut MaybeUninit<Result<TupleStruct, Error>>,
+    ) {
+        out.write(unsafe {
             self.take()
                 .serialize_tuple_struct(name, len)
                 .unsafe_map(TupleStruct::new)
                 .map_err(erase)
-        }
+        });
     }
 
     fn erased_serialize_tuple_variant(
@@ -535,31 +587,41 @@ where
         variant_index: u32,
         variant: &'static str,
         len: usize,
-    ) -> Result<TupleVariant, Error> {
-        unsafe {
+        out: &mut MaybeUninit<Result<TupleVariant, Error>>,
+    ) {
+        out.write(unsafe {
             self.take()
                 .serialize_tuple_variant(name, variant_index, variant, len)
                 .unsafe_map(TupleVariant::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_map(&mut self, len: Option<usize>) -> Result<Map, Error> {
-        unsafe {
+    fn erased_serialize_map(
+        &mut self,
+        len: Option<usize>,
+        out: &mut MaybeUninit<Result<Map, Error>>,
+    ) {
+        out.write(unsafe {
             self.take()
                 .serialize_map(len)
                 .unsafe_map(Map::new)
                 .map_err(erase)
-        }
+        });
     }
 
-    fn erased_serialize_struct(&mut self, name: &'static str, len: usize) -> Result<Struct, Error> {
-        unsafe {
+    fn erased_serialize_struct(
+        &mut self,
+        name: &'static str,
+        len: usize,
+        out: &mut MaybeUninit<Result<Struct, Error>>,
+    ) {
+        out.write(unsafe {
             self.take()
                 .serialize_struct(name, len)
                 .unsafe_map(Struct::new)
                 .map_err(erase)
-        }
+        });
     }
 
     fn erased_serialize_struct_variant(
@@ -568,13 +630,14 @@ where
         variant_index: u32,
         variant: &'static str,
         len: usize,
-    ) -> Result<StructVariant, Error> {
-        unsafe {
+        out: &mut MaybeUninit<Result<StructVariant, Error>>,
+    ) {
+        out.write(unsafe {
             self.take()
                 .serialize_struct_variant(name, variant_index, variant, len)
                 .unsafe_map(StructVariant::new)
                 .map_err(erase)
-        }
+        });
     }
 
     fn erased_is_human_readable(&self) -> bool {
@@ -624,12 +687,9 @@ where
     let mut erased = erase::Serializer {
         state: Some(serializer),
     };
-    unsafe {
-        value
-            .do_erased_serialize(&mut erased)
-            .unsafe_map(Ok::take)
-            .map_err(unerase)
-    }
+    let mut out = MaybeUninit::uninit();
+    value.do_erased_serialize(&mut erased, &mut out);
+    unsafe { out.assume_init().unsafe_map(Ok::take).map_err(unerase) }
 }
 
 serialize_trait_object!(Serialize);
@@ -648,86 +708,126 @@ macro_rules! impl_serializer_for_trait_object {
             type SerializeStructVariant = StructVariant<'a>;
 
             fn serialize_bool(self, v: bool) -> Result<Ok, Error> {
-                self.erased_serialize_bool(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_bool(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_i8(self, v: i8) -> Result<Ok, Error> {
-                self.erased_serialize_i8(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_i8(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_i16(self, v: i16) -> Result<Ok, Error> {
-                self.erased_serialize_i16(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_i16(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_i32(self, v: i32) -> Result<Ok, Error> {
-                self.erased_serialize_i32(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_i32(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_i64(self, v: i64) -> Result<Ok, Error> {
-                self.erased_serialize_i64(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_i64(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_i128(self, v: i128) -> Result<Ok, Error> {
-                self.erased_serialize_i128(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_i128(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_u8(self, v: u8) -> Result<Ok, Error> {
-                self.erased_serialize_u8(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_u8(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_u16(self, v: u16) -> Result<Ok, Error> {
-                self.erased_serialize_u16(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_u16(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_u32(self, v: u32) -> Result<Ok, Error> {
-                self.erased_serialize_u32(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_u32(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_u64(self, v: u64) -> Result<Ok, Error> {
-                self.erased_serialize_u64(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_u64(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_u128(self, v: u128) -> Result<Ok, Error> {
-                self.erased_serialize_u128(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_u128(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_f32(self, v: f32) -> Result<Ok, Error> {
-                self.erased_serialize_f32(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_f32(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_f64(self, v: f64) -> Result<Ok, Error> {
-                self.erased_serialize_f64(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_f64(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_char(self, v: char) -> Result<Ok, Error> {
-                self.erased_serialize_char(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_char(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_str(self, v: &str) -> Result<Ok, Error> {
-                self.erased_serialize_str(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_str(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_bytes(self, v: &[u8]) -> Result<Ok, Error> {
-                self.erased_serialize_bytes(v)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_bytes(v, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_none(self) -> Result<Ok, Error> {
-                self.erased_serialize_none()
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_none(&mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_some<T>(self, value: &T) -> Result<Ok, Error>
             where
                 T: ?Sized + serde::Serialize,
             {
-                self.erased_serialize_some(&value)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_some(&value, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_unit(self) -> Result<Ok, Error> {
-                self.erased_serialize_unit()
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_unit(&mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_unit_struct(self, name: &'static str) -> Result<Ok, Error> {
-                self.erased_serialize_unit_struct(name)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_unit_struct(name, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_unit_variant(
@@ -736,14 +836,18 @@ macro_rules! impl_serializer_for_trait_object {
                 variant_index: u32,
                 variant: &'static str,
             ) -> Result<Ok, Error> {
-                self.erased_serialize_unit_variant(name, variant_index, variant)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_unit_variant(name, variant_index, variant, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_newtype_struct<T>(self, name: &'static str, value: &T) -> Result<Ok, Error>
             where
                 T: ?Sized + serde::Serialize,
             {
-                self.erased_serialize_newtype_struct(name, &value)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_newtype_struct(name, &value, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_newtype_variant<T>(
@@ -756,15 +860,27 @@ macro_rules! impl_serializer_for_trait_object {
             where
                 T: ?Sized + serde::Serialize,
             {
-                self.erased_serialize_newtype_variant(name, variant_index, variant, &value)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_newtype_variant(
+                    name,
+                    variant_index,
+                    variant,
+                    &value,
+                    &mut out,
+                );
+                unsafe { out.assume_init() }
             }
 
             fn serialize_seq(self, len: Option<usize>) -> Result<Seq<'a>, Error> {
-                self.erased_serialize_seq(len)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_seq(len, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_tuple(self, len: usize) -> Result<Tuple<'a>, Error> {
-                self.erased_serialize_tuple(len)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_tuple(len, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_tuple_struct(
@@ -772,7 +888,9 @@ macro_rules! impl_serializer_for_trait_object {
                 name: &'static str,
                 len: usize,
             ) -> Result<TupleStruct<'a>, Error> {
-                self.erased_serialize_tuple_struct(name, len)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_tuple_struct(name, len, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_tuple_variant(
@@ -782,15 +900,21 @@ macro_rules! impl_serializer_for_trait_object {
                 variant: &'static str,
                 len: usize,
             ) -> Result<TupleVariant<'a>, Error> {
-                self.erased_serialize_tuple_variant(name, variant_index, variant, len)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_tuple_variant(name, variant_index, variant, len, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_map(self, len: Option<usize>) -> Result<Map<'a>, Error> {
-                self.erased_serialize_map(len)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_map(len, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_struct(self, name: &'static str, len: usize) -> Result<Struct<'a>, Error> {
-                self.erased_serialize_struct(name, len)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_struct(name, len, &mut out);
+                unsafe { out.assume_init() }
             }
 
             fn serialize_struct_variant(
@@ -800,7 +924,9 @@ macro_rules! impl_serializer_for_trait_object {
                 variant: &'static str,
                 len: usize,
             ) -> Result<StructVariant<'a>, Error> {
-                self.erased_serialize_struct_variant(name, variant_index, variant, len)
+                let mut out = MaybeUninit::uninit();
+                self.erased_serialize_struct_variant(name, variant_index, variant, len, &mut out);
+                unsafe { out.assume_init() }
             }
 
             #[cfg(not(feature = "alloc"))]
@@ -1273,124 +1399,124 @@ impl<'a> SerializeStructVariant for StructVariant<'a> {
 macro_rules! deref_erased_serializer {
     (<'a $(, $T:ident)*> Serializer for $ty:ty $(where $($where:tt)*)?) => {
         impl<'a $(, $T)*> Serializer for $ty $(where $($where)*)? {
-            fn erased_serialize_bool(&mut self, v: bool) -> Result<Ok, Error> {
-                (**self).erased_serialize_bool(v)
+            fn erased_serialize_bool(&mut self, v: bool, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_bool(v, out);
             }
 
-            fn erased_serialize_i8(&mut self, v: i8) -> Result<Ok, Error> {
-                (**self).erased_serialize_i8(v)
+            fn erased_serialize_i8(&mut self, v: i8, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_i8(v, out);
             }
 
-            fn erased_serialize_i16(&mut self, v: i16) -> Result<Ok, Error> {
-                (**self).erased_serialize_i16(v)
+            fn erased_serialize_i16(&mut self, v: i16, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_i16(v, out);
             }
 
-            fn erased_serialize_i32(&mut self, v: i32) -> Result<Ok, Error> {
-                (**self).erased_serialize_i32(v)
+            fn erased_serialize_i32(&mut self, v: i32, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_i32(v, out);
             }
 
-            fn erased_serialize_i64(&mut self, v: i64) -> Result<Ok, Error> {
-                (**self).erased_serialize_i64(v)
+            fn erased_serialize_i64(&mut self, v: i64, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_i64(v, out);
             }
 
-            fn erased_serialize_i128(&mut self, v: i128) -> Result<Ok, Error> {
-                (**self).erased_serialize_i128(v)
+            fn erased_serialize_i128(&mut self, v: i128, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_i128(v, out);
             }
 
-            fn erased_serialize_u8(&mut self, v: u8) -> Result<Ok, Error> {
-                (**self).erased_serialize_u8(v)
+            fn erased_serialize_u8(&mut self, v: u8, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_u8(v, out);
             }
 
-            fn erased_serialize_u16(&mut self, v: u16) -> Result<Ok, Error> {
-                (**self).erased_serialize_u16(v)
+            fn erased_serialize_u16(&mut self, v: u16, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_u16(v, out);
             }
 
-            fn erased_serialize_u32(&mut self, v: u32) -> Result<Ok, Error> {
-                (**self).erased_serialize_u32(v)
+            fn erased_serialize_u32(&mut self, v: u32, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_u32(v, out);
             }
 
-            fn erased_serialize_u64(&mut self, v: u64) -> Result<Ok, Error> {
-                (**self).erased_serialize_u64(v)
+            fn erased_serialize_u64(&mut self, v: u64, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_u64(v, out);
             }
 
-            fn erased_serialize_u128(&mut self, v: u128) -> Result<Ok, Error> {
-                (**self).erased_serialize_u128(v)
+            fn erased_serialize_u128(&mut self, v: u128, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_u128(v, out);
             }
 
-            fn erased_serialize_f32(&mut self, v: f32) -> Result<Ok, Error> {
-                (**self).erased_serialize_f32(v)
+            fn erased_serialize_f32(&mut self, v: f32, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_f32(v, out);
             }
 
-            fn erased_serialize_f64(&mut self, v: f64) -> Result<Ok, Error> {
-                (**self).erased_serialize_f64(v)
+            fn erased_serialize_f64(&mut self, v: f64, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_f64(v, out);
             }
 
-            fn erased_serialize_char(&mut self, v: char) -> Result<Ok, Error> {
-                (**self).erased_serialize_char(v)
+            fn erased_serialize_char(&mut self, v: char, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_char(v, out);
             }
 
-            fn erased_serialize_str(&mut self, v: &str) -> Result<Ok, Error> {
-                (**self).erased_serialize_str(v)
+            fn erased_serialize_str(&mut self, v: &str, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_str(v, out);
             }
 
-            fn erased_serialize_bytes(&mut self, v: &[u8]) -> Result<Ok, Error> {
-                (**self).erased_serialize_bytes(v)
+            fn erased_serialize_bytes(&mut self, v: &[u8], out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_bytes(v, out);
             }
 
-            fn erased_serialize_none(&mut self) -> Result<Ok, Error> {
-                (**self).erased_serialize_none()
+            fn erased_serialize_none(&mut self, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_none(out);
             }
 
-            fn erased_serialize_some(&mut self, value: &dyn Serialize) -> Result<Ok, Error> {
-                (**self).erased_serialize_some(value)
+            fn erased_serialize_some(&mut self, value: &dyn Serialize, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_some(value, out);
             }
 
-            fn erased_serialize_unit(&mut self) -> Result<Ok, Error> {
-                (**self).erased_serialize_unit()
+            fn erased_serialize_unit(&mut self, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_unit(out);
             }
 
-            fn erased_serialize_unit_struct(&mut self, name: &'static str) -> Result<Ok, Error> {
-                (**self).erased_serialize_unit_struct(name)
+            fn erased_serialize_unit_struct(&mut self, name: &'static str, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_unit_struct(name, out);
             }
 
-            fn erased_serialize_unit_variant(&mut self, name: &'static str, variant_index: u32, variant: &'static str) -> Result<Ok, Error> {
-                (**self).erased_serialize_unit_variant(name, variant_index, variant)
+            fn erased_serialize_unit_variant(&mut self, name: &'static str, variant_index: u32, variant: &'static str, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_unit_variant(name, variant_index, variant, out);
             }
 
-            fn erased_serialize_newtype_struct(&mut self, name: &'static str, value: &dyn Serialize) -> Result<Ok, Error> {
-                (**self).erased_serialize_newtype_struct(name, value)
+            fn erased_serialize_newtype_struct(&mut self, name: &'static str, value: &dyn Serialize, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_newtype_struct(name, value, out);
             }
 
-            fn erased_serialize_newtype_variant(&mut self, name: &'static str, variant_index: u32, variant: &'static str, value: &dyn Serialize) -> Result<Ok, Error> {
-                (**self).erased_serialize_newtype_variant(name, variant_index, variant, value)
+            fn erased_serialize_newtype_variant(&mut self, name: &'static str, variant_index: u32, variant: &'static str, value: &dyn Serialize, out: &mut MaybeUninit<Result<Ok, Error>>) {
+                (**self).erased_serialize_newtype_variant(name, variant_index, variant, value, out);
             }
 
-            fn erased_serialize_seq(&mut self, len: Option<usize>) -> Result<Seq, Error> {
-                (**self).erased_serialize_seq(len)
+            fn erased_serialize_seq(&mut self, len: Option<usize>, out: &mut MaybeUninit<Result<Seq, Error>>) {
+                (**self).erased_serialize_seq(len, out);
             }
 
-            fn erased_serialize_tuple(&mut self, len: usize) -> Result<Tuple, Error> {
-                (**self).erased_serialize_tuple(len)
+            fn erased_serialize_tuple(&mut self, len: usize, out: &mut MaybeUninit<Result<Tuple, Error>>) {
+                (**self).erased_serialize_tuple(len, out);
             }
 
-            fn erased_serialize_tuple_struct(&mut self, name: &'static str, len: usize) -> Result<TupleStruct, Error> {
-                (**self).erased_serialize_tuple_struct(name, len)
+            fn erased_serialize_tuple_struct(&mut self, name: &'static str, len: usize, out: &mut MaybeUninit<Result<TupleStruct, Error>>) {
+                (**self).erased_serialize_tuple_struct(name, len, out);
             }
 
-            fn erased_serialize_tuple_variant(&mut self, name: &'static str, variant_index: u32, variant: &'static str, len: usize) -> Result<TupleVariant, Error> {
-                (**self).erased_serialize_tuple_variant(name, variant_index, variant, len)
+            fn erased_serialize_tuple_variant(&mut self, name: &'static str, variant_index: u32, variant: &'static str, len: usize, out: &mut MaybeUninit<Result<TupleVariant, Error>>) {
+                (**self).erased_serialize_tuple_variant(name, variant_index, variant, len, out);
             }
 
-            fn erased_serialize_map(&mut self, len: Option<usize>) -> Result<Map, Error> {
-                (**self).erased_serialize_map(len)
+            fn erased_serialize_map(&mut self, len: Option<usize>, out: &mut MaybeUninit<Result<Map, Error>>) {
+                (**self).erased_serialize_map(len, out);
             }
 
-            fn erased_serialize_struct(&mut self, name: &'static str, len: usize) -> Result<Struct, Error> {
-                (**self).erased_serialize_struct(name, len)
+            fn erased_serialize_struct(&mut self, name: &'static str, len: usize, out: &mut MaybeUninit<Result<Struct, Error>>) {
+                (**self).erased_serialize_struct(name, len, out);
             }
 
-            fn erased_serialize_struct_variant(&mut self, name: &'static str, variant_index: u32, variant: &'static str, len: usize) -> Result<StructVariant, Error> {
-                (**self).erased_serialize_struct_variant(name, variant_index, variant, len)
+            fn erased_serialize_struct_variant(&mut self, name: &'static str, variant_index: u32, variant: &'static str, len: usize, out: &mut MaybeUninit<Result<StructVariant, Error>>) {
+                (**self).erased_serialize_struct_variant(name, variant_index, variant, len, out);
             }
 
             fn erased_is_human_readable(&self) -> bool {
