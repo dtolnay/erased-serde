@@ -591,7 +591,8 @@ impl<T> sealed::serializer::Sealed for erase::Serializer<T> where T: serde::Seri
 ///
 /// impl<'a> serde::Serialize for dyn Event + 'a {
 ///     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-///         where S: serde::Serializer
+///     where
+///         S: serde::Serializer,
 ///     {
 ///         erased_serde::serialize(self, serializer)
 ///     }
