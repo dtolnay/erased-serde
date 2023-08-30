@@ -13,14 +13,6 @@ pub struct Error {
 /// Result type alias where the error is `erased_serde::Error`.
 pub type Result<T> = core::result::Result<T, Error>;
 
-pub(crate) fn erase_ser<E: serde::ser::Error>(e: E) -> Error {
-    serde::ser::Error::custom(e)
-}
-
-pub(crate) fn unerase_ser<E: serde::ser::Error>(e: Error) -> E {
-    e.as_serde_ser_error()
-}
-
 pub(crate) fn erase_de<E: serde::de::Error>(e: E) -> Error {
     serde::de::Error::custom(e)
 }
@@ -161,13 +153,6 @@ impl serde::de::Error for Error {
 }
 
 impl Error {
-    fn as_serde_ser_error<E: serde::ser::Error>(&self) -> E {
-        match self.imp.as_ref() {
-            ErrorImpl::Custom(msg) => E::custom(msg),
-            _ => unreachable!(),
-        }
-    }
-
     fn as_serde_de_error<E: serde::de::Error>(&self) -> E {
         match self.imp.as_ref() {
             ErrorImpl::Custom(msg) => E::custom(msg),
@@ -237,5 +222,27 @@ impl Unexpected {
             Unexpected::StructVariant => serde::de::Unexpected::StructVariant,
             Unexpected::Other(msg) => serde::de::Unexpected::Other(msg),
         }
+    }
+}
+
+pub struct ShortCircuit;
+
+impl Display for ShortCircuit {
+    fn fmt(&self, _formatter: &mut fmt::Formatter) -> fmt::Result {
+        unreachable!()
+    }
+}
+
+impl Debug for ShortCircuit {
+    fn fmt(&self, _formatter: &mut fmt::Formatter) -> fmt::Result {
+        unreachable!()
+    }
+}
+
+impl serde::ser::StdError for ShortCircuit {}
+
+impl serde::ser::Error for ShortCircuit {
+    fn custom<T: Display>(_msg: T) -> Self {
+        unreachable!()
     }
 }
