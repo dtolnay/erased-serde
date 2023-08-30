@@ -239,9 +239,7 @@ impl dyn Serializer {
         S: serde::Serializer,
         S::Ok: 'static,
     {
-        erase::Serializer {
-            state: Some(serializer),
-        }
+        erase::Serializer::new(serializer)
     }
 }
 
@@ -293,17 +291,30 @@ where
 impl<T> sealed::serialize::Sealed for T where T: ?Sized + serde::Serialize {}
 
 mod erase {
-    pub struct Serializer<S> {
-        pub(crate) state: Option<S>,
+    use core::mem;
+
+    pub enum Serializer<S> {
+        Ready(S),
+        Consumed,
     }
 
     impl<S> Serializer<S> {
+        pub(crate) fn new(serializer: S) -> Self {
+            Serializer::Ready(serializer)
+        }
+
         pub(crate) fn take(&mut self) -> S {
-            self.state.take().unwrap()
+            match mem::replace(self, Serializer::Consumed) {
+                Serializer::Ready(serializer) => serializer,
+                Serializer::Consumed => panic!(),
+            }
         }
 
         pub(crate) fn as_ref(&self) -> &S {
-            self.state.as_ref().unwrap()
+            match self {
+                Serializer::Ready(serializer) => serializer,
+                Serializer::Consumed => panic!(),
+            }
         }
     }
 }
@@ -684,9 +695,7 @@ where
     T: ?Sized + Serialize,
     S: serde::Serializer,
 {
-    let mut erased = erase::Serializer {
-        state: Some(serializer),
-    };
+    let mut erased = erase::Serializer::new(serializer);
     let mut out = MaybeUninit::uninit();
     value.do_erased_serialize(&mut erased, &mut out);
     unsafe { out.assume_init().unsafe_map(Ok::take).map_err(unerase) }
