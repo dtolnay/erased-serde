@@ -276,7 +276,7 @@ where
     T: ?Sized + serde::Serialize,
 {
     fn erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<(), Error> {
-        self.serialize(serializer).map(drop)
+        self.serialize(MakeSerializer(serializer)).map(drop)
     }
 
     fn do_erased_serialize(
@@ -284,7 +284,7 @@ where
         serializer: &mut dyn Serializer,
         out: &mut MaybeUninit<Result<Ok, Error>>,
     ) {
-        out.write(self.serialize(serializer));
+        out.write(self.serialize(MakeSerializer(serializer)));
     }
 }
 
@@ -703,9 +703,11 @@ where
 
 serialize_trait_object!(Serialize);
 
+struct MakeSerializer<T>(T);
+
 macro_rules! impl_serializer_for_trait_object {
     ($ty:ty) => {
-        impl<'a> serde::Serializer for $ty {
+        impl<'a> serde::Serializer for MakeSerializer<$ty> {
             type Ok = Ok;
             type Error = Error;
             type SerializeSeq = Seq<'a>;
@@ -718,103 +720,103 @@ macro_rules! impl_serializer_for_trait_object {
 
             fn serialize_bool(self, v: bool) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_bool(v, &mut out);
+                self.0.erased_serialize_bool(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_i8(self, v: i8) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_i8(v, &mut out);
+                self.0.erased_serialize_i8(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_i16(self, v: i16) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_i16(v, &mut out);
+                self.0.erased_serialize_i16(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_i32(self, v: i32) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_i32(v, &mut out);
+                self.0.erased_serialize_i32(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_i64(self, v: i64) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_i64(v, &mut out);
+                self.0.erased_serialize_i64(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_i128(self, v: i128) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_i128(v, &mut out);
+                self.0.erased_serialize_i128(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_u8(self, v: u8) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_u8(v, &mut out);
+                self.0.erased_serialize_u8(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_u16(self, v: u16) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_u16(v, &mut out);
+                self.0.erased_serialize_u16(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_u32(self, v: u32) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_u32(v, &mut out);
+                self.0.erased_serialize_u32(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_u64(self, v: u64) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_u64(v, &mut out);
+                self.0.erased_serialize_u64(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_u128(self, v: u128) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_u128(v, &mut out);
+                self.0.erased_serialize_u128(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_f32(self, v: f32) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_f32(v, &mut out);
+                self.0.erased_serialize_f32(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_f64(self, v: f64) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_f64(v, &mut out);
+                self.0.erased_serialize_f64(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_char(self, v: char) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_char(v, &mut out);
+                self.0.erased_serialize_char(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_str(self, v: &str) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_str(v, &mut out);
+                self.0.erased_serialize_str(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_bytes(self, v: &[u8]) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_bytes(v, &mut out);
+                self.0.erased_serialize_bytes(v, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_none(self) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_none(&mut out);
+                self.0.erased_serialize_none(&mut out);
                 unsafe { out.assume_init() }
             }
 
@@ -823,19 +825,19 @@ macro_rules! impl_serializer_for_trait_object {
                 T: ?Sized + serde::Serialize,
             {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_some(&value, &mut out);
+                self.0.erased_serialize_some(&value, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_unit(self) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_unit(&mut out);
+                self.0.erased_serialize_unit(&mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_unit_struct(self, name: &'static str) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_unit_struct(name, &mut out);
+                self.0.erased_serialize_unit_struct(name, &mut out);
                 unsafe { out.assume_init() }
             }
 
@@ -846,7 +848,8 @@ macro_rules! impl_serializer_for_trait_object {
                 variant: &'static str,
             ) -> Result<Ok, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_unit_variant(name, variant_index, variant, &mut out);
+                self.0
+                    .erased_serialize_unit_variant(name, variant_index, variant, &mut out);
                 unsafe { out.assume_init() }
             }
 
@@ -855,7 +858,8 @@ macro_rules! impl_serializer_for_trait_object {
                 T: ?Sized + serde::Serialize,
             {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_newtype_struct(name, &value, &mut out);
+                self.0
+                    .erased_serialize_newtype_struct(name, &value, &mut out);
                 unsafe { out.assume_init() }
             }
 
@@ -870,7 +874,7 @@ macro_rules! impl_serializer_for_trait_object {
                 T: ?Sized + serde::Serialize,
             {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_newtype_variant(
+                self.0.erased_serialize_newtype_variant(
                     name,
                     variant_index,
                     variant,
@@ -882,13 +886,13 @@ macro_rules! impl_serializer_for_trait_object {
 
             fn serialize_seq(self, len: Option<usize>) -> Result<Seq<'a>, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_seq(len, &mut out);
+                self.0.erased_serialize_seq(len, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_tuple(self, len: usize) -> Result<Tuple<'a>, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_tuple(len, &mut out);
+                self.0.erased_serialize_tuple(len, &mut out);
                 unsafe { out.assume_init() }
             }
 
@@ -898,7 +902,7 @@ macro_rules! impl_serializer_for_trait_object {
                 len: usize,
             ) -> Result<TupleStruct<'a>, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_tuple_struct(name, len, &mut out);
+                self.0.erased_serialize_tuple_struct(name, len, &mut out);
                 unsafe { out.assume_init() }
             }
 
@@ -910,19 +914,20 @@ macro_rules! impl_serializer_for_trait_object {
                 len: usize,
             ) -> Result<TupleVariant<'a>, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_tuple_variant(name, variant_index, variant, len, &mut out);
+                self.0
+                    .erased_serialize_tuple_variant(name, variant_index, variant, len, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_map(self, len: Option<usize>) -> Result<Map<'a>, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_map(len, &mut out);
+                self.0.erased_serialize_map(len, &mut out);
                 unsafe { out.assume_init() }
             }
 
             fn serialize_struct(self, name: &'static str, len: usize) -> Result<Struct<'a>, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_struct(name, len, &mut out);
+                self.0.erased_serialize_struct(name, len, &mut out);
                 unsafe { out.assume_init() }
             }
 
@@ -934,7 +939,8 @@ macro_rules! impl_serializer_for_trait_object {
                 len: usize,
             ) -> Result<StructVariant<'a>, Error> {
                 let mut out = MaybeUninit::uninit();
-                self.erased_serialize_struct_variant(name, variant_index, variant, len, &mut out);
+                self.0
+                    .erased_serialize_struct_variant(name, variant_index, variant, len, &mut out);
                 unsafe { out.assume_init() }
             }
 
@@ -947,7 +953,7 @@ macro_rules! impl_serializer_for_trait_object {
             }
 
             fn is_human_readable(&self) -> bool {
-                self.erased_is_human_readable()
+                self.0.erased_is_human_readable()
             }
         }
     };
@@ -1640,16 +1646,5 @@ mod tests {
         assert::<Box<dyn Serialize + Sync + Send>>();
         assert::<Vec<Box<dyn Serialize>>>();
         assert::<Vec<Box<dyn Serialize + Send>>>();
-    }
-
-    #[test]
-    fn assert_serializer() {
-        fn assert<T: serde::Serializer>() {}
-
-        assert::<&mut dyn Serializer>();
-        assert::<&mut (dyn Serializer + Send)>();
-        assert::<&mut (dyn Serializer + Sync)>();
-        assert::<&mut (dyn Serializer + Send + Sync)>();
-        assert::<&mut (dyn Serializer + Sync + Send)>();
     }
 }
