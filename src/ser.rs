@@ -703,9 +703,9 @@ where
 
 serialize_trait_object!(Serialize);
 
-struct MakeSerializer<T>(T);
+struct MakeSerializer<'a>(&'a mut dyn Serializer);
 
-impl<'a> serde::Serializer for MakeSerializer<&'a mut (dyn Serializer + '_)> {
+impl<'a> serde::Serializer for MakeSerializer<'a> {
     type Ok = Ok;
     type Error = Error;
     type SerializeSeq = Seq<'a>;
