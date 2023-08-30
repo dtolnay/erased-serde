@@ -53,14 +53,12 @@ use serde::ser::{
 /// This trait is sealed and can only be implemented via a `serde::Serialize`
 /// impl.
 pub trait Serialize: sealed::serialize::Sealed {
-    #[doc(hidden)]
-    fn do_erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<Ok, Error>;
-}
-
-impl<'a> dyn Serialize + 'a {
-    pub fn erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<(), Error> {
+    fn erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<(), Error> {
         self.do_erased_serialize(serializer).map(drop)
     }
+
+    #[doc(hidden)]
+    fn do_erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<Ok, Error>;
 }
 
 /// An object-safe equivalent of Serde's `Serializer` trait.
