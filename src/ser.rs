@@ -960,9 +960,6 @@ macro_rules! impl_serializer_for_trait_object {
 }
 
 impl_serializer_for_trait_object!(&'a mut (dyn Serializer + '_));
-impl_serializer_for_trait_object!(&'a mut (dyn Serializer + Send + '_));
-impl_serializer_for_trait_object!(&'a mut (dyn Serializer + Sync + '_));
-impl_serializer_for_trait_object!(&'a mut (dyn Serializer + Send + Sync + '_));
 
 pub struct Seq<'a> {
     data: Any,
