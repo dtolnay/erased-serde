@@ -53,7 +53,14 @@ use serde::ser::{
 /// This trait is sealed and can only be implemented via a `serde::Serialize`
 /// impl.
 pub trait Serialize: sealed::serialize::Sealed {
-    fn erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<Ok, Error>;
+    #[doc(hidden)]
+    fn do_erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<Ok, Error>;
+}
+
+impl<'a> dyn Serialize + 'a {
+    pub fn erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<(), Error> {
+        self.do_erased_serialize(serializer).map(drop)
+    }
 }
 
 /// An object-safe equivalent of Serde's `Serializer` trait.
@@ -242,7 +249,7 @@ impl<T> Serialize for T
 where
     T: ?Sized + serde::Serialize,
 {
-    fn erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<Ok, Error> {
+    fn do_erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<Ok, Error> {
         self.serialize(serializer)
     }
 }
@@ -619,7 +626,7 @@ where
     };
     unsafe {
         value
-            .erased_serialize(&mut erased)
+            .do_erased_serialize(&mut erased)
             .unsafe_map(Ok::take)
             .map_err(unerase)
     }
