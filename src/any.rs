@@ -37,7 +37,7 @@ impl Any {
     //    let a = Any::new(&s);
     //    drop(s);
     //
-    // Now `a.view()` and `a.take()` return references to a dead String.
+    // Now `a.as_ref()` and `a.take()` return references to a dead String.
     pub(crate) unsafe fn new<T>(t: T) -> Self {
         let value: Value;
         let drop: unsafe fn(&mut Value);
@@ -70,7 +70,7 @@ impl Any {
     }
 
     // This is unsafe -- caller is responsible that T is the correct type.
-    pub(crate) unsafe fn view<T>(&mut self) -> &mut T {
+    pub(crate) unsafe fn as_ref<T>(&mut self) -> &mut T {
         if self.type_id != non_static_type_id::<T>() {
             self.invalid_cast_to::<T>();
         }

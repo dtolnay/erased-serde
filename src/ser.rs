@@ -826,7 +826,7 @@ impl<'a> Seq<'a> {
                 where
                     T: serde::ser::SerializeSeq,
                 {
-                    unsafe { data.view::<T>().serialize_element(v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_element(v).map_err(erase) }
                 }
                 serialize_element::<T>
             },
@@ -882,7 +882,7 @@ impl<'a> Tuple<'a> {
                 where
                     T: serde::ser::SerializeTuple,
                 {
-                    unsafe { data.view::<T>().serialize_element(v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_element(v).map_err(erase) }
                 }
                 serialize_element::<T>
             },
@@ -935,7 +935,7 @@ impl<'a> TupleStruct<'a> {
                 where
                     T: serde::ser::SerializeTupleStruct,
                 {
-                    unsafe { data.view::<T>().serialize_field(v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_field(v).map_err(erase) }
                 }
                 serialize_field::<T>
             },
@@ -988,7 +988,7 @@ impl<'a> TupleVariant<'a> {
                 where
                     T: serde::ser::SerializeTupleVariant,
                 {
-                    unsafe { data.view::<T>().serialize_field(v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_field(v).map_err(erase) }
                 }
                 serialize_field::<T>
             },
@@ -1043,7 +1043,7 @@ impl<'a> Map<'a> {
                 where
                     T: serde::ser::SerializeMap,
                 {
-                    unsafe { data.view::<T>().serialize_key(v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_key(v).map_err(erase) }
                 }
                 serialize_key::<T>
             },
@@ -1052,7 +1052,7 @@ impl<'a> Map<'a> {
                 where
                     T: serde::ser::SerializeMap,
                 {
-                    unsafe { data.view::<T>().serialize_value(v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_value(v).map_err(erase) }
                 }
                 serialize_value::<T>
             },
@@ -1065,7 +1065,7 @@ impl<'a> Map<'a> {
                 where
                     T: serde::ser::SerializeMap,
                 {
-                    unsafe { data.view::<T>().serialize_entry(k, v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_entry(k, v).map_err(erase) }
                 }
                 serialize_entry::<T>
             },
@@ -1137,7 +1137,7 @@ impl<'a> Struct<'a> {
                 where
                     T: serde::ser::SerializeStruct,
                 {
-                    unsafe { data.view::<T>().serialize_field(k, v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_field(k, v).map_err(erase) }
                 }
                 serialize_field::<T>
             },
@@ -1194,7 +1194,7 @@ impl<'a> StructVariant<'a> {
                 where
                     T: serde::ser::SerializeStructVariant,
                 {
-                    unsafe { data.view::<T>().serialize_field(k, v).map_err(erase) }
+                    unsafe { data.as_ref::<T>().serialize_field(k, v).map_err(erase) }
                 }
                 serialize_field::<T>
             },
