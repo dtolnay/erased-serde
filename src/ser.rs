@@ -716,109 +716,109 @@ impl<'a> serde::Serializer for MakeSerializer<'a> {
     type SerializeStruct = Struct<'a>;
     type SerializeStructVariant = StructVariant<'a>;
 
-    fn serialize_bool(self, v: bool) -> Result<Ok, Error> {
+    fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_bool(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_i8(self, v: i8) -> Result<Ok, Error> {
+    fn serialize_i8(self, v: i8) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_i8(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_i16(self, v: i16) -> Result<Ok, Error> {
+    fn serialize_i16(self, v: i16) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_i16(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_i32(self, v: i32) -> Result<Ok, Error> {
+    fn serialize_i32(self, v: i32) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_i32(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_i64(self, v: i64) -> Result<Ok, Error> {
+    fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_i64(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_i128(self, v: i128) -> Result<Ok, Error> {
+    fn serialize_i128(self, v: i128) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_i128(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_u8(self, v: u8) -> Result<Ok, Error> {
+    fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_u8(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_u16(self, v: u16) -> Result<Ok, Error> {
+    fn serialize_u16(self, v: u16) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_u16(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_u32(self, v: u32) -> Result<Ok, Error> {
+    fn serialize_u32(self, v: u32) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_u32(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_u64(self, v: u64) -> Result<Ok, Error> {
+    fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_u64(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_u128(self, v: u128) -> Result<Ok, Error> {
+    fn serialize_u128(self, v: u128) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_u128(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_f32(self, v: f32) -> Result<Ok, Error> {
+    fn serialize_f32(self, v: f32) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_f32(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_f64(self, v: f64) -> Result<Ok, Error> {
+    fn serialize_f64(self, v: f64) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_f64(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_char(self, v: char) -> Result<Ok, Error> {
+    fn serialize_char(self, v: char) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_char(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_str(self, v: &str) -> Result<Ok, Error> {
+    fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_str(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_bytes(self, v: &[u8]) -> Result<Ok, Error> {
+    fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_bytes(v, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_none(self) -> Result<Ok, Error> {
+    fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_none(&mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_some<T>(self, value: &T) -> Result<Ok, Error>
+    fn serialize_some<T>(self, value: &T) -> Result<Self::Ok, Self::Error>
     where
         T: ?Sized + serde::Serialize,
     {
@@ -827,13 +827,13 @@ impl<'a> serde::Serializer for MakeSerializer<'a> {
         unsafe { out.assume_init() }
     }
 
-    fn serialize_unit(self) -> Result<Ok, Error> {
+    fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_unit(&mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_unit_struct(self, name: &'static str) -> Result<Ok, Error> {
+    fn serialize_unit_struct(self, name: &'static str) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_unit_struct(name, &mut out);
         unsafe { out.assume_init() }
@@ -844,14 +844,18 @@ impl<'a> serde::Serializer for MakeSerializer<'a> {
         name: &'static str,
         variant_index: u32,
         variant: &'static str,
-    ) -> Result<Ok, Error> {
+    ) -> Result<Self::Ok, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0
             .erased_serialize_unit_variant(name, variant_index, variant, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_newtype_struct<T>(self, name: &'static str, value: &T) -> Result<Ok, Error>
+    fn serialize_newtype_struct<T>(
+        self,
+        name: &'static str,
+        value: &T,
+    ) -> Result<Self::Ok, Self::Error>
     where
         T: ?Sized + serde::Serialize,
     {
@@ -867,7 +871,7 @@ impl<'a> serde::Serializer for MakeSerializer<'a> {
         variant_index: u32,
         variant: &'static str,
         value: &T,
-    ) -> Result<Ok, Error>
+    ) -> Result<Self::Ok, Self::Error>
     where
         T: ?Sized + serde::Serialize,
     {
@@ -877,13 +881,13 @@ impl<'a> serde::Serializer for MakeSerializer<'a> {
         unsafe { out.assume_init() }
     }
 
-    fn serialize_seq(self, len: Option<usize>) -> Result<Seq<'a>, Error> {
+    fn serialize_seq(self, len: Option<usize>) -> Result<Seq<'a>, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_seq(len, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_tuple(self, len: usize) -> Result<Tuple<'a>, Error> {
+    fn serialize_tuple(self, len: usize) -> Result<Tuple<'a>, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_tuple(len, &mut out);
         unsafe { out.assume_init() }
@@ -893,7 +897,7 @@ impl<'a> serde::Serializer for MakeSerializer<'a> {
         self,
         name: &'static str,
         len: usize,
-    ) -> Result<TupleStruct<'a>, Error> {
+    ) -> Result<TupleStruct<'a>, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_tuple_struct(name, len, &mut out);
         unsafe { out.assume_init() }
@@ -905,20 +909,20 @@ impl<'a> serde::Serializer for MakeSerializer<'a> {
         variant_index: u32,
         variant: &'static str,
         len: usize,
-    ) -> Result<TupleVariant<'a>, Error> {
+    ) -> Result<TupleVariant<'a>, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0
             .erased_serialize_tuple_variant(name, variant_index, variant, len, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_map(self, len: Option<usize>) -> Result<Map<'a>, Error> {
+    fn serialize_map(self, len: Option<usize>) -> Result<Map<'a>, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_map(len, &mut out);
         unsafe { out.assume_init() }
     }
 
-    fn serialize_struct(self, name: &'static str, len: usize) -> Result<Struct<'a>, Error> {
+    fn serialize_struct(self, name: &'static str, len: usize) -> Result<Struct<'a>, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0.erased_serialize_struct(name, len, &mut out);
         unsafe { out.assume_init() }
@@ -930,7 +934,7 @@ impl<'a> serde::Serializer for MakeSerializer<'a> {
         variant_index: u32,
         variant: &'static str,
         len: usize,
-    ) -> Result<StructVariant<'a>, Error> {
+    ) -> Result<StructVariant<'a>, Self::Error> {
         let mut out = MaybeUninit::uninit();
         self.0
             .erased_serialize_struct_variant(name, variant_index, variant, len, &mut out);
@@ -994,14 +998,14 @@ impl<'a> SerializeSeq for Seq<'a> {
     type Ok = Ok;
     type Error = Error;
 
-    fn serialize_element<T>(&mut self, value: &T) -> Result<(), Error>
+    fn serialize_element<T>(&mut self, value: &T) -> Result<(), Self::Error>
     where
         T: ?Sized + serde::Serialize,
     {
         unsafe { (self.serialize_element)(&mut self.data, &value) }
     }
 
-    fn end(self) -> Result<Ok, Error> {
+    fn end(self) -> Result<Self::Ok, Self::Error> {
         unsafe { (self.end)(self.data) }
     }
 }
@@ -1050,14 +1054,14 @@ impl<'a> SerializeTuple for Tuple<'a> {
     type Ok = Ok;
     type Error = Error;
 
-    fn serialize_element<T>(&mut self, value: &T) -> Result<(), Error>
+    fn serialize_element<T>(&mut self, value: &T) -> Result<(), Self::Error>
     where
         T: ?Sized + serde::Serialize,
     {
         unsafe { (self.serialize_element)(&mut self.data, &value) }
     }
 
-    fn end(self) -> Result<Ok, Error> {
+    fn end(self) -> Result<Self::Ok, Self::Error> {
         unsafe { (self.end)(self.data) }
     }
 }
@@ -1106,14 +1110,14 @@ impl<'a> SerializeTupleStruct for TupleStruct<'a> {
     type Ok = Ok;
     type Error = Error;
 
-    fn serialize_field<T>(&mut self, value: &T) -> Result<(), Error>
+    fn serialize_field<T>(&mut self, value: &T) -> Result<(), Self::Error>
     where
         T: ?Sized + serde::Serialize,
     {
         unsafe { (self.serialize_field)(&mut self.data, &value) }
     }
 
-    fn end(self) -> Result<Ok, Error> {
+    fn end(self) -> Result<Self::Ok, Self::Error> {
         unsafe { (self.end)(self.data) }
     }
 }
@@ -1162,14 +1166,14 @@ impl<'a> SerializeTupleVariant for TupleVariant<'a> {
     type Ok = Ok;
     type Error = Error;
 
-    fn serialize_field<T>(&mut self, value: &T) -> Result<(), Error>
+    fn serialize_field<T>(&mut self, value: &T) -> Result<(), Self::Error>
     where
         T: ?Sized + serde::Serialize,
     {
         unsafe { (self.serialize_field)(&mut self.data, &value) }
     }
 
-    fn end(self) -> Result<Ok, Error> {
+    fn end(self) -> Result<Self::Ok, Self::Error> {
         unsafe { (self.end)(self.data) }
     }
 }
@@ -1246,21 +1250,21 @@ impl<'a> SerializeMap for Map<'a> {
     type Ok = Ok;
     type Error = Error;
 
-    fn serialize_key<T>(&mut self, key: &T) -> Result<(), Error>
+    fn serialize_key<T>(&mut self, key: &T) -> Result<(), Self::Error>
     where
         T: ?Sized + serde::Serialize,
     {
         unsafe { (self.serialize_key)(&mut self.data, &key) }
     }
 
-    fn serialize_value<T>(&mut self, value: &T) -> Result<(), Error>
+    fn serialize_value<T>(&mut self, value: &T) -> Result<(), Self::Error>
     where
         T: ?Sized + serde::Serialize,
     {
         unsafe { (self.serialize_value)(&mut self.data, &value) }
     }
 
-    fn serialize_entry<K, V>(&mut self, key: &K, value: &V) -> Result<(), Error>
+    fn serialize_entry<K, V>(&mut self, key: &K, value: &V) -> Result<(), Self::Error>
     where
         K: ?Sized + serde::Serialize,
         V: ?Sized + serde::Serialize,
@@ -1268,7 +1272,7 @@ impl<'a> SerializeMap for Map<'a> {
         unsafe { (self.serialize_entry)(&mut self.data, &key, &value) }
     }
 
-    fn end(self) -> Result<Ok, Error> {
+    fn end(self) -> Result<Self::Ok, Self::Error> {
         unsafe { (self.end)(self.data) }
     }
 }
@@ -1322,14 +1326,14 @@ impl<'a> SerializeStruct for Struct<'a> {
     type Ok = Ok;
     type Error = Error;
 
-    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<(), Error>
+    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error>
     where
         T: ?Sized + serde::Serialize,
     {
         unsafe { (self.serialize_field)(&mut self.data, key, &value) }
     }
 
-    fn end(self) -> Result<Ok, Error> {
+    fn end(self) -> Result<Self::Ok, Self::Error> {
         unsafe { (self.end)(self.data) }
     }
 }
@@ -1383,14 +1387,14 @@ impl<'a> SerializeStructVariant for StructVariant<'a> {
     type Ok = Ok;
     type Error = Error;
 
-    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<(), Error>
+    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error>
     where
         T: ?Sized + serde::Serialize,
     {
         unsafe { (self.serialize_field)(&mut self.data, key, &value) }
     }
 
-    fn end(self) -> Result<Ok, Error> {
+    fn end(self) -> Result<Self::Ok, Self::Error> {
         unsafe { (self.end)(self.data) }
     }
 }
