@@ -214,7 +214,6 @@ impl dyn Serializer {
     pub fn erase<S>(serializer: S) -> impl Serializer
     where
         S: serde::Serializer,
-        S::Ok: 'static,
     {
         erase::Serializer::new(serializer)
     }
