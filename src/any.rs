@@ -70,21 +70,6 @@ impl Any {
     }
 
     // This is unsafe -- caller is responsible that T is the correct type.
-    pub(crate) unsafe fn as_ref<T>(&mut self) -> &mut T {
-        if self.type_id != non_static_type_id::<T>() {
-            self.invalid_cast_to::<T>();
-        }
-
-        let ptr = if is_small::<T>() {
-            unsafe { self.value.inline.as_mut_ptr().cast::<T>() }
-        } else {
-            unsafe { self.value.ptr.cast::<T>() }
-        };
-
-        unsafe { &mut *ptr }
-    }
-
-    // This is unsafe -- caller is responsible that T is the correct type.
     pub(crate) unsafe fn take<T>(mut self) -> T {
         if self.type_id != non_static_type_id::<T>() {
             self.invalid_cast_to::<T>();
