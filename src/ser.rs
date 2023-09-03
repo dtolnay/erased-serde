@@ -211,7 +211,7 @@ impl dyn Serializer {
     ///     value.erased_serialize(format).unwrap();
     /// }
     /// ```
-    pub fn erase<S>(serializer: S) -> erase::Serializer<S>
+    pub fn erase<S>(serializer: S) -> impl Serializer
     where
         S: serde::Serializer,
         S::Ok: 'static,
