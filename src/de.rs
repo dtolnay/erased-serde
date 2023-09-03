@@ -252,7 +252,7 @@ impl<'de> dyn Deserializer<'de> {
     ///     println!("{}", data["A"] + data["B"]);
     /// }
     /// ```
-    pub fn erase<D>(deserializer: D) -> erase::Deserializer<D>
+    pub fn erase<D>(deserializer: D) -> impl Deserializer<'de>
     where
         D: serde::Deserializer<'de>,
     {
