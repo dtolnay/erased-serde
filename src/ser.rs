@@ -1289,8 +1289,8 @@ impl serde::ser::SerializeStructVariant for MakeSerializer<&mut dyn SerializeStr
 // IMPL ERASED SERDE FOR ERASED SERDE //////////////////////////////////////////
 
 macro_rules! deref_erased_serializer {
-    (<'a $(, $T:ident)*> Serializer for $ty:ty $(where $($where:tt)*)?) => {
-        impl<'a $(, $T)*> Serializer for $ty $(where $($where)*)? {
+    (<$T:ident> Serializer for $ty:ty $(where $($where:tt)*)?) => {
+        impl<$T> Serializer for $ty $(where $($where)*)? {
             fn erased_serialize_bool(&mut self, v: bool) {
                 (**self).erased_serialize_bool(v);
             }
@@ -1420,15 +1420,12 @@ macro_rules! deref_erased_serializer {
             }
         }
 
-        impl<'a $(, $T)*> sealed::serializer::Sealed for $ty $(where $($where)*)? {}
+        impl<$T> sealed::serializer::Sealed for $ty $(where $($where)*)? {}
     };
 }
 
-deref_erased_serializer!(<'a> Serializer for Box<dyn Serializer + 'a>);
-deref_erased_serializer!(<'a> Serializer for Box<dyn Serializer + Send + 'a>);
-deref_erased_serializer!(<'a> Serializer for Box<dyn Serializer + Sync + 'a>);
-deref_erased_serializer!(<'a> Serializer for Box<dyn Serializer + Send + Sync + 'a>);
-deref_erased_serializer!(<'a, T> Serializer for &'a mut T where T: ?Sized + Serializer);
+deref_erased_serializer!(<T> Serializer for &mut T where T: ?Sized + Serializer);
+deref_erased_serializer!(<T> Serializer for Box<T> where T: ?Sized + Serializer);
 
 // TEST ////////////////////////////////////////////////////////////////////////
 
