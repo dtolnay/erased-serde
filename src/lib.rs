@@ -109,6 +109,7 @@
     clippy::needless_pass_by_value,
     clippy::semicolon_if_nothing_returned, // https://github.com/rust-lang/rust-clippy/issues/7324
     clippy::similar_names,
+    clippy::struct_field_names,
     clippy::unused_self,
     clippy::wildcard_imports
 )]
