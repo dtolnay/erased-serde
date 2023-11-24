@@ -1178,6 +1178,7 @@ pub trait SerializeStruct {
         key: &'static str,
         value: &dyn Serialize,
     ) -> Result<(), ShortCircuit>;
+    fn erased_skip_field(&mut self, key: &'static str) -> Result<(), ShortCircuit>;
     fn erased_end(&mut self);
 }
 
@@ -1195,6 +1196,17 @@ where
             _ => unreachable!(),
         };
         serializer.serialize_field(key, value).map_err(|err| {
+            *self = erase::Serializer::Error(err);
+            ShortCircuit
+        })
+    }
+
+    fn erased_skip_field(&mut self, key: &'static str) -> Result<(), ShortCircuit> {
+        let serializer = match self {
+            erase::Serializer::Struct(serializer) => serializer,
+            _ => unreachable!(),
+        };
+        serializer.skip_field(key).map_err(|err| {
             *self = erase::Serializer::Error(err);
             ShortCircuit
         })
@@ -1223,6 +1235,10 @@ impl serde::ser::SerializeStruct for MakeSerializer<&mut dyn SerializeStruct> {
         self.0.erased_serialize_field(key, &value)
     }
 
+    fn skip_field(&mut self, key: &'static str) -> Result<(), Self::Error> {
+        self.0.erased_skip_field(key)
+    }
+
     fn end(self) -> Result<Self::Ok, Self::Error> {
         self.0.erased_end();
         Ok(())
@@ -1235,6 +1251,7 @@ pub trait SerializeStructVariant {
         key: &'static str,
         value: &dyn Serialize,
     ) -> Result<(), ShortCircuit>;
+    fn erased_skip_field(&mut self, key: &'static str) -> Result<(), ShortCircuit>;
     fn erased_end(&mut self);
 }
 
@@ -1252,6 +1269,17 @@ where
             _ => unreachable!(),
         };
         serializer.serialize_field(key, value).map_err(|err| {
+            *self = erase::Serializer::Error(err);
+            ShortCircuit
+        })
+    }
+
+    fn erased_skip_field(&mut self, key: &'static str) -> Result<(), ShortCircuit> {
+        let serializer = match self {
+            erase::Serializer::Struct(serializer) => serializer,
+            _ => unreachable!(),
+        };
+        serializer.skip_field(key).map_err(|err| {
             *self = erase::Serializer::Error(err);
             ShortCircuit
         })
@@ -1278,6 +1306,10 @@ impl serde::ser::SerializeStructVariant for MakeSerializer<&mut dyn SerializeStr
         T: ?Sized + serde::Serialize,
     {
         self.0.erased_serialize_field(key, &value)
+    }
+
+    fn skip_field(&mut self, key: &'static str) -> Result<(), Self::Error> {
+        self.0.erased_skip_field(key)
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
