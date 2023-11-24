@@ -1571,11 +1571,8 @@ macro_rules! deref_erased_deserializer {
     };
 }
 
-deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de> + '_>);
-deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de> + Send + '_>);
-deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de> + Sync + '_>);
-deref_erased_deserializer!(<'de> Deserializer<'de> for Box<dyn Deserializer<'de> + Send + Sync + '_>);
 deref_erased_deserializer!(<'de, T> Deserializer<'de> for &mut T where T: ?Sized + Deserializer<'de>);
+deref_erased_deserializer!(<'de, T> Deserializer<'de> for Box<T> where T: ?Sized + Deserializer<'de>);
 
 // TEST ////////////////////////////////////////////////////////////////////////
 
