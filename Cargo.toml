@@ -6,6 +6,7 @@ categories = ["encoding", "rust-patterns", "no-std"]
 description = "Type-erased Serialize and Serializer traits"
 documentation = "https://docs.rs/erased-serde"
 edition = "2021"
+exclude = ["benches"]
 keywords = ["serde", "erasure"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/dtolnay/erased-serde"
