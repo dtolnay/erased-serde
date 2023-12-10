@@ -11,9 +11,9 @@ and `Deserializer` traits that can be used as [trait objects].
 
 [trait objects]: https://doc.rust-lang.org/book/first-edition/trait-objects.html
 
-- [`erased_serde::Serialize`](https://docs.rs/erased-serde/0.3/erased_serde/trait.Serialize.html)
-- [`erased_serde::Serializer`](https://docs.rs/erased-serde/0.3/erased_serde/trait.Serializer.html)
-- [`erased_serde::Deserializer`](https://docs.rs/erased-serde/0.3/erased_serde/trait.Deserializer.html)
+- [`erased_serde::Serialize`](https://docs.rs/erased-serde/0.4/erased_serde/trait.Serialize.html)
+- [`erased_serde::Serializer`](https://docs.rs/erased-serde/0.4/erased_serde/trait.Serializer.html)
+- [`erased_serde::Deserializer`](https://docs.rs/erased-serde/0.4/erased_serde/trait.Deserializer.html)
 
 The usual Serde `Serialize`, `Serializer` and `Deserializer` traits cannot be
 used as trait objects like `&dyn Serialize` or boxed trait objects like
@@ -36,7 +36,7 @@ format.**
 ```toml
 [dependencies]
 serde = "1.0"
-erased-serde = "0.3"
+erased-serde = "0.4"
 ```
 
 ## Serialization
