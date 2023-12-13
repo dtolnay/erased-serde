@@ -243,6 +243,6 @@ impl serde::ser::StdError for ShortCircuit {}
 
 impl serde::ser::Error for ShortCircuit {
     fn custom<T: Display>(_msg: T) -> Self {
-        unreachable!()
+        ShortCircuit {}
     }
 }
