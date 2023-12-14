@@ -224,25 +224,3 @@ impl Unexpected {
         }
     }
 }
-
-pub struct ShortCircuit;
-
-impl Display for ShortCircuit {
-    fn fmt(&self, _formatter: &mut fmt::Formatter) -> fmt::Result {
-        unreachable!()
-    }
-}
-
-impl Debug for ShortCircuit {
-    fn fmt(&self, _formatter: &mut fmt::Formatter) -> fmt::Result {
-        unreachable!()
-    }
-}
-
-impl serde::ser::StdError for ShortCircuit {}
-
-impl serde::ser::Error for ShortCircuit {
-    fn custom<T: Display>(_msg: T) -> Self {
-        ShortCircuit {}
-    }
-}
