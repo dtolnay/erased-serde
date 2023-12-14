@@ -54,7 +54,7 @@ pub trait Serialize: sealed::serialize::Sealed {
     fn erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<(), Error>;
 
     #[doc(hidden)]
-    fn do_erased_serialize(&self, serializer: &mut dyn Serializer);
+    fn do_erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<(), ()>;
 }
 
 /// An object-safe equivalent of Serde's `Serializer` trait.
@@ -234,8 +234,8 @@ where
         }
     }
 
-    fn do_erased_serialize(&self, serializer: &mut dyn Serializer) {
-        let _: Result<(), ShortCircuit> = self.serialize(MakeSerializer(serializer));
+    fn do_erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<(), ()> {
+        self.serialize(MakeSerializer(serializer)).map_err(|_| ())
     }
 }
 
@@ -646,8 +646,10 @@ where
     T: ?Sized + Serialize,
     S: serde::Serializer,
 {
+    use serde::ser::Error as _;
+
     let mut erased = erase::Serializer::new(serializer);
-    value.do_erased_serialize(&mut erased);
+    value.do_erased_serialize(&mut erased).map_err(|_| S::Error::custom("the value being serialized failed"))?;
     match erased {
         erase::Serializer::Complete(ok) => Ok(ok),
         erase::Serializer::Error(err) => Err(err),
@@ -1535,6 +1537,26 @@ mod tests {
         test_json(E::Newtype(true));
         test_json(E::Tuple(true, false));
         test_json(E::Struct { t: true, f: false });
+    }
+
+    #[test]
+    fn test_error_custom() {
+        struct Kaboom;
+
+        impl serde::Serialize for Kaboom {
+            fn serialize<S>(&self, _: S) -> Result<S::Ok, S::Error>
+            where
+                S: serde::Serializer,
+            {
+                use serde::ser::Error as _;
+
+                Err(S::Error::custom("kaboom"))
+            }
+        }
+
+        let obj: &dyn Serialize = &Kaboom;
+
+        assert!(serde_json::to_vec(obj).is_err());
     }
 
     #[test]
