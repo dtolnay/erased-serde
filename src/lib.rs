@@ -96,7 +96,7 @@
 //! ```
 
 #![doc(html_root_url = "https://docs.rs/erased-serde/0.4.2")]
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 #![deny(unsafe_op_in_unsafe_fn)]
 #![allow(
     clippy::box_collection,
@@ -116,6 +116,9 @@
 )]
 
 extern crate alloc;
+
+#[cfg(feature = "std")]
+extern crate std;
 
 #[macro_use]
 mod macros;
