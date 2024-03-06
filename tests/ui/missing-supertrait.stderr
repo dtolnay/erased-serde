@@ -1,4 +1,4 @@
-error[E0277]: the trait bound `__T: serde::ser::Serialize` is not satisfied
+error[E0277]: the trait bound `__T: erased_serde::Serialize` is not satisfied
  --> tests/ui/missing-supertrait.rs:5:1
   |
 5 | serialize_trait_object!(MyTrait);
