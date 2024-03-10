@@ -55,9 +55,9 @@ pub trait DeserializeSeed<'de> {
 
 /// An object-safe equivalent of Serde's `Deserializer` trait.
 ///
-/// Any implementation of Serde's `Deserializer` can be converted to an
-/// `&erased_serde::Deserializer` or `Box<erased_serde::Deserializer>` trait
-/// object using `erased_serde::Deserializer::erase`.
+/// Any implementation of Serde's `Deserializer` can be converted to a
+/// `&dyn erased_serde::Deserializer` or `Box<dyn erased_serde::Deserializer>`
+/// trait object using `erased_serde::Deserializer::erase`.
 ///
 /// ```rust
 /// use erased_serde::Deserializer;

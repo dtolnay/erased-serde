@@ -13,8 +13,9 @@ use serde::ser::{
 
 /// An object-safe equivalent of Serde's `Serialize` trait.
 ///
-/// Any implementation of Serde's `Serialize` converts seamlessly to an
-/// `&erased_serde::Serialize` or `Box<erased_serde::Serialize>` trait object.
+/// Any implementation of Serde's `Serialize` converts seamlessly to a
+/// `&dyn erased_serde::Serialize` or `Box<dyn erased_serde::Serialize>` trait
+/// object.
 ///
 /// ```rust
 /// use erased_serde::{Serialize, Serializer};
@@ -61,9 +62,9 @@ pub trait Serialize: sealed::serialize::Sealed {
 
 /// An object-safe equivalent of Serde's `Serializer` trait.
 ///
-/// Any implementation of Serde's `Serializer` can be converted to an
-/// `&erased_serde::Serializer` or `Box<erased_serde::Serializer>` trait object
-/// using `erased_serde::Serializer::erase`.
+/// Any implementation of Serde's `Serializer` can be converted to a
+/// `&dyn erased_serde::Serializer` or `Box<dyn erased_serde::Serializer>` trait
+/// object using `erased_serde::Serializer::erase`.
 ///
 /// ```rust
 /// use erased_serde::{Serialize, Serializer};
