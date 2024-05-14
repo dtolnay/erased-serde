@@ -1,6 +1,5 @@
 use alloc::boxed::Box;
 use core::any::TypeId;
-use core::marker::PhantomData;
 use core::mem::{self, MaybeUninit};
 use core::ptr;
 
@@ -41,7 +40,7 @@ impl Any {
     pub(crate) unsafe fn new<T>(t: T) -> Self {
         let value: Value;
         let drop: unsafe fn(&mut Value);
-        let type_id = non_static_type_id::<T>();
+        let type_id = typeid::of::<T>();
 
         if is_small::<T>() {
             let mut inline = [MaybeUninit::uninit(); 2];
@@ -71,7 +70,7 @@ impl Any {
 
     // This is unsafe -- caller is responsible that T is the correct type.
     pub(crate) unsafe fn take<T>(mut self) -> T {
-        if self.type_id != non_static_type_id::<T>() {
+        if self.type_id != typeid::of::<T>() {
             self.invalid_cast_to::<T>();
         }
 
@@ -105,60 +104,4 @@ impl Drop for Any {
     fn drop(&mut self) {
         unsafe { (self.drop)(&mut self.value) }
     }
-}
-
-trait NonStaticAny {
-    fn get_type_id(&self) -> TypeId
-    where
-        Self: 'static;
-}
-
-impl<T: ?Sized> NonStaticAny for PhantomData<T> {
-    fn get_type_id(&self) -> TypeId
-    where
-        Self: 'static,
-    {
-        TypeId::of::<T>()
-    }
-}
-
-fn non_static_type_id<T: ?Sized>() -> TypeId {
-    let non_static_thing = PhantomData::<T>;
-    let thing = unsafe {
-        mem::transmute::<&dyn NonStaticAny, &(dyn NonStaticAny + 'static)>(&non_static_thing)
-    };
-    NonStaticAny::get_type_id(thing)
-}
-
-#[test]
-fn test_non_static_type_id() {
-    assert_eq!(non_static_type_id::<usize>(), non_static_type_id::<usize>());
-    assert_eq!(
-        non_static_type_id::<&str>(),
-        non_static_type_id::<&'static str>()
-    );
-
-    assert_ne!(non_static_type_id::<u32>(), non_static_type_id::<[u8; 4]>());
-    assert_ne!(
-        non_static_type_id::<u32>(),
-        non_static_type_id::<[u32; 2]>()
-    );
-
-    assert_ne!(non_static_type_id::<usize>(), non_static_type_id::<isize>());
-    assert_ne!(
-        non_static_type_id::<usize>(),
-        non_static_type_id::<&usize>()
-    );
-    assert_ne!(
-        non_static_type_id::<&usize>(),
-        non_static_type_id::<&&usize>()
-    );
-    assert_ne!(
-        non_static_type_id::<&usize>(),
-        non_static_type_id::<&mut usize>()
-    );
-
-    struct A;
-    struct B;
-    assert_ne!(non_static_type_id::<A>(), non_static_type_id::<B>());
 }
