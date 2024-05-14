@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable, 1.61.0]
+        rust: [nightly, beta, stable, 1.70.0, 1.61.0]
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +38,7 @@ jobs:
       - run: cargo check --manifest-path tests/crate/Cargo.toml
       - run: cargo check --manifest-path tests/crate/Cargo.toml --no-default-features --features alloc
       - run: cargo test
+        if: matrix.rust != '1.61.0'
 
   minimal:
     name: Minimal versions
