@@ -10,7 +10,7 @@ exclude = ["benches"]
 keywords = ["serde", "erasure"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/dtolnay/erased-serde"
-rust-version = "1.56"
+rust-version = "1.61"
 
 [dependencies]
 serde = { version = "1.0.194", default-features = false }
