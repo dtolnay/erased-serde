@@ -57,7 +57,7 @@ impl Any {
                 mem::drop(unsafe { Box::from_raw(value.ptr.cast::<T>()) });
             }
             drop = ptr_drop::<T>;
-        };
+        }
 
         Any {
             value,
