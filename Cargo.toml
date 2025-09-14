@@ -16,6 +16,9 @@ rust-version = "1.61"
 serde_core = { version = "1.0.220", default-features = false }
 typeid = "1"
 
+[target.'cfg(any())'.dependencies]
+serde = { version = "1.0.220", default-features = false }
+
 [dev-dependencies]
 rustversion = "1.0.13"
 serde = "1.0.220"
