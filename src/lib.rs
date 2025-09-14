@@ -121,6 +121,8 @@ extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
+extern crate serde_core as serde;
+
 #[macro_use]
 mod macros;
 
