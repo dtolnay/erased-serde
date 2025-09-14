@@ -53,6 +53,13 @@ use serde::ser::{
 ///
 /// This trait is sealed and can only be implemented via a `serde::Serialize`
 /// impl.
+#[cfg_attr(
+    not(no_diagnostic_namespace),
+    diagnostic::on_unimplemented(
+        message = "the trait bound `{Self}: serde::Serialize` is not satisfied",
+        label = "the trait `serde::Serialize` is not implemented for `{Self}`, so it does not implement `erased_serde::Serialize`",
+    )
+)]
 pub trait Serialize: sealed::serialize::Sealed {
     fn erased_serialize(&self, serializer: &mut dyn Serializer) -> Result<(), Error>;
 
