@@ -3,7 +3,7 @@
 #[doc(hidden)]
 pub use core::marker::{Send, Sized, Sync};
 #[doc(hidden)]
-pub use serde;
+pub use serde_core as serde;
 
 #[doc(hidden)]
 pub type Result<T, E> = core::result::Result<T, E>;
