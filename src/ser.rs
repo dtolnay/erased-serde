@@ -1609,4 +1609,11 @@ mod tests {
         assert::<Vec<Box<dyn Serialize>>>();
         assert::<Vec<Box<dyn Serialize + Send>>>();
     }
+
+    #[test]
+    fn test_dangle() {
+        let mut json_serializer = serde_json::Serializer::new(Vec::new());
+        let _erased_serializer = <dyn Serializer>::erase(&mut json_serializer);
+        drop(json_serializer);
+    }
 }

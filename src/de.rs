@@ -1657,4 +1657,11 @@ mod tests {
         assert::<Box<dyn Deserializer + Send + Sync>>();
         assert::<Box<dyn Deserializer + Sync + Send>>();
     }
+
+    #[test]
+    fn test_dangle() {
+        let mut json_deserializer = serde_json::Deserializer::from_str("");
+        let _erased_deserializer = <dyn Deserializer>::erase(&mut json_deserializer);
+        drop(json_deserializer);
+    }
 }
