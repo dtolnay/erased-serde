@@ -224,39 +224,41 @@ pub trait EnumAccess<'de> {
 }
 
 impl<'de> dyn Deserializer<'de> {
-    /// Convert any Serde `Deserializer` to a trait object.
-    ///
-    /// ```rust
-    /// use erased_serde::Deserializer;
-    /// use std::collections::BTreeMap as Map;
-    ///
-    /// fn main() {
-    ///     static JSON: &'static [u8] = br#"{"A": 65, "B": 66}"#;
-    ///     static CBOR: &'static [u8] = &[162, 97, 65, 24, 65, 97, 66, 24, 66];
-    ///
-    ///     // Construct some deserializers.
-    ///     let json = &mut serde_json::Deserializer::from_slice(JSON);
-    ///     let cbor = &mut serde_cbor::Deserializer::from_slice(CBOR);
-    ///
-    ///     // The values in this map are boxed trait objects, which is not possible
-    ///     // with the normal serde::Deserializer because of object safety.
-    ///     let mut formats: Map<&str, Box<dyn Deserializer>> = Map::new();
-    ///     formats.insert("json", Box::new(<dyn Deserializer>::erase(json)));
-    ///     formats.insert("cbor", Box::new(<dyn Deserializer>::erase(cbor)));
-    ///
-    ///     // Pick a Deserializer out of the formats map.
-    ///     let format = formats.get_mut("json").unwrap();
-    ///
-    ///     let data: Map<String, usize> = erased_serde::deserialize(format).unwrap();
-    ///
-    ///     println!("{}", data["A"] + data["B"]);
-    /// }
-    /// ```
-    pub fn erase<D>(deserializer: D) -> impl Deserializer<'de>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        erase::Deserializer::new(deserializer)
+    return_impl_trait! {
+        /// Convert any Serde `Deserializer` to a trait object.
+        ///
+        /// ```rust
+        /// use erased_serde::Deserializer;
+        /// use std::collections::BTreeMap as Map;
+        ///
+        /// fn main() {
+        ///     static JSON: &'static [u8] = br#"{"A": 65, "B": 66}"#;
+        ///     static CBOR: &'static [u8] = &[162, 97, 65, 24, 65, 97, 66, 24, 66];
+        ///
+        ///     // Construct some deserializers.
+        ///     let json = &mut serde_json::Deserializer::from_slice(JSON);
+        ///     let cbor = &mut serde_cbor::Deserializer::from_slice(CBOR);
+        ///
+        ///     // The values in this map are boxed trait objects, which is not possible
+        ///     // with the normal serde::Deserializer because of object safety.
+        ///     let mut formats: Map<&str, Box<dyn Deserializer>> = Map::new();
+        ///     formats.insert("json", Box::new(<dyn Deserializer>::erase(json)));
+        ///     formats.insert("cbor", Box::new(<dyn Deserializer>::erase(cbor)));
+        ///
+        ///     // Pick a Deserializer out of the formats map.
+        ///     let format = formats.get_mut("json").unwrap();
+        ///
+        ///     let data: Map<String, usize> = erased_serde::deserialize(format).unwrap();
+        ///
+        ///     println!("{}", data["A"] + data["B"]);
+        /// }
+        /// ```
+        pub fn erase<D>(deserializer: D) -> impl Deserializer<'de> [erase::Deserializer<D>]
+        where
+            D: serde::Deserializer<'de>,
+        {
+            erase::Deserializer::new(deserializer)
+        }
     }
 }
 
