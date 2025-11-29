@@ -287,6 +287,15 @@ mod erase {
                 _ => unreachable!(),
             }
         }
+
+        /// Takes the stored result of the erased serializer after serializing.
+        pub fn result(self) -> Result<S::Ok, S::Error> {
+            match self {
+                 Serializer::Complete(ok) => Ok(ok),
+                 Serializer::Error(err) => Err(err),
+                 _ => panic!("Tried to take result of serializer before serializing or finished serializing an object.")
+            }
+        }
     }
 }
 
