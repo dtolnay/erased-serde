@@ -697,6 +697,16 @@ where
     }
 }
 
+/// Converts the result from a Serializer::erase_xxx function into a public-api result.
+pub fn convert_ser_error(err: ErrorImpl) -> crate::Error {
+    match err {
+        ErrorImpl::ShortCircuit => {
+            serde::ser::Error::custom("Call `serializer::result()` to find out the error.")
+        }
+        ErrorImpl::Custom(msg) => serde::ser::Error::custom(msg),
+    }
+}
+
 serialize_trait_object!(Serialize);
 
 struct MakeSerializer<TraitObject>(TraitObject);

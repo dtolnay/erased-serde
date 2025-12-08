@@ -136,7 +136,7 @@ mod ser;
 
 pub use crate::de::{deserialize, Deserializer};
 pub use crate::error::{Error, Result};
-pub use crate::ser::{serialize, Serialize, Serializer};
+pub use crate::ser::{convert_ser_error, serialize, Serialize, Serializer};
 
 // Not public API.
 #[doc(hidden)]
