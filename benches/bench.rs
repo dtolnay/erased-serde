@@ -1,15 +1,11 @@
-#![feature(test)]
 #![allow(clippy::struct_excessive_bools, clippy::struct_field_names)]
-
-extern crate test;
 
 mod twitter;
 
 use crate::twitter::Twitter;
+use criterion::{criterion_group, criterion_main, Bencher, Criterion};
 use std::fs;
-use test::Bencher;
 
-#[bench]
 fn serialize_twitter_monomorphized(b: &mut Bencher) {
     let bytes = fs::read("benches/twitter.json").unwrap();
     let value: Twitter = serde_json::from_slice(&bytes).unwrap();
@@ -21,7 +17,6 @@ fn serialize_twitter_monomorphized(b: &mut Bencher) {
     });
 }
 
-#[bench]
 fn serialize_twitter_erased(b: &mut Bencher) {
     let bytes = fs::read("benches/twitter.json").unwrap();
     let value: Twitter = serde_json::from_slice(&bytes).unwrap();
@@ -37,7 +32,6 @@ fn serialize_twitter_erased(b: &mut Bencher) {
     });
 }
 
-#[bench]
 fn twitter_to_json_value_monomorphized(b: &mut Bencher) {
     let bytes = fs::read("benches/twitter.json").unwrap();
     let value: Twitter = serde_json::from_slice(&bytes).unwrap();
@@ -47,7 +41,6 @@ fn twitter_to_json_value_monomorphized(b: &mut Bencher) {
     });
 }
 
-#[bench]
 fn twitter_to_json_value_erased(b: &mut Bencher) {
     let bytes = fs::read("benches/twitter.json").unwrap();
     let value: Twitter = serde_json::from_slice(&bytes).unwrap();
@@ -57,3 +50,18 @@ fn twitter_to_json_value_erased(b: &mut Bencher) {
         erased_serde::serialize(erased_value, serializer).unwrap()
     });
 }
+
+fn bench(c: &mut Criterion) {
+    let mut group = c.benchmark_group("serialize_twitter");
+    group.bench_function("monomorphized", serialize_twitter_monomorphized);
+    group.bench_function("erased", serialize_twitter_erased);
+    group.finish();
+
+    let mut group = c.benchmark_group("twitter_to_json_value");
+    group.bench_function("monomorphized", twitter_to_json_value_monomorphized);
+    group.bench_function("erased", twitter_to_json_value_erased);
+    group.finish();
+}
+
+criterion_group!(benches, bench);
+criterion_main!(benches);
