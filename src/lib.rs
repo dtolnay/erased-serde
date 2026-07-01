@@ -106,6 +106,7 @@
     clippy::manual_map, // https://github.com/rust-lang/rust-clippy/issues/7820
     clippy::missing_errors_doc,
     clippy::needless_doctest_main,
+    clippy::needless_late_init,
     clippy::needless_pass_by_ref_mut,
     clippy::needless_pass_by_value,
     clippy::semicolon_if_nothing_returned, // https://github.com/rust-lang/rust-clippy/issues/7324
