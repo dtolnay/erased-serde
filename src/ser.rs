@@ -287,6 +287,15 @@ mod erase {
                 _ => unreachable!(),
             }
         }
+
+        /// Takes the stored result of the erased serializer after serializing.
+        pub fn result(self) -> Result<S::Ok, S::Error> {
+            match self {
+                 Serializer::Complete(ok) => Ok(ok),
+                 Serializer::Error(err) => Err(err),
+                 _ => panic!("Tried to take result of serializer before serializing or finished serializing an object.")
+            }
+        }
     }
 }
 
@@ -685,6 +694,16 @@ where
         erase::Serializer::Complete(ok) => Ok(ok),
         erase::Serializer::Error(err) => Err(err),
         _ => unreachable!(),
+    }
+}
+
+/// Converts the result from a Serializer::erase_xxx function into a public-api result.
+pub fn convert_ser_error(err: ErrorImpl) -> crate::Error {
+    match err {
+        ErrorImpl::ShortCircuit => {
+            serde::ser::Error::custom("Call `serializer::result()` to find out the error.")
+        }
+        ErrorImpl::Custom(msg) => serde::ser::Error::custom(msg),
     }
 }
 
