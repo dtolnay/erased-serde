@@ -125,6 +125,7 @@ pub trait Serializer: sealed::serializer::Sealed {
     fn erased_serialize_f64(&mut self, v: f64);
     fn erased_serialize_char(&mut self, v: char);
     fn erased_serialize_str(&mut self, v: &str);
+    fn erased_collect_str(&mut self, value: &dyn Display);
     fn erased_serialize_bytes(&mut self, v: &[u8]);
     fn erased_serialize_none(&mut self);
     fn erased_serialize_some(&mut self, value: &dyn Serialize);
@@ -394,6 +395,13 @@ where
 
     fn erased_serialize_str(&mut self, v: &str) {
         *self = match self.take_serializer().serialize_str(v) {
+            Ok(ok) => erase::Serializer::Complete(ok),
+            Err(err) => erase::Serializer::Error(err),
+        };
+    }
+
+    fn erased_collect_str(&mut self, value: &dyn Display) {
+        *self = match self.take_serializer().collect_str(value) {
             Ok(ok) => erase::Serializer::Complete(ok),
             Err(err) => erase::Serializer::Error(err),
         };
@@ -900,12 +908,12 @@ impl<'a> serde::Serializer for MakeSerializer<&'a mut (dyn Serializer + '_)> {
             .map(MakeSerializer)
     }
 
-    #[cfg(not(feature = "alloc"))]
     fn collect_str<T>(self, value: &T) -> Result<Self::Ok, Self::Error>
     where
         T: ?Sized + Display,
     {
-        unreachable!()
+        self.0.erased_collect_str(&value);
+        Ok(())
     }
 
     fn is_human_readable(&self) -> bool {
@@ -1396,6 +1404,10 @@ macro_rules! deref_erased_serializer {
 
             fn erased_serialize_str(&mut self, v: &str) {
                 (**self).erased_serialize_str(v);
+            }
+
+            fn erased_collect_str(&mut self, value: &dyn Display) {
+                (**self).erased_collect_str(value);
             }
 
             fn erased_serialize_bytes(&mut self, v: &[u8]) {
